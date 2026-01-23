@@ -16,26 +16,34 @@
         .input-f { width: 100%; padding: 14px; background: #F1F5F9; border-radius: 14px; border: 1px solid #E2E8F0; outline: none; margin-bottom: 12px; font-size: 14px; }
         .btn-p { background: #2563EB; color: white; padding: 16px; border-radius: 16px; font-weight: 700; width: 100%; transition: 0.2s; border: none; cursor: pointer; }
         .btn-p:active { transform: scale(0.97); }
-        /* Style du verrou */
-        #premium-lock { display: none; position: fixed; inset: 0; background: white; z-index: 5000; flex-direction: column; align-items: center; justify-content: center; padding: 30px; text-align: center; }
+        
+        /* Style de l'écran de verrouillage */
+        #premium-lock { 
+            display: none; position: fixed; inset: 0; background: white; z-index: 9999; 
+            flex-direction: column; align-items: center; justify-content: center; 
+            padding: 30px; text-align: center; 
+        }
     </style>
 </head>
 <body class="pb-28">
 
     <div id="premium-lock">
-        <div class="w-20 h-20 bg-amber-100 rounded-3xl flex items-center justify-center mb-6">
-            <i data-lucide="crown" class="text-amber-500 w-10 h-10"></i>
+        <div class="w-20 h-20 bg-blue-100 rounded-3xl flex items-center justify-center mb-6">
+            <i data-lucide="lock" class="text-blue-600 w-10 h-10"></i>
         </div>
-        <h2 class="text-2xl font-black mb-2">Essai terminé !</h2>
-        <p class="text-slate-500 text-sm mb-8">Votre période d'essai de 10 jours est expirée. Payez votre abonnement pour débloquer vos données.</p>
-        <div class="bg-slate-50 p-6 rounded-3xl w-full mb-6 border border-slate-100">
-            <span class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Tarif Mensuel</span>
+        <h2 class="text-2xl font-black mb-2">Limite Gratuite Atteinte</h2>
+        <p class="text-slate-500 text-sm mb-8">Vous avez atteint le quota de 10 ventes. <br> Activez la version Premium pour un usage illimité.</p>
+        
+        <div class="bg-slate-50 p-6 rounded-3xl w-full max-w-xs mb-6 border">
             <p class="text-3xl font-black text-slate-900">3 000 FCFA</p>
+            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Paiement unique à vie</p>
         </div>
-        <a href="https://me.fedapay.com/sF5bKiUt" target="_blank" class="btn-p bg-amber-500 shadow-xl shadow-amber-200 flex items-center justify-center gap-3 mb-4">
-            ACTIVER LE PREMIUM
+
+        <a href="https://me.fedapay.com/sF5bKiUt" target="_blank" class="btn-p bg-blue-600 shadow-xl shadow-blue-200 flex items-center justify-center gap-3 mb-4 w-full max-w-xs">
+            ACTIVER MAINTENANT
         </a>
-        <p class="text-[10px] text-slate-400 font-bold uppercase">Paiement Mobile Money Sécurisé</p>
+        
+        <button onclick="unlockByCode()" class="text-blue-600 text-[11px] font-bold uppercase tracking-wider">J'ai déjà mon code d'activation</button>
     </div>
 
     <div id="setup-screen" class="fixed inset-0 bg-white z-[3000] p-6 overflow-y-auto hidden">
@@ -66,7 +74,7 @@
             <img id="headLogo" class="w-8 h-8 rounded-lg object-cover hidden">
             <h1 id="headBiz" class="font-black text-blue-600">ComptaPro</h1>
         </div>
-        <button onclick="alert('Version 1.0 - Licence Active')" class="text-amber-500"><i data-lucide="crown"></i></button>
+        <button onclick="showPage('settings')" class="text-amber-500"><i data-lucide="crown"></i></button>
     </header>
 
     <main class="p-5 space-y-6">
@@ -95,4 +103,32 @@
             </div>
             <div id="addProductForm" class="hidden bg-white p-5 rounded-3xl border shadow-sm mb-4">
                 <input type="text" id="p_name" placeholder="Nom du produit" class="input-f">
-                <div class="grid grid-cols-2 gap-2"><input type="number" id="p_cost
+                <div class="grid grid-cols-2 gap-2"><input type="number" id="p_cost" placeholder="Prix d'achat" class="input-f"><input type="number" id="p_price" placeholder="Prix de vente" class="input-f"></div>
+                <input type="number" id="p_qty" placeholder="Quantité initiale" class="input-f">
+                <button onclick="addProduct()" class="btn-p">AJOUTER AU STOCK</button>
+            </div>
+            <div id="stockList" class="space-y-2"></div>
+        </div>
+
+        <div id="page-invoice" class="page space-y-4">
+            <h2 class="text-2xl font-black italic">Nouvelle Vente</h2>
+            <div class="bg-white p-6 rounded-3xl border space-y-4">
+                <input type="text" id="c_name" placeholder="Nom de l'acheteur" class="input-f">
+                <label class="text-[10px] font-bold text-slate-400 uppercase">Sélectionner Produit</label>
+                <select id="v_product" class="input-f" onchange="updateMaxQty()"><option value="">-- Choisir un article --</option></select>
+                <input type="number" id="v_qty" placeholder="Quantité à vendre" class="input-f">
+                <p id="qtyHint" class="text-[10px] text-orange-500 font-bold px-2"></p>
+                <button onclick="processSale()" class="btn-p shadow-lg shadow-blue-100">VALIDER & TÉLÉCHARGER PDF</button>
+            </div>
+        </div>
+
+        <div id="page-settings" class="page space-y-4">
+            <h2 class="text-2xl font-black italic">Paramètres</h2>
+            <div class="bg-white p-6 rounded-3xl border space-y-4 shadow-sm">
+                <p class="text-[10px] font-bold text-slate-400 uppercase">Identité Entreprise</p>
+                <input type="text" id="set_biz" placeholder="Nom Entreprise" class="input-f">
+                <input type="text" id="set_fname" placeholder="Prénom" class="input-f">
+                <input type="text" id="set_lname" placeholder="Nom" class="input-f">
+                <input type="email" id="set_email" placeholder="Email" class="input-f">
+                <input type="tel" id="set_phone" placeholder="Téléphone" class="input-f">
+                <input type="text" id="set_country" placeholder="Pays
