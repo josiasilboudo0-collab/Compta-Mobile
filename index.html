@@ -14,7 +14,7 @@
         .page { display: none; } .page.active { display: block; animation: fadeIn 0.3s; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .input-f { width: 100%; padding: 14px; background: #F1F5F9; border-radius: 14px; border: 1px solid #E2E8F0; outline: none; margin-bottom: 12px; font-size: 14px; }
-        .btn-p { background: #2563EB; color: white; padding: 16px; border-radius: 16px; font-weight: 700; width: 100%; transition: 0.2s; text-align:center; display:block; }
+        .btn-p { background: #2563EB; color: white; padding: 16px; border-radius: 16px; font-weight: 700; width: 100%; transition: 0.2s; }
         .btn-p:active { transform: scale(0.97); }
     </style>
 </head>
@@ -39,26 +39,8 @@
                 <input type="text" id="u_country" placeholder="Pays" class="input-f">
                 <select id="u_cur" class="input-f"><option value="XOF">FCFA</option><option value="USD">USD ($)</option><option value="EUR">EUR (€)</option></select>
             </div>
-            <button onclick="saveProfile()" class="btn-p mt-4 shadow-xl shadow-blue-200 uppercase tracking-widest w-full">Créer mon espace</button>
+            <button onclick="saveProfile()" class="btn-p mt-4 shadow-xl shadow-blue-200 uppercase tracking-widest">Créer mon espace</button>
         </div>
-    </div>
-
-    <div id="page-premium" class="page fixed inset-0 bg-white z-[2000] p-8 flex flex-col items-center justify-center text-center">
-        <div class="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mb-6">
-            <i data-lucide="crown" class="text-amber-500 w-10 h-10"></i>
-        </div>
-        <h2 class="text-3xl font-black mb-2">Passez au Premium</h2>
-        <p class="text-slate-500 mb-8">Votre période d'essai de 10 jours est terminée ou vous souhaitez débloquer toutes les fonctionnalités.</p>
-        <div class="bg-slate-50 p-6 rounded-3xl w-full mb-8">
-            <p class="text-4xl font-black">3 000F <span class="text-sm font-normal text-slate-400">/ mois</span></p>
-            <ul class="text-left mt-4 space-y-2 text-sm">
-                <li class="flex items-center gap-2"><i data-lucide="check-circle" class="w-4 text-emerald-500"></i> Stock illimité</li>
-                <li class="flex items-center gap-2"><i data-lucide="check-circle" class="w-4 text-emerald-500"></i> Factures PDF professionnelles</li>
-                <li class="flex items-center gap-2"><i data-lucide="check-circle" class="w-4 text-emerald-500"></i> Support prioritaire</li>
-            </ul>
-        </div>
-        <a href="https://me.fedapay.com/sF5bKiUt" target="_blank" class="btn-p w-full bg-amber-500 shadow-xl shadow-amber-100">ACTIVER MAINTENANT</a>
-        <button onclick="showPage('home')" class="mt-6 text-slate-400 text-xs font-bold uppercase tracking-widest underline">Retour</button>
     </div>
 
     <header class="p-5 flex justify-between items-center bg-white border-b sticky top-0 z-50">
@@ -66,17 +48,15 @@
             <img id="headLogo" class="w-8 h-8 rounded-lg object-cover hidden">
             <h1 id="headBiz" class="font-black text-blue-600">ComptaPro</h1>
         </div>
-        <button onclick="showPage('premium')" id="premiumBadge" class="text-amber-500 flex items-center gap-1 text-[10px] font-bold">
-            <i data-lucide="crown" class="w-4"></i> PRO
-        </button>
+        <button onclick="showPage('premium')" class="text-amber-500"><i data-lucide="crown"></i></button>
     </header>
 
     <main class="p-5 space-y-6">
+        
         <div id="page-home" class="page active space-y-6">
             <div class="bg-slate-900 p-8 rounded-[2.5rem] text-white shadow-2xl">
                 <p class="text-[10px] uppercase font-bold text-slate-400 mb-1 italic">Profit Réel Estimé</p>
                 <h2 class="text-4xl font-black"><span id="valProfit">0</span> <span class="cur text-sm font-normal"></span></h2>
-                <p id="trialDays" class="text-[9px] text-emerald-400 mt-4 font-bold"></p>
             </div>
             <div class="grid grid-cols-2 gap-4">
                 <button onclick="showPage('invoice')" class="bg-white p-6 rounded-3xl border flex flex-col items-center gap-2">
@@ -100,7 +80,7 @@
                 <input type="text" id="p_name" placeholder="Nom du produit" class="input-f">
                 <div class="grid grid-cols-2 gap-2"><input type="number" id="p_cost" placeholder="Prix d'achat" class="input-f"><input type="number" id="p_price" placeholder="Prix de vente" class="input-f"></div>
                 <input type="number" id="p_qty" placeholder="Quantité initiale" class="input-f">
-                <button onclick="addProduct()" class="btn-p w-full">AJOUTER AU STOCK</button>
+                <button onclick="addProduct()" class="btn-p">AJOUTER AU STOCK</button>
             </div>
             <div id="stockList" class="space-y-2"></div>
         </div>
@@ -113,7 +93,7 @@
                 <select id="v_product" class="input-f" onchange="updateMaxQty()"><option value="">-- Choisir un article --</option></select>
                 <input type="number" id="v_qty" placeholder="Quantité à vendre" class="input-f">
                 <p id="qtyHint" class="text-[10px] text-orange-500 font-bold px-2"></p>
-                <button onclick="processSale()" class="btn-p shadow-lg shadow-blue-100 w-full">VALIDER & TÉLÉCHARGER PDF</button>
+                <button onclick="processSale()" class="btn-p shadow-lg shadow-blue-100">VALIDER & TÉLÉCHARGER PDF</button>
             </div>
         </div>
 
@@ -127,11 +107,12 @@
                 <input type="email" id="set_email" placeholder="Email" class="input-f">
                 <input type="tel" id="set_phone" placeholder="Téléphone" class="input-f">
                 <input type="text" id="set_country" placeholder="Pays" class="input-f">
-                <button onclick="updateSettings()" class="btn-p bg-emerald-600 w-full">ENREGISTRER</button>
+                <button onclick="updateSettings()" class="btn-p bg-emerald-600">ENREGISTRER LES MODIFICATIONS</button>
                 <hr class="my-2">
                 <button onclick="if(confirm('Tout effacer ?')) {localStorage.clear(); location.reload();}" class="w-full text-red-500 text-[10px] font-bold uppercase tracking-widest">Réinitialiser l'application</button>
             </div>
         </div>
+
     </main>
 
     <nav class="fixed bottom-0 left-0 right-0 h-20 bg-white border-t flex justify-around items-center px-8 z-50">
@@ -143,25 +124,10 @@
 
     <script>
         lucide.createIcons();
-        let db = JSON.parse(localStorage.getItem('cp_stock_db')) || { profile: null, inventory: [], sales: [], totalProfit: 0, startDate: Date.now() };
+        let db = JSON.parse(localStorage.getItem('cp_stock_db')) || { profile: null, inventory: [], sales: [], totalProfit: 0 };
         let logoBase64 = db.profile ? db.profile.logo : "";
 
         if(!db.profile) document.getElementById('setup-screen').classList.remove('hidden'); else init();
-
-        function checkPremium() {
-            const now = Date.now();
-            const tenDays = 10 * 24 * 60 * 60 * 1000;
-            const diff = now - db.startDate;
-            const remaining = Math.ceil((tenDays - diff) / (24 * 60 * 60 * 1000));
-            
-            if (diff > tenDays) {
-                showPage('premium');
-                document.getElementById('trialDays').innerText = "Essai expiré";
-                document.getElementById('trialDays').classList.replace('text-emerald-400', 'text-red-400');
-            } else {
-                document.getElementById('trialDays').innerText = `Période d'essai : ${remaining} jour(s) restant(s)`;
-            }
-        }
 
         function previewLogo(e) {
             const reader = new FileReader();
@@ -185,8 +151,17 @@
                 country: document.getElementById('u_country').value,
                 logo: logoBase64
             };
-            db.startDate = Date.now(); // Date de début de l'essai
             localStorage.setItem('cp_stock_db', JSON.stringify(db)); location.reload();
+        }
+
+        function updateSettings() {
+            db.profile.biz = document.getElementById('set_biz').value;
+            db.profile.fname = document.getElementById('set_fname').value;
+            db.profile.lname = document.getElementById('set_lname').value;
+            db.profile.email = document.getElementById('set_email').value;
+            db.profile.phone = document.getElementById('set_phone').value;
+            db.profile.country = document.getElementById('set_country').value;
+            save(); alert("Informations mises à jour !"); location.reload();
         }
 
         function init() {
@@ -201,18 +176,13 @@
             document.getElementById('set_phone').value = db.profile.phone;
             document.getElementById('set_country').value = db.profile.country;
 
-            checkPremium();
             renderStock(); renderHome(); populateProductSelect();
         }
 
         function save() { localStorage.setItem('cp_stock_db', JSON.stringify(db)); }
-        function showPage(id) { 
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); 
-            document.getElementById('page-'+id).classList.add('active'); 
-        }
-
         function toggleAddProduct() { document.getElementById('addProductForm').classList.toggle('hidden'); }
-        
+        function showPage(id) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById('page-'+id).classList.add('active'); }
+
         function addProduct() {
             const name = document.getElementById('p_name').value;
             const cost = parseInt(document.getElementById('p_cost').value);
@@ -223,19 +193,19 @@
             save(); renderStock(); populateProductSelect(); toggleAddProduct();
         }
 
-        function deleteProduct(id) {
-            if(confirm("Supprimer ce produit ?")) {
-                db.inventory = db.inventory.filter(p => p.id !== id);
-                save(); renderStock(); populateProductSelect();
-            }
-        }
-
         function restock(id) {
-            const added = prompt("Quantité à ajouter :");
+            const added = prompt("Quantité à ajouter au stock :");
             if(!added || isNaN(added)) return;
             const p = db.inventory.find(i => i.id === id);
             p.qty += parseInt(added);
             save(); renderStock(); populateProductSelect();
+        }
+
+        function deleteProduct(id) {
+            if(confirm("Supprimer définitivement ce produit ?")) {
+                db.inventory = db.inventory.filter(p => p.id !== id);
+                save(); renderStock(); populateProductSelect();
+            }
         }
 
         function renderStock() {
@@ -244,8 +214,8 @@
                     <div><p class="font-bold text-sm">${p.name}</p><p class="text-[10px] text-slate-400">P.V: ${p.price} ${db.profile.cur}</p></div>
                     <div class="flex items-center gap-3">
                         <p class="font-black ${p.qty <= 5 ? 'text-red-500' : 'text-blue-600'}">${p.qty}</p>
-                        <button onclick="restock(${p.id})" class="text-slate-300"><i data-lucide="refresh-cw" class="w-4"></i></button>
-                        <button onclick="deleteProduct(${p.id})" class="text-slate-200"><i data-lucide="trash-2" class="w-4"></i></button>
+                        <button onclick="restock(${p.id})" class="text-slate-300 hover:text-blue-600"><i data-lucide="refresh-cw" class="w-4"></i></button>
+                        <button onclick="deleteProduct(${p.id})" class="text-slate-300 hover:text-red-500"><i data-lucide="trash-2" class="w-4"></i></button>
                     </div>
                 </div>
             `).join('');
@@ -282,23 +252,13 @@
 
         function renderHome() {
             document.getElementById('valProfit').innerText = db.totalProfit.toLocaleString();
-            document.getElementById('historyList').innerHTML = `<h3 class="text-[10px] font-bold text-slate-400 uppercase mb-3 tracking-widest">Ventes Récentes</h3>` + 
+            document.getElementById('historyList').innerHTML = `<h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Ventes Récentes</h3>` + 
                 db.sales.slice(-5).reverse().map(s => `
                 <div class="bg-white p-4 rounded-2xl border flex justify-between items-center mb-2">
                     <div><p class="font-bold text-xs">${s.client}</p><p class="text-[9px] text-slate-400">${s.item} x${s.qty}</p></div>
                     <p class="font-black text-blue-600">${s.total} ${db.profile.cur}</p>
                 </div>
             `).join('');
-        }
-
-        function updateSettings() {
-            db.profile.biz = document.getElementById('set_biz').value;
-            db.profile.fname = document.getElementById('set_fname').value;
-            db.profile.lname = document.getElementById('set_lname').value;
-            db.profile.email = document.getElementById('set_email').value;
-            db.profile.phone = document.getElementById('set_phone').value;
-            db.profile.country = document.getElementById('set_country').value;
-            save(); alert("Modifié !"); location.reload();
         }
 
         function generateProfessionalInvoice(client, item, qty, price, total) {
