@@ -3,121 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Compta Mobile</title>
+    <title>Compta Business Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { font-family: sans-serif; background: #f0f2f5; margin: 0; padding-bottom: 100px; }
-        .page { display: none; padding: 20px; }
+        body { font-family: sans-serif; background: #F8FAFC; margin: 0; padding-bottom: 90px; }
+        .page { display: none; padding: 20px; animation: fadeIn 0.3s; }
         .page.active { display: block !important; }
-        nav { position: fixed; bottom: 0; left: 0; right: 0; height: 70px; background: white; border-top: 2px solid #e2e8f0; display: flex; z-index: 9999; }
-        .nav-btn { flex: 1; border: none; background: none; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; color: #64748b; cursor: pointer; }
-        .card { background: white; border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid #e2e8f0; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        .card { background: white; border-radius: 20px; padding: 20px; border: 1px solid #E2E8F0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        input, select { width: 100%; padding: 14px; border: 1px solid #E2E8F0; border-radius: 12px; margin-bottom: 15px; outline: none; }
+        .btn-blue { background: #2563EB; color: white; width: 100%; padding: 16px; border-radius: 15px; font-weight: bold; border: none; cursor: pointer; }
+        
+        nav { position: fixed; bottom: 0; left: 0; right: 0; height: 80px; background: white; border-top: 1px solid #E2E8F0; display: flex; z-index: 1000; }
+        .nav-btn { flex: 1; border: none; background: none; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; color: #94A3B8; font-weight: bold; }
+        .nav-btn.active { color: #2563EB; }
     </style>
-
-    <script>
-        // --- TOUTES LES FONCTIONS ICI ---
-        function showPage(pageId) {
-            console.log("Tentative d'ouverture de : " + pageId);
-            
-            // 1. Cacher toutes les pages manuellement
-            var pages = document.getElementsByClassName('page');
-            for (var i = 0; i < pages.length; i++) {
-                pages[i].style.display = 'none';
-                pages[i].classList.remove('active');
-            }
-            
-            // 2. Afficher la page cible
-            var target = document.getElementById('page-' + pageId);
-            if (target) {
-                target.style.display = 'block';
-                target.classList.add('active');
-            } else {
-                alert("Erreur : La page " + pageId + " n'existe pas.");
-            }
-        }
-
-        var myId = Math.floor(1000 + Math.random() * 8999);
-
-        function initApp() {
-            document.getElementById('uid-display').innerText = myId;
-            console.log("App Initialisée avec ID: " + myId);
-        }
-
-        function validerCle() {
-            var code = document.getElementById('cle-input').value;
-            var mois = new Date().getMonth() + 1;
-            var attendu = (myId + 42 + mois) * 7;
-            
-            if(code == attendu) {
-                alert("✅ Mode PRO activé !");
-                document.getElementById('badge').innerText = "PRO ACTIF";
-                document.getElementById('badge').style.color = "green";
-                showPage('home');
-            } else {
-                alert("❌ Code incorrect pour le mois " + mois + ". (Attendu pour test: " + attendu + ")");
-            }
-        }
-    </script>
 </head>
-<body onload="initApp()">
+<body onload="checkFirstStart()">
 
-    <div style="background: white; padding: 15px; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between;">
-        <b style="color: #2563eb;">Compta Mobile</b>
-        <span id="badge" style="color: red; font-size: 10px; font-weight: bold;">MODE GRATUIT</span>
+    <div id="setup-screen" class="fixed inset-0 bg-white z-[2000] p-6 overflow-y-auto hidden">
+        <h2 class="text-3xl font-black text-center mt-10 mb-2">Bienvenue 🚀</h2>
+        <p class="text-center text-slate-500 mb-8">Configurez votre profil</p>
+        <div class="card">
+            <label class="text-[10px] font-bold text-slate-400 uppercase">Logo (Cliquez pour ajouter)</label>
+            <div class="flex justify-center my-4">
+                <div onclick="document.getElementById('fileInput').click()" class="w-20 h-20 bg-slate-100 rounded-2xl flex items-center justify-center border-2 border-dashed border-slate-300 overflow-hidden">
+                    <img id="logo-preview" class="hidden w-full h-full object-cover">
+                    <span id="logo-plus" class="text-2xl text-slate-400">+</span>
+                </div>
+                <input type="file" id="fileInput" class="hidden" accept="image/*" onchange="handleLogo(this)">
+            </div>
+            <input type="text" id="setup-name" placeholder="Nom de la Boutique">
+            <input type="tel" id="setup-tel" placeholder="Téléphone (+226...)">
+            <select id="setup-currency"><option value="FCFA">FCFA</option><option value="USD">USD ($)</option></select>
+            <button onclick="finirInscription()" class="btn-blue">COMMENCER</button>
+        </div>
     </div>
 
-    <div id="pages-container">
-        
+    <header class="bg-white p-4 border-b flex justify-between items-center sticky top-0 z-50">
+        <div class="flex items-center gap-2">
+            <img id="header-logo" class="w-8 h-8 rounded-lg hidden object-cover">
+            <b id="header-name" class="text-slate-800">Business</b>
+        </div>
+        <span id="status-badge" class="bg-red-100 text-red-600 text-[10px] px-2 py-1 rounded-full font-bold">GRATUIT</span>
+    </header>
+
+    <div id="all-pages">
         <div id="page-home" class="page active">
-            <div style="background: #2563eb; color: white; padding: 30px; border-radius: 20px; text-align: center; margin-bottom: 20px;">
-                <p style="margin: 0; opacity: 0.8; font-size: 12px;">BÉNÉFICE</p>
-                <h2 style="margin: 5px 0; font-size: 32px;">0 FCFA</h2>
+            <div class="bg-slate-900 p-8 rounded-[2rem] text-white shadow-xl mb-6">
+                <p class="text-[10px] uppercase text-slate-400 font-bold">Profit Total</p>
+                <h2 class="text-4xl font-black mt-1"><span id="dash-profit">0</span> <small class="text-sm font-normal user-cur">FCFA</small></h2>
             </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                <div onclick="showPage('stock')" class="card" style="text-align: center;">📦<br>STOCK</div>
-                <div onclick="showPage('facture')" class="card" style="text-align: center;">📄<br>FACTURES</div>
+            <div class="grid grid-cols-2 gap-4">
+                <div onclick="showPage('stock')" class="card text-center py-8">📦<br><b class="text-xs uppercase mt-2 block">Stock</b></div>
+                <div onclick="showPage('facture')" class="card text-center py-8">📄<br><b class="text-xs uppercase mt-2 block">Factures</b></div>
             </div>
         </div>
 
         <div id="page-stock" class="page">
-            <h2 style="font-weight: bold; margin-bottom: 15px;">📦 Gestion Stock</h2>
+            <h2 class="text-2xl font-black mb-6">📦 Mon Stock</h2>
             <div class="card">
-                <input type="text" placeholder="Nom produit" style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px;">
-                <button onclick="alert('Produit ajouté !')" style="width: 100%; background: #2563eb; color: white; padding: 10px; border: none; border-radius: 8px;">Ajouter</button>
+                <input type="text" id="prod-name" placeholder="Nom du produit">
+                <input type="number" id="prod-price" placeholder="Prix de vente">
+                <button onclick="ajouterProduit()" class="btn-blue">AJOUTER</button>
             </div>
-            <p style="text-align: center; color: #999; font-size: 12px;">Liste vide</p>
+            <div id="stock-list" class="space-y-3"></div>
         </div>
 
         <div id="page-facture" class="page">
-            <h2 style="font-weight: bold; margin-bottom: 15px;">📄 Factures</h2>
-            <div class="card" style="text-align: center; padding: 40px; color: #999;">
-                Aucune facture pour le moment.
+            <h2 class="text-2xl font-black mb-6">📄 Factures</h2>
+            <div class="card text-center py-20 text-slate-400">Aucune facture.</div>
+        </div>
+
+        <div id="page-settings" class="page">
+            <h2 class="text-2xl font-black mb-6">⚙️ Paramètres</h2>
+            <div class="card">
+                <input type="text" id="edit-name" placeholder="Nom">
+                <input type="tel" id="edit-tel" placeholder="Téléphone">
+                <button onclick="updateProfil()" class="btn-blue bg-slate-800">METTRE À JOUR</button>
             </div>
+            <p class="text-center text-[10px] text-slate-400 uppercase font-bold">ID Appareil : <span id="uid-display"></span></p>
         </div>
 
         <div id="page-premium" class="page">
-            <h2 style="font-weight: bold; text-align: center; margin-bottom: 20px;">⭐ Devenir PRO</h2>
-            <div class="card" style="text-align: center;">
-                <p style="font-size: 12px; color: #666;">ID de votre appareil :</p>
-                <h3 id="uid-display" style="font-size: 24px; color: #2563eb; margin: 10px 0;">----</h3>
-                
-                <a href="https://qaasxtqf.mychariow.shop/abonnement-pro-compta-mobile/checkout" target="_blank" style="display: block; background: #f59e0b; color: white; padding: 15px; border-radius: 10px; text-decoration: none; font-weight: bold; margin-bottom: 15px;">
-                    PAYER 3 000 FCFA
-                </a>
-
-                <input type="number" id="cle-input" placeholder="Entrez la clé ici" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; text-align: center; margin-bottom: 10px;">
-                <button onclick="validerCle()" style="width: 100%; background: black; color: white; padding: 15px; border-radius: 10px; font-weight: bold;">ACTIVER</button>
-            </div>
-        </div>
-
-    </div>
-
-    <nav>
-        <div class="nav-btn" onclick="showPage('home')">🏠<span>Accueil</span></div>
-        <div class="nav-btn" onclick="showPage('stock')">📦<span>Stock</span></div>
-        <div class="nav-btn" onclick="showPage('facture')">📄<span>Factures</span></div>
-        <div class="nav-btn" onclick="showPage('premium')">⭐<span>PRO</span></div>
-    </nav>
-
-</body>
-</html>
+            <div class="card text-center">
+                <div class="text-4xl mb-4">⭐</div>
+                <h2 class="text-2xl font-black">Abonnement Pro</h2>
