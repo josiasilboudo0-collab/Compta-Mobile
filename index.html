@@ -2,179 +2,253 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ComptaPro Global SaaS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ComptaPro - Global Manager</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #F8FAFC; color: #0F172A; }
-        .fintech-card { background: white; border-radius: 24px; padding: 24px; border: 1px solid #E2E8F0; }
-        .input-field { width: 100%; padding: 14px; background: #F1F5F9; border-radius: 12px; border: 1px solid #E2E8F0; outline: none; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #F8FAFC; -webkit-tap-highlight-color: transparent; }
         .page { display: none; }
-        .page.active { display: block; }
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 2000; align-items: center; justify-content: center; padding: 20px; }
+        .page.active { display: block; animation: fadeIn 0.2s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .fintech-card { background: white; border-radius: 24px; padding: 20px; border: 1px solid #E2E8F0; }
+        .btn-blue { background: #2563EB; color: white; padding: 16px; border-radius: 16px; font-weight: 800; width: 100%; transition: transform 0.1s; }
+        .btn-blue:active { transform: scale(0.95); }
+        .input-box { width: 100%; padding: 16px; background: #F1F5F9; border-radius: 14px; border: 1px solid #E2E8F0; outline: none; margin-bottom: 12px; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 2000; align-items: center; justify-content: center; padding: 20px; }
         .modal.active { display: flex; }
     </style>
 </head>
-<body class="pb-28">
+<body class="pb-24">
 
-    <div id="limitModal" class="modal">
-        <div class="bg-white p-8 rounded-[30px] w-full max-w-sm text-center space-y-4">
-            <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto"><i data-lucide="lock"></i></div>
-            <h2 class="text-xl font-black">Limite Quotidienne Atteinte</h2>
-            <p class="text-slate-500 text-sm">Vous avez atteint le maximum de 3 ventes gratuites aujourd'hui.</p>
-            <button onclick="showPage('premium'); closeModal()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-black uppercase text-xs">Débloquer avec Gold</button>
-            <button onclick="closeModal()" class="text-slate-400 text-xs font-bold uppercase">Plus tard</button>
+    <div id="setup-screen" class="fixed inset-0 bg-white z-[3000] flex flex-col p-8 items-center justify-center text-center hidden">
+        <div class="w-20 h-20 bg-blue-600 rounded-[2rem] flex items-center justify-center text-white mb-6 shadow-xl shadow-blue-200">
+            <i data-lucide="globe" class="w-10 h-10"></i>
+        </div>
+        <h1 class="text-3xl font-black mb-2">ComptaPro</h1>
+        <p class="text-slate-400 mb-8">Ready to go Global?</p>
+        <select id="setupLang" class="input-box"><option value="fr">Français 🇫🇷</option><option value="en">English 🇺🇸</option></select>
+        <select id="setupCur" class="input-box"><option value="XOF">FCFA (CFA)</option><option value="USD">Dollar ($)</option><option value="EUR">Euro (€)</option></select>
+        <button onclick="startApp()" class="btn-blue">START BUSINESS</button>
+    </div>
+
+    <div id="modalLimit" class="modal">
+        <div class="bg-white p-8 rounded-[30px] w-full max-w-sm text-center">
+            <h2 class="text-2xl font-black mb-4">Limite Atteinte 🔒</h2>
+            <p class="text-slate-500 mb-6 text-sm">Vous avez atteint 3 ventes aujourd'hui. Passez au pack Gold pour enregistrer en illimité !</p>
+            <button onclick="changePage('gold')" class="btn-blue mb-4">DEVENIR GOLD</button>
+            <button onclick="closeModal()" class="text-slate-400 font-bold text-xs uppercase">Plus tard</button>
         </div>
     </div>
 
-    <header class="bg-white p-5 border-b border-slate-200 sticky top-0 z-50 flex justify-between items-center">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white"><i data-lucide="globe"></i></div>
-            <div>
-                <h1 class="text-sm font-black text-slate-900 leading-tight">ComptaPro</h1>
-                <p id="trialLabel" class="text-[9px] font-bold uppercase text-emerald-600">Plan Gratuit</p>
-            </div>
+    <header class="p-5 flex justify-between items-center bg-white/80 sticky top-0 z-50 backdrop-blur-md border-b">
+        <div>
+            <h1 class="font-black text-blue-600 text-xl tracking-tighter">ComptaPro</h1>
+            <p id="subStatus" class="text-[9px] font-bold text-emerald-500 uppercase tracking-widest">Plan Gratuit</p>
         </div>
-        <button onclick="showPage('premium')" class="bg-amber-100 text-amber-700 text-[10px] font-black px-4 py-2 rounded-full flex items-center gap-1">
-            <i data-lucide="crown" class="w-3 h-3"></i> GOLD
+        <button onclick="changePage('gold')" class="w-10 h-10 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center border border-amber-100">
+            <i data-lucide="crown"></i>
         </button>
     </header>
 
     <main class="p-5 space-y-6">
 
-        <div id="renewalAlert" class="hidden bg-amber-50 border border-amber-200 p-4 rounded-2xl flex items-center gap-3">
-            <i data-lucide="alert-circle" class="text-amber-600"></i>
-            <p class="text-xs text-amber-800 font-bold">Votre abonnement Gold expire dans <span id="daysLeftSub">0</span> jours ! Pensez à renouveler.</p>
-        </div>
-
         <div id="page-home" class="page active space-y-6">
-            <div class="fintech-card bg-slate-900 text-white border-none shadow-2xl relative">
-                <p class="text-slate-500 text-[10px] font-bold uppercase mb-1">Bénéfice Net</p>
-                <p class="text-4xl font-black"><span id="beneficeDisplay">0</span> <span class="text-lg font-light opacity-50 curLabel">USD</span></p>
+            <div class="fintech-card bg-slate-900 text-white border-none shadow-2xl shadow-blue-100">
+                <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">Profit Total</p>
+                <p class="text-4xl font-black"><span id="mainProfit">0</span> <span class="text-lg opacity-50 displayCur">USD</span></p>
+                <div class="flex gap-4 mt-6 pt-6 border-t border-slate-800 text-[10px] font-bold">
+                    <span class="text-emerald-400 uppercase">Sales: <span id="mainSales">0</span></span>
+                    <span class="text-red-400 uppercase">Costs: <span id="mainCosts">0</span></span>
+                </div>
             </div>
 
             <div class="grid grid-cols-2 gap-4">
-                <button onclick="checkLimitAndShow('factures')" class="fintech-card flex flex-col items-center py-6 gap-2">
-                    <i data-lucide="plus-circle" class="text-emerald-500"></i>
-                    <span class="text-[10px] font-black uppercase">Vente</span>
+                <button onclick="checkLimit('sales')" class="fintech-card flex flex-col items-center gap-3 py-8">
+                    <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center"><i data-lucide="plus-square"></i></div>
+                    <span class="text-[10px] font-black uppercase">Vendre</span>
                 </button>
-                <button onclick="showPage('depenses')" class="fintech-card flex flex-col items-center py-6 gap-2">
-                    <i data-lucide="minus-circle" class="text-red-500"></i>
+                <button onclick="changePage('costs')" class="fintech-card flex flex-col items-center gap-3 py-8">
+                    <div class="w-12 h-12 bg-red-50 text-red-600 rounded-2xl flex items-center justify-center"><i data-lucide="minus-square"></i></div>
                     <span class="text-[10px] font-black uppercase">Dépense</span>
                 </button>
             </div>
-            
-            <div id="history" class="space-y-2"></div>
+
+            <div class="space-y-4">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest">Dernières Activités</h3>
+                    <input type="text" id="searchBar" oninput="renderHistory()" placeholder="Chercher..." class="text-[10px] bg-white border px-3 py-1 rounded-full outline-none">
+                </div>
+                <div id="historyList" class="space-y-3"></div>
+                <button onclick="exportCSV()" class="w-full text-[10px] font-bold text-blue-600 uppercase py-2">Exporter le rapport (CSV)</button>
+            </div>
         </div>
 
-        <div id="page-factures" class="page space-y-4">
-            <h2 class="text-xl font-black italic">Nouvelle Vente</h2>
+        <div id="page-sales" class="page space-y-4">
+            <h2 class="text-2xl font-black italic">Nouvelle Vente</h2>
             <div class="fintech-card space-y-4">
-                <input type="text" id="clientName" placeholder="Nom du Client" class="input-field">
-                <input type="number" id="clientAmount" placeholder="Montant" class="input-field font-bold">
-                <button onclick="validerVente()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-black">ENREGISTRER</button>
+                <input type="text" id="v_client" placeholder="Nom du Client" class="input-box">
+                <input type="number" id="v_amount" placeholder="Montant" class="input-box font-bold">
+                <button onclick="saveTx('sale')" class="btn-blue shadow-lg shadow-blue-200">VALIDER & REÇU PDF</button>
             </div>
         </div>
 
-        <div id="page-premium" class="page space-y-6">
-            <div class="text-center">
-                <h2 class="text-2xl font-black italic">Abonnement Gold</h2>
-                <p class="text-sm text-slate-500">PDF illimités & Ventes sans limites.</p>
+        <div id="page-costs" class="page space-y-4">
+            <h2 class="text-2xl font-black italic text-red-600">Encaisser Dépense</h2>
+            <div class="fintech-card space-y-4">
+                <input type="text" id="d_motif" placeholder="Motif (Loyer, Stock, Carburant)" class="input-box">
+                <input type="number" id="d_amount" placeholder="Montant" class="input-box font-bold">
+                <button onclick="saveTx('cost')" class="btn-blue bg-slate-900 shadow-lg shadow-slate-200 uppercase text-xs">Enregistrer l'achat</button>
             </div>
-            <button onclick="activateGoldDemo()" class="w-full bg-slate-900 text-white p-6 rounded-[24px] text-left relative overflow-hidden">
-                <p class="text-blue-400 font-bold text-[10px] uppercase">Pack Business</p>
-                <p class="text-2xl font-black">3 000 F / mois</p>
-                <p class="text-xs opacity-60 mt-2 italic">Cliquez ici pour simuler l'activation Gold</p>
-            </button>
+        </div>
+
+        <div id="page-gold" class="page space-y-6">
+            <div class="text-center py-8">
+                <div class="w-20 h-20 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4"><i data-lucide="crown" class="w-10 h-10"></i></div>
+                <h2 class="text-3xl font-black">ComptaPro GOLD</h2>
+                <p class="text-slate-500 text-sm">Débloquez votre plein potentiel.</p>
+            </div>
+            <div class="fintech-card border-2 border-blue-600">
+                <p class="text-blue-600 font-black text-xs uppercase">Pack Business Mondial</p>
+                <p class="text-3xl font-black mt-2">3 000 F / $5 <span class="text-sm font-normal text-slate-400">/ mois</span></p>
+                <ul class="mt-6 space-y-3 text-xs font-bold text-slate-600">
+                    <li class="flex items-center gap-2 text-emerald-500"><i data-lucide="check" class="w-4 h-4"></i> Ventes illimitées</li>
+                    <li class="flex items-center gap-2 text-emerald-500"><i data-lucide="check" class="w-4 h-4"></i> Rapports PDF pro</li>
+                    <li class="flex items-center gap-2 text-emerald-500"><i data-lucide="check" class="w-4 h-4"></i> Support prioritaire</li>
+                </ul>
+                <a href="https://me.fedapay.com/sF5bKiUt" class="btn-blue mt-8 block text-center">S'ABONNER MAINTENANT</a>
+            </div>
         </div>
 
     </main>
 
-    <nav class="fixed bottom-0 left-0 right-0 h-20 bg-white border-t border-slate-200 flex justify-around items-center px-6 z-50">
-        <button onclick="showPage('home')" class="nav-item text-blue-600 flex flex-col items-center gap-1"><i data-lucide="home"></i></button>
-        <button onclick="checkLimitAndShow('factures')" class="nav-item text-slate-400 flex flex-col items-center gap-1"><i data-lucide="receipt"></i></button>
-        <button onclick="showPage('premium')" class="nav-item text-slate-400 flex flex-col items-center gap-1"><i data-lucide="crown"></i></button>
+    <nav class="fixed bottom-0 left-0 right-0 h-20 bg-white border-t border-slate-100 flex justify-around items-center px-8 z-[1000]">
+        <button onclick="changePage('home')" class="text-blue-600"><i data-lucide="home"></i></button>
+        <button onclick="checkLimit('sales')" class="text-slate-300"><i data-lucide="plus-circle"></i></button>
+        <button onclick="changePage('gold')" class="text-slate-300"><i data-lucide="crown"></i></button>
     </nav>
 
     <script>
+        const { jsPDF } = window.jspdf;
         lucide.createIcons();
-        let stats = JSON.parse(localStorage.getItem('globalStats')) || { ventes: 0, depenses: 0, logs: [], lastResetDate: new Date().toLocaleDateString(), dailyCount: 0 };
-        let userConfig = JSON.parse(localStorage.getItem('userConfig')) || { currency: 'XOF', isGold: false, goldExpiry: null };
+
+        // 1. DATABASE
+        let app = JSON.parse(localStorage.getItem('cp_final_db')) || {
+            user: null,
+            sales: 0, costs: 0,
+            logs: [],
+            daily: { date: new Date().toLocaleDateString(), count: 0 }
+        };
+
+        // 2. INITIALISATION
+        if(!app.user) { document.getElementById('setup-screen').classList.remove('hidden'); }
+        else { updateUI(); }
+
+        function startApp() {
+            app.user = { lang: document.getElementById('setupLang').value, currency: document.getElementById('setupCur').value, isGold: false };
+            save();
+            document.getElementById('setup-screen').classList.add('hidden');
+            updateUI();
+        }
+
+        function save() { localStorage.setItem('cp_final_db', JSON.stringify(app)); }
 
         function updateUI() {
-            // Reset daily count if new day
+            document.getElementById('mainProfit').innerText = (app.sales - app.costs).toLocaleString();
+            document.getElementById('mainSales').innerText = app.sales.toLocaleString();
+            document.getElementById('mainCosts').innerText = app.costs.toLocaleString();
+            document.querySelectorAll('.displayCur').forEach(e => e.innerText = app.user.currency);
+            renderHistory();
+        }
+
+        // 3. LOGIQUE METIER
+        function changePage(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-' + id).classList.add('active');
+            window.scrollTo(0,0);
+        }
+
+        function checkLimit(page) {
             const today = new Date().toLocaleDateString();
-            if(stats.lastResetDate !== today) {
-                stats.dailyCount = 0;
-                stats.lastResetDate = today;
+            if(app.daily.date !== today) { app.daily = { date: today, count: 0 }; }
+            
+            if(!app.user.isGold && app.daily.count >= 3) {
+                document.getElementById('modalLimit').classList.add('active');
+            } else {
+                changePage(page);
+            }
+        }
+
+        function saveTx(type) {
+            const name = type === 'sale' ? document.getElementById('v_client').value : document.getElementById('d_motif').value;
+            const amt = parseInt(type === 'sale' ? document.getElementById('v_amount').value : document.getElementById('d_amount').value);
+            
+            if(!amt || !name) return alert("Remplissez les champs !");
+
+            if(type === 'sale') {
+                app.sales += amt;
+                app.daily.count++;
+                generatePDF(name, amt);
+            } else {
+                app.costs += amt;
             }
 
-            // Check Gold Expiry (Rappel)
-            if(userConfig.isGold && userConfig.goldExpiry) {
-                const diffTime = new Date(userConfig.goldExpiry) - new Date();
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                if(diffDays <= 3 && diffDays > 0) {
-                    document.getElementById('renewalAlert').classList.remove('hidden');
-                    document.getElementById('daysLeftSub').innerText = diffDays;
-                }
-                document.getElementById('trialLabel').innerText = "Compte Gold ✅";
-            }
+            app.logs.push({ title: name, amount: amt, type: type, date: new Date().toLocaleTimeString() });
+            save();
+            updateUI();
+            changePage('home');
+            
+            // Clear inputs
+            document.querySelectorAll('input').forEach(i => i.value = "");
+        }
 
-            document.getElementById('beneficeDisplay').innerText = (stats.ventes - stats.depenses).toLocaleString();
-            const hist = document.getElementById('history');
-            hist.innerHTML = stats.logs.slice(-5).reverse().map(l => `
-                <div class="fintech-card p-4 flex justify-between items-center mb-2">
-                    <p class="font-bold text-sm">${l.title}</p>
-                    <p class="font-black text-emerald-500">+${l.amount} ${userConfig.currency}</p>
+        function renderHistory() {
+            const search = document.getElementById('searchBar').value.toLowerCase();
+            const list = document.getElementById('historyList');
+            const filtered = app.logs.filter(l => l.title.toLowerCase().includes(search));
+            
+            list.innerHTML = filtered.slice(-10).reverse().map(l => `
+                <div class="fintech-card flex justify-between items-center py-4">
+                    <div>
+                        <p class="font-bold text-sm">${l.title}</p>
+                        <p class="text-[9px] text-slate-400 uppercase">${l.date}</p>
+                    </div>
+                    <p class="font-black ${l.type==='sale'?'text-emerald-500':'text-red-500'}">
+                        ${l.type==='sale'?'+':'-'}${l.amount.toLocaleString()}
+                    </p>
                 </div>
             `).join('');
-
-            localStorage.setItem('globalStats', JSON.stringify(stats));
-            localStorage.setItem('userConfig', JSON.stringify(userConfig));
         }
 
-        function checkLimitAndShow(page) {
-            if(!userConfig.isGold && stats.dailyCount >= 3) {
-                document.getElementById('limitModal').classList.add('active');
-            } else {
-                showPage(page);
-            }
+        function generatePDF(name, amt) {
+            const doc = new jsPDF();
+            doc.setFont("helvetica", "bold");
+            doc.text("FACTURE COMPTAPRO", 105, 20, { align: "center" });
+            doc.setFontSize(10);
+            doc.text(`DATE: ${new Date().toLocaleDateString()}`, 20, 40);
+            doc.text(`CLIENT: ${name.toUpperCase()}`, 20, 50);
+            doc.line(20, 60, 190, 60);
+            doc.text("TOTAL PAYÉ", 20, 80);
+            doc.text(`${amt} ${app.user.currency}`, 170, 80);
+            doc.text("Merci de votre confiance.", 105, 120, { align: "center" });
+            doc.save(`Facture_${name}.pdf`);
         }
 
-        function validerVente() {
-            const amt = parseInt(document.getElementById('clientAmount').value);
-            if(!amt) return;
-            
-            stats.ventes += amt;
-            stats.dailyCount += 1;
-            stats.logs.push({title: document.getElementById('clientName').value || 'Vente', amount: amt, type: 'sale'});
-            updateUI();
-            showPage('home');
+        function exportCSV() {
+            let csv = "Item,Montant,Type,Heure\n";
+            app.logs.forEach(l => { csv += `${l.title},${l.amount},${l.type},${l.date}\n` });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = 'Rapport_ComptaPro.csv';
+            a.click();
         }
 
-        function showPage(id) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById('page-'+id).classList.add('active');
-        }
-
-        function closeModal() { document.getElementById('limitModal').classList.remove('active'); }
-
-        // Simulation Activation Gold pour test (A lier à ton lien de paiement plus tard)
-        function activateGoldDemo() {
-            userConfig.isGold = true;
-            // On simule une fin d'abonnement dans 3 jours pour voir le rappel
-            const expiry = new Date();
-            expiry.setDate(expiry.getDate() + 3);
-            userConfig.goldExpiry = expiry.getTime();
-            localStorage.setItem('userConfig', JSON.stringify(userConfig));
-            alert("Pack Gold activé (Démo 30 jours) !");
-            location.reload();
-        }
-
-        updateUI();
+        function closeModal() { document.getElementById('modalLimit').classList.remove('active'); }
     </script>
 </body>
 </html>
