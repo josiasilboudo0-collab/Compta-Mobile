@@ -3,48 +3,176 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ComptaPro Stock Edition</title>
+    <title>ComptaPro</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAFC; }
-        .page { display: none; } 
-        .page.active { display: block; animation: fadeIn 0.3s; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .input-f { width: 100%; padding: 14px; background: #F1F5F9; border-radius: 14px; border: 1px solid #E2E8F0; outline: none; margin-bottom: 12px; font-size: 14px; }
-        .btn-p { background: #2563EB; color: white; padding: 16px; border-radius: 16px; font-weight: 700; width: 100%; transition: 0.2s; border: none; cursor: pointer; }
-        .btn-p:active { transform: scale(0.97); }
-        nav button.active { color: #2563EB; }
+        body { font-family: system-ui, -apple-system, sans-serif; background: #F8FAFC; margin: 0; padding-bottom: 90px; }
+        .page { display: none; padding: 20px; }
+        .page.active { display: block !important; }
+        .input-f { width: 100%; padding: 14px; background: #F1F5F9; border-radius: 14px; border: 1px solid #E2E8F0; outline: none; margin-bottom: 12px; }
+        .btn-p { background: #2563EB; color: white; padding: 16px; border-radius: 16px; font-weight: 700; width: 100%; border: none; cursor: pointer; }
+        nav { position: fixed; bottom: 0; left: 0; right: 0; height: 75px; background: white; border-top: 1px solid #E2E8F0; display: flex; z-index: 1000; }
+        .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; color: #94A3B8; background: none; border: none; }
+        .nav-btn.active { color: #2563EB; font-weight: bold; }
     </style>
 </head>
-<body class="pb-28">
+<body onload="initApp()">
 
-    <div id="setup-screen" class="fixed inset-0 bg-white z-[3000] p-6 overflow-y-auto hidden">
-        <div class="max-w-md mx-auto text-center">
-            <h1 class="text-3xl font-black mb-6">Profil Business</h1>
-            <div class="flex flex-col items-center mb-6">
-                <div onclick="document.getElementById('logoInput').click()" class="w-24 h-24 bg-slate-100 rounded-3xl border-2 border-dashed border-slate-300 flex items-center justify-center overflow-hidden cursor-pointer">
-                    <img id="logoPreview" class="hidden w-full h-full object-cover">
-                    <i id="logoIcon" data-lucide="camera" class="text-slate-400"></i>
-                </div>
-                <input type="file" id="logoInput" accept="image/*" class="hidden" onchange="previewLogo(event)">
-                <p class="text-[10px] mt-2 font-bold text-blue-600 uppercase">Logo Entreprise</p>
-            </div>
-            <div class="grid grid-cols-2 gap-3">
-                <input type="text" id="u_fname" placeholder="Prénom" class="input-f">
-                <input type="text" id="u_lname" placeholder="Nom" class="input-f">
-            </div>
-            <input type="text" id="u_biz" placeholder="Nom de l'entreprise" class="input-f">
-            <input type="tel" id="u_phone" placeholder="Contact Téléphonique" class="input-f">
-            <select id="u_cur" class="input-f"><option value="XOF">FCFA (CFA)</option><option value="USD">USD ($)</option></select>
-            <button onclick="saveProfile()" class="btn-p mt-4 shadow-xl shadow-blue-200 uppercase tracking-widest">Créer mon espace</button>
-        </div>
+    <div id="setup-screen" class="fixed inset-0 bg-white z-[3000] p-6 hidden">
+        <h1 class="text-2xl font-black text-center mb-6">Configuration</h1>
+        <input type="text" id="u_biz" placeholder="Nom de votre Boutique" class="input-f">
+        <input type="tel" id="u_phone" placeholder="Téléphone (ex: 226...)" class="input-f">
+        <select id="u_cur" class="input-f"><option value="FCFA">FCFA</option><option value="USD">USD ($)</option></select>
+        <button onclick="saveProfile()" class="btn-p">CRÉER MON ESPACE</button>
     </div>
 
-    <header class="p-5 flex justify-between items-center bg-white border-b sticky top-0 z-50">
-        <div class="flex items-center gap-3">
-            <img id="headLogo" class="w-8 h-8 rounded-lg object-cover hidden">
-            <h1 id="headBiz" class="font-black text-blue-600 truncate max-w-[150px]">ComptaPro</h1>
+    <header class="p-4 bg-white border-b flex justify-between items-center sticky top-0 z-50">
+        <b id="headBiz" class="text-blue-600">ComptaPro</b>
+        <span id="sub-badge" class="text-[10px] font-bold px-2 py-1 rounded-full bg-red-100 text-red-600">GRATUIT</span>
+    </header>
+
+    <div id="pages-container">
+        
+        <div id="page-home" class="page active">
+            <div class="bg-slate-900 p-8 rounded-3xl text-white shadow-xl mb-6 text-center">
+                <p class="text-[10px] uppercase text-slate-400">Profit Total</p>
+                <h2 class="text-3xl font-black"><span id="valProfit">0</span> <span class="cur"></span></h2>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <button onclick="checkAccess('invoice')" class="bg-white p-6 rounded-2xl border flex flex-col items-center gap-2 shadow-sm">
+                    <span class="text-2xl">🛒</span><span class="text-[10px] font-bold uppercase">Vente</span>
+                </button>
+                <button onclick="checkAccess('stock')" class="bg-white p-6 rounded-2xl border flex flex-col items-center gap-2 shadow-sm">
+                    <span class="text-2xl">📦</span><span class="text-[10px] font-bold uppercase">Stock</span>
+                </button>
+            </div>
+        </div>
+
+        <div id="page-stock" class="page">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">📦 Mon Stock</h2>
+                <button onclick="toggleForm()" class="bg-blue-600 text-white w-8 h-8 rounded-full font-bold">+</button>
+            </div>
+            <div id="addForm" class="hidden bg-white p-4 rounded-2xl border mb-4">
+                <input type="text" id="p_name" placeholder="Nom produit" class="input-f">
+                <input type="number" id="p_cost" placeholder="Prix achat" class="input-f">
+                <input type="number" id="p_price" placeholder="Prix vente" class="input-f">
+                <input type="number" id="p_qty" placeholder="Quantité" class="input-f">
+                <button onclick="addProduct()" class="btn-p">AJOUTER</button>
+            </div>
+            <div id="stockList" class="space-y-2"></div>
+        </div>
+
+        <div id="page-invoice" class="page">
+            <h2 class="text-xl font-bold mb-4">📝 Nouvelle Vente</h2>
+            <div class="bg-white p-4 rounded-2xl border shadow-sm">
+                <input type="text" id="c_name" placeholder="Nom du Client" class="input-f">
+                <select id="v_product" class="input-f"><option value="">-- Choisir --</option></select>
+                <input type="number" id="v_qty" placeholder="Quantité" class="input-f">
+                <button onclick="processSale()" class="btn-p">VALIDER & PDF</button>
+            </div>
+        </div>
+
+        <div id="page-premium" class="page">
+            <div class="bg-white p-6 rounded-3xl border text-center">
+                <div class="text-4xl mb-4">👑</div>
+                <h2 class="text-xl font-black">Passer en Pro</h2>
+                <p class="text-slate-500 text-sm mb-6">Débloquez le Stock et les Factures</p>
+                <a href="https://qaasxtqf.mychariow.shop/abonnement-pro-compta-mobile/checkout" target="_blank" class="btn-p bg-blue-600 block mb-3 no-underline">PAYER 3 000 F (AUTOMATIQUE)</a>
+                <button onclick="payWA()" class="btn-p bg-emerald-500 mb-6">PAYER PAR WHATSAPP</button>
+                <div class="bg-slate-50 p-4 rounded-xl mb-4">
+                    <p class="text-[10px] font-bold text-slate-400">ID À ENVOYER :</p>
+                    <b id="prem_uid" class="text-xl text-blue-600"></b>
+                </div>
+                <input type="number" id="key-input" placeholder="Clé d'activation" class="input-f text-center font-bold">
+                <button onclick="activatePro()" class="btn-p bg-black">ACTIVER</button>
+            </div>
+        </div>
+
+        <div id="page-settings" class="page">
+            <h2 class="text-xl font-bold mb-4">⚙️ Paramètres</h2>
+            <div class="bg-white p-4 rounded-2xl border text-center">
+                <p id="prof_name" class="font-bold"></p>
+                <p id="prof_phone" class="text-sm text-slate-500 mb-4"></p>
+                <button onclick="if(confirm('Tout effacer ?')) {localStorage.clear(); location.reload();}" class="text-red-500 text-xs font-bold uppercase">Réinitialiser l'application</button>
+            </div>
+        </div>
+
+    </div>
+
+    <nav>
+        <button onclick="showPage('home')" id="n-home" class="nav-btn active"><span>🏠</span><span>Accueil</span></button>
+        <button onclick="checkAccess('stock')" id="n-stock" class="nav-btn"><span>📦</span><span>Stock</span></button>
+        <button onclick="checkAccess('invoice')" id="n-invoice" class="nav-btn"><span>📝</span><span>Vente</span></button>
+        <button onclick="showPage('settings')" id="n-settings" class="nav-btn"><span>⚙️</span><span>Profil</span></button>
+    </nav>
+
+    <script>
+        let db = JSON.parse(localStorage.getItem('cp_lite_db')) || { 
+            profile: null, inventory: [], sales: [], totalProfit: 0, 
+            uid: Math.floor(1000 + Math.random() * 8999), expiry: null 
+        };
+
+        function initApp() {
+            if(!db.profile) {
+                document.getElementById('setup-screen').classList.remove('hidden');
+            } else {
+                document.getElementById('headBiz').innerText = db.profile.biz;
+                document.getElementById('prof_name').innerText = db.profile.biz;
+                document.getElementById('prof_phone').innerText = db.profile.phone;
+                document.getElementById('prem_uid').innerText = db.uid;
+                updateUI();
+            }
+        }
+
+        function saveProfile() {
+            const biz = document.getElementById('u_biz').value;
+            const phone = document.getElementById('u_phone').value;
+            if(!biz || !phone) return alert("Remplissez tout !");
+            db.profile = { biz, phone, cur: document.getElementById('u_cur').value };
+            save(); location.reload();
+        }
+
+        function updateUI() {
+            document.getElementById('valProfit').innerText = db.totalProfit.toLocaleString();
+            document.querySelectorAll('.cur').forEach(e => e.innerText = db.profile.cur);
+            renderStock();
+            populateSelect();
+            checkSub();
+        }
+
+        function checkAccess(p) {
+            const now = new Date().getTime();
+            if(db.expiry && now < db.expiry) showPage(p);
+            else { alert("Module PRO requis"); showPage('premium'); }
+        }
+
+        function showPage(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('page-'+id).classList.add('active');
+            document.getElementById('n-'+id).classList.add('active');
+        }
+
+        function payWA() {
+            const msg = encodeURIComponent("Bonjour, je souhaite activer PRO. ID : " + db.uid);
+            window.open("https://wa.me/22666566140?text=" + msg, "_blank");
+        }
+
+        function activatePro() {
+            const key = document.getElementById('key-input').value;
+            const m = new Date().getMonth() + 1;
+            if(key == (db.uid + 42 + m) * 7) {
+                db.expiry = new Date().getTime() + (30 * 24 * 60 * 60 * 1000);
+                save(); alert("Mode PRO Activé !"); location.reload();
+            } else alert("Clé incorrecte");
+        }
+
+        function checkSub() {
+            const now = new Date().getTime();
+            if(db.expiry && now < db.expiry) {
+                const b = document.getElementById('sub-badge');
+                b.innerText = "PRO ACTIF";
+                b.className = "text-[10px] font-bold px-2 py-1 rounded-full bg-green-100 text-green
