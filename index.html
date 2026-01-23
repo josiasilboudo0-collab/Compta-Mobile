@@ -3,121 +3,207 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ComptaPro Gold - Burkina Faso</title>
+    <title>ComptaPro - Solution Business</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; color: #f8fafc; }
-        .glass-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; }
-        .btn-premium { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); box-shadow: 0 10px 20px -5px rgba(245, 158, 11, 0.4); }
-        .animate-gold { animation: pulse-gold 2s infinite; }
-        @keyframes pulse-gold { 0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(245, 158, 11, 0); } 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); } }
+        body { font-family: 'Inter', sans-serif; background-color: #F8FAFC; color: #1E293B; }
+        .fintech-card { background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .btn-primary { background-color: #2563EB; color: white; transition: all 0.2s; }
+        .btn-primary:hover { background-color: #1D4ED8; }
+        .nav-active { color: #2563EB !important; border-top: 2px solid #2563EB; }
+        .page { display: none; }
+        .page.active { display: block; }
+        header { background: #FFFFFF; border-bottom: 1px solid #E2E8F0; }
     </style>
 </head>
 <body class="pb-24">
 
-    <header class="p-6 flex justify-between items-center">
-        <div>
-            <h1 class="text-2xl font-extrabold bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent italic">ComptaPro Gold</h1>
-            <p class="text-[9px] text-slate-500 uppercase tracking-[3px] font-bold">L'outil des champions 🇧🇫</p>
+    <header class="p-4 flex justify-between items-center sticky top-0 z-40">
+        <div class="flex items-center gap-3">
+            <div id="mainLogo" class="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center border border-slate-200 overflow-hidden text-blue-600">
+                <img id="displayLogo" class="hidden w-full h-full object-cover">
+                <i data-lucide="shield-check" id="placeholderIcon"></i>
+            </div>
+            <div>
+                <h1 class="text-lg font-bold text-slate-900 tracking-tight">ComptaPro</h1>
+                <div class="flex items-center gap-1.5">
+                    <span class="w-2 h-2 bg-emerald-500 rounded-full"></span>
+                    <p id="daysLeft" class="text-[10px] text-slate-500 font-medium">Essai : 10 jours restants</p>
+                </div>
+            </div>
         </div>
-        <button onclick="openPaymentModal()" id="badgePro" class="btn-premium px-4 py-2 rounded-xl text-[10px] font-black uppercase text-white animate-gold">Devenir Pro</button>
+        <button onclick="openPaymentModal()" class="text-xs font-semibold text-blue-600 bg-blue-50 px-4 py-2 rounded-lg hover:bg-blue-100 transition">
+            S'abonner
+        </button>
     </header>
 
-    <main class="px-6 space-y-6">
-        <section class="glass-card p-6">
-            <h3 class="text-slate-300 font-bold mb-4 flex items-center gap-2 text-sm italic">
-                <i data-lucide="zap" class="text-yellow-400 w-4 h-4"></i> Performance Business
-            </h3>
-            <div class="h-40 w-full"><canvas id="growthChart"></canvas></div>
-        </section>
+    <main class="px-5 pt-6">
+        
+        <div id="page-home" class="page active space-y-5">
+            <section class="fintech-card p-6">
+                <div class="flex justify-between items-start mb-2">
+                    <p class="text-slate-500 text-xs font-medium uppercase tracking-wider">Solde disponible</p>
+                    <i data-lucide="trending-up" class="text-emerald-500 w-4 h-4"></i>
+                </div>
+                <p class="text-3xl font-bold text-slate-900" id="caisseDisplay">0 <span class="text-base font-medium text-slate-400">FCFA</span></p>
+            </section>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <button onclick="showPage('factures')" class="fintech-card p-5 flex flex-col items-start gap-4 hover:bg-slate-50 transition">
+                    <div class="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center text-blue-600">
+                        <i data-lucide="plus" class="w-5 h-5"></i>
+                    </div>
+                    <span class="text-sm font-semibold text-slate-700">Facturation</span>
+                </button>
+                <button onclick="showPage('stats')" class="fintech-card p-5 flex flex-col items-start gap-4 hover:bg-slate-50 transition">
+                    <div class="w-10 h-10 bg-indigo-50 rounded-full flex items-center justify-center text-indigo-600">
+                        <i data-lucide="pie-chart" class="w-5 h-5"></i>
+                    </div>
+                    <span class="text-sm font-semibold text-slate-700">Analyses</span>
+                </button>
+            </div>
+        </div>
 
-        <section class="grid grid-cols-2 gap-4">
-            <div class="glass-card p-5 border-l-4 border-l-green-500">
-                <p class="text-slate-400 text-[9px] font-bold uppercase">Mes Ventes</p>
-                <p class="text-lg font-black mt-1">0 <span class="text-[10px]">FCFA</span></p>
+        <div id="page-factures" class="page space-y-6">
+            <div class="flex flex-col gap-1">
+                <h2 class="text-xl font-bold text-slate-900">Nouveau Reçu</h2>
+                <p class="text-xs text-slate-500">Envoyez une preuve de paiement à votre client.</p>
             </div>
-            <div class="glass-card p-5 border-l-4 border-l-orange-500">
-                <p class="text-slate-400 text-[9px] font-bold uppercase">Statut</p>
-                <p id="statusAbonnement" class="text-lg font-black mt-1 text-orange-400 uppercase">Gratuit</p>
+            <div class="fintech-card p-6 space-y-5">
+                <div class="space-y-2">
+                    <label class="text-xs font-semibold text-slate-700">Client</label>
+                    <input type="text" id="clientName" placeholder="Nom complet" class="w-full bg-slate-50 rounded-xl px-4 py-3 text-sm border border-slate-200 outline-none focus:border-blue-500 transition">
+                </div>
+                <div class="space-y-2">
+                    <label class="text-xs font-semibold text-slate-700">Montant total</label>
+                    <input type="number" id="clientAmount" placeholder="Montant en FCFA" class="w-full bg-slate-50 rounded-xl px-4 py-3 text-sm border border-slate-200 outline-none focus:border-blue-500 transition">
+                </div>
+                <button onclick="partagerWhatsApp()" class="w-full btn-primary py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-200">
+                    <i data-lucide="share-2" class="w-4 h-4"></i> Partager via WhatsApp
+                </button>
             </div>
-        </section>
+        </div>
+
+        <div id="page-stats" class="page space-y-6">
+            <h2 class="text-xl font-bold text-slate-900">Activité</h2>
+            <div class="fintech-card p-6 h-64">
+                <canvas id="mainChart"></canvas>
+            </div>
+        </div>
+
+        <div id="page-settings" class="page space-y-6">
+            <h2 class="text-xl font-bold text-slate-900">Paramètres</h2>
+            <div class="fintech-card p-8 text-center space-y-4">
+                <div class="w-24 h-24 bg-slate-50 rounded-3xl mx-auto flex items-center justify-center border-2 border-dashed border-slate-200 overflow-hidden" id="previewBox">
+                    <img id="settingLogoPreview" class="hidden w-full h-full object-cover">
+                    <i data-lucide="image" class="text-slate-300 w-8 h-8"></i>
+                </div>
+                <input type="file" id="logoInput" accept="image/*" class="hidden">
+                <button onclick="document.getElementById('logoInput').click()" class="text-sm font-bold text-blue-600">Modifier le logo business</button>
+            </div>
+        </div>
     </main>
 
-    <div id="paymentModal" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden z-50 flex items-center justify-center p-4">
-        <div class="glass-card w-full max-w-sm p-6 text-center relative border-orange-500/50">
-            <button onclick="closePaymentModal()" class="absolute top-4 right-4 text-slate-500"><i data-lucide="x"></i></button>
-            <h2 class="text-2xl font-black mb-6">Passez au GOLD 🏆</h2>
+    <div id="paymentModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full max-w-sm rounded-t-3xl sm:rounded-3xl p-8 shadow-2xl relative">
+            <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-6 sm:hidden"></div>
+            <button onclick="closePaymentModal()" class="absolute top-6 right-6 text-slate-400"><i data-lucide="x"></i></button>
+            
+            <h2 class="text-xl font-bold text-slate-900 mb-2">Choisir un forfait</h2>
+            <p class="text-sm text-slate-500 mb-8">Débloquez la puissance de ComptaPro.</p>
+            
+            <div class="space-y-4">
+                <a href="https://me.fedapay.com/sF5bKiUt" target="_blank" class="block p-5 rounded-2xl border-2 border-slate-100 hover:border-blue-500 transition-all group">
+                    <p class="text-blue-600 font-bold text-xs mb-1">Premium PRO</p>
+                    <div class="flex items-baseline gap-1">
+                        <span class="text-2xl font-bold text-slate-900">3 000F</span>
+                        <span class="text-slate-400 text-sm">/ mois</span>
+                    </div>
+                </a>
 
-            <div class="space-y-4 mb-6">
-                <div class="p-4 rounded-2xl bg-white/5 border border-white/10 text-left">
-                    <p class="text-orange-400 font-bold text-xs uppercase">Pack 1 Mois</p>
-                    <p class="text-xl font-black">3 000 FCFA</p>
-                    <a href="https://me.fedapay.com/sF5bKiUt" class="block w-full text-center mt-3 py-2 bg-slate-700 rounded-xl text-xs font-bold">Choisir</a>
-                </div>
-                <div class="p-4 rounded-2xl bg-orange-500/10 border border-orange-500 text-left">
-                    <p class="text-orange-500 font-bold text-xs uppercase">Pack 3 Mois (Premium)</p>
-                    <p class="text-xl font-black">6 000 FCFA</p>
-                    <a href="https://me.fedapay.com/804MYb_W" class="block w-full text-center mt-3 py-2 bg-orange-500 rounded-xl text-xs font-bold">Choisir</a>
-                </div>
-            </div>
-
-            <div class="pt-4 border-t border-white/10">
-                <p class="text-[10px] text-slate-500 mb-3 uppercase">Déjà un code d'activation ?</p>
-                <div class="flex gap-2">
-                    <input type="text" id="activationCode" placeholder="CODE..." class="bg-slate-800 border border-white/10 rounded-lg px-3 py-2 text-sm w-full outline-none">
-                    <button onclick="verifierCode()" class="bg-white text-black px-4 py-2 rounded-lg text-xs font-bold">OK</button>
-                </div>
+                <a href="https://me.fedapay.com/804MYb_W" target="_blank" class="block p-5 rounded-2xl border-2 border-blue-600 bg-blue-50 text-left relative">
+                    <span class="absolute -top-3 right-4 bg-blue-600 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase">Conseillé</span>
+                    <p class="text-blue-700 font-bold text-xs mb-1">Premium Entreprise</p>
+                    <div class="flex items-baseline gap-1">
+                        <span class="text-2xl font-bold text-slate-900">6 000F</span>
+                        <span class="text-slate-400 text-sm">/ mois</span>
+                    </div>
+                </a>
             </div>
         </div>
     </div>
 
-    <nav class="fixed bottom-6 left-6 right-6 h-16 glass-card border-none shadow-2xl flex justify-around items-center px-4">
-        <button class="text-purple-400"><i data-lucide="home"></i></button>
-        <button class="text-slate-500"><i data-lucide="plus-circle"></i></button>
-        <button class="text-slate-500"><i data-lucide="settings"></i></button>
+    <nav class="fixed bottom-0 left-0 right-0 h-20 bg-white border-t border-slate-200 flex justify-around items-center px-6 z-40">
+        <button onclick="showPage('home')" class="nav-btn flex flex-col items-center gap-1 text-blue-600"><i data-lucide="layout-grid" class="w-6 h-6"></i><span class="text-[10px] font-medium">Accueil</span></button>
+        <button onclick="showPage('factures')" class="nav-btn flex flex-col items-center gap-1 text-slate-400"><i data-lucide="file-text" class="w-6 h-6"></i><span class="text-[10px] font-medium">Factures</span></button>
+        <button onclick="showPage('stats')" class="nav-btn flex flex-col items-center gap-1 text-slate-400"><i data-lucide="activity" class="w-6 h-6"></i><span class="text-[10px] font-medium">Stats</span></button>
+        <button onclick="showPage('settings')" class="nav-btn flex flex-col items-center gap-1 text-slate-400"><i data-lucide="settings" class="w-6 h-6"></i><span class="text-[10px] font-medium">Réglages</span></button>
     </nav>
 
     <script>
         lucide.createIcons();
 
-        // 1. Vérifier si l'utilisateur revient d'un paiement réussi
-        window.onload = function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('bravo')) {
-                activerModePro("ACTIVATION AUTO");
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-' + pageId).classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(b => {
+                b.classList.remove('text-blue-600');
+                b.classList.add('text-slate-400');
+            });
+            event.currentTarget.classList.replace('text-slate-400', 'text-blue-600');
+        }
+
+        function partagerWhatsApp() {
+            const nom = document.getElementById('clientName').value;
+            const montant = document.getElementById('clientAmount').value;
+            if(!nom || !montant) { alert("Détails manquants"); return; }
+            const texte = `✅ *REÇU DE PAIEMENT*\n\nClient : *${nom}*\nMontant : *${montant} FCFA*\n\n_Généré par ComptaPro_ 🇧🇫`;
+            window.open(`https://wa.me/?text=${encodeURIComponent(texte)}`, '_blank');
+        }
+
+        const logoInput = document.getElementById('logoInput');
+        logoInput.onchange = function() {
+            const [file] = logoInput.files;
+            if (file) {
+                const url = URL.createObjectURL(file);
+                document.getElementById('displayLogo').src = url;
+                document.getElementById('settingLogoPreview').src = url;
+                document.getElementById('displayLogo').classList.remove('hidden');
+                document.getElementById('settingLogoPreview').classList.remove('hidden');
+                document.getElementById('placeholderIcon').classList.add('hidden');
+                document.getElementById('previewBox').style.borderStyle = 'solid';
             }
         };
 
-        function activerModePro(planName) {
-            localStorage.setItem('userStatus', 'PRO');
-            document.getElementById('statusAbonnement').innerText = planName;
-            document.getElementById('statusAbonnement').className = "text-lg font-black mt-1 text-green-400";
-            document.getElementById('badgePro').classList.add('hidden');
-            alert("Accès Premium Activé ! Profitez bien.");
-        }
+        let start = localStorage.getItem('start') || new Date().getTime();
+        localStorage.setItem('start', start);
+        let left = 10 - Math.floor((new Date().getTime() - start) / 86400000);
+        document.getElementById('daysLeft').innerText = left > 0 ? `Essai : ${left} jours restants` : "Essai expiré";
 
         function openPaymentModal() { document.getElementById('paymentModal').classList.remove('hidden'); }
         function closePaymentModal() { document.getElementById('paymentModal').classList.add('hidden'); }
 
-        function verifierCode() {
-            const code = document.getElementById('activationCode').value.toUpperCase();
-            if(code === "PRO3K" || code === "PRO6K") {
-                activerModePro(code);
-                closePaymentModal();
-            } else {
-                alert("Code invalide.");
-            }
-        }
-
-        // Graphique simple
-        const ctx = document.getElementById('growthChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'line',
-            data: { labels: ['S1', 'S2', 'S3', 'S4'], datasets: [{ data: [10, 25, 15, 30], borderColor: '#a855f7', tension: 0.4, borderWidth: 3, pointRadius: 0 }] },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false }, ticks: { color: '#475569' } } } }
+        const ctx = document.getElementById('mainChart').getContext('2d');
+        new Chart(ctx, { 
+            type: 'bar', 
+            data: { 
+                labels: ['L', 'M', 'M', 'J', 'V', 'S', 'D'], 
+                datasets: [{ 
+                    label: 'Ventes', 
+                    data: [4000, 7000, 5000, 9000, 12000, 15000, 8000], 
+                    backgroundColor: '#2563EB',
+                    borderRadius: 8
+                }] 
+            }, 
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                plugins: { legend: { display: false } },
+                scales: { y: { border: { display: false }, grid: { color: '#F1F5F9' } }, x: { grid: { display: false } } }
+            } 
         });
     </script>
 </body>
