@@ -3,89 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Compta Mobile Pro</title>
+    <title>Compta Mobile</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        body { font-family: sans-serif; background: #f4f7fe; padding-bottom: 80px; }
-        .page { display: none; }
+        body { font-family: sans-serif; background: #f0f2f5; padding-bottom: 100px; }
+        .page { display: none; padding: 20px; }
         .page.active { display: block; }
-        .card { background: white; border-radius: 15px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .btn-blue { background: #2563eb; color: white; width: 100%; padding: 12px; border-radius: 10px; font-weight: bold; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; margin-bottom: 10px; }
+        .nav-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; height: 100%; color: #64748b; }
+        .nav-btn.active { color: #2563eb; font-weight: bold; }
+        .card { background: white; border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body>
 
-    <header class="bg-white p-4 border-b flex justify-between items-center sticky top-0 z-50">
-        <h1 class="font-bold text-lg text-blue-600">Compta Mobile</h1>
-        <span id="status-badge" class="text-[10px] bg-red-100 text-red-600 px-2 py-1 rounded-full font-bold">GRATUIT</span>
-    </header>
+    <div class="bg-white p-4 border-b flex justify-between items-center sticky top-0 z-50">
+        <h1 class="font-bold text-lg">Compta Pro</h1>
+        <span id="badge" class="bg-red-100 text-red-600 text-[10px] px-2 py-1 rounded-full font-bold">GRATUIT</span>
+    </div>
 
-    <div class="p-4">
+    <div id="main-content">
         <div id="page-home" class="page active">
-            <div class="bg-blue-600 p-6 rounded-2xl text-white mb-6">
-                <p class="text-xs opacity-80 uppercase">Profit total</p>
+            <div class="bg-blue-600 p-8 rounded-2xl text-white mb-6 shadow-lg">
+                <p class="text-xs opacity-75 uppercase">Bénéfice</p>
                 <h2 class="text-3xl font-bold">0 FCFA</h2>
             </div>
-
             <div class="grid grid-cols-2 gap-4">
-                <button onclick="showPage('stock')" class="card flex flex-col items-center">
-                    <i data-lucide="package" class="text-blue-600 mb-2"></i>
-                    <span class="font-bold text-sm">STOCK</span>
-                </button>
-                <button onclick="showPage('facture')" class="card flex flex-col items-center">
-                    <i data-lucide="receipt" class="text-emerald-600 mb-2"></i>
-                    <span class="font-bold text-sm">FACTURES</span>
-                </button>
+                <div onclick="showPage('stock')" class="card text-center cursor-pointer">📦<br>Stock</div>
+                <div onclick="showPage('facture')" class="card text-center cursor-pointer">📄<br>Factures</div>
             </div>
         </div>
 
         <div id="page-stock" class="page">
-            <div class="flex justify-between mb-4 text-blue-600" onclick="showPage('home')">← Retour</div>
-            <h2 class="text-xl font-bold mb-4">Gestion Stock</h2>
+            <h2 class="text-xl font-bold mb-4">📦 Gestion Stock</h2>
             <div class="card">
-                <input type="text" id="p-name" placeholder="Nom du produit">
-                <input type="number" id="p-price" placeholder="Prix de vente">
-                <button onclick="ajouterProduit()" class="btn-blue">AJOUTER AU STOCK</button>
+                <input type="text" id="p_name" placeholder="Produit" class="w-full border p-2 mb-2 rounded">
+                <input type="number" id="p_price" placeholder="Prix" class="w-full border p-2 mb-2 rounded">
+                <button onclick="ajouter()" class="w-full bg-blue-600 text-white p-2 rounded font-bold">AJOUTER</button>
             </div>
-            <div id="liste-stock" class="space-y-2"></div>
+            <div id="liste"></div>
         </div>
 
         <div id="page-facture" class="page">
-            <div class="flex justify-between mb-4 text-blue-600" onclick="showPage('home')">← Retour</div>
-            <h2 class="text-xl font-bold mb-4">Créer Facture</h2>
-            <div class="card text-center text-gray-500 py-10">
-                <i data-lucide="construction" class="mx-auto mb-2"></i>
-                Module de facturation prêt pour l'activation.
+            <h2 class="text-xl font-bold mb-4">📄 Factures</h2>
+            <div class="card text-center text-gray-400 py-10">
+                Aucune facture générée.
             </div>
         </div>
 
         <div id="page-premium" class="page">
-            <h2 class="text-xl font-bold mb-4 text-center">Activer PRO</h2>
+            <h2 class="text-xl font-bold mb-4 text-center">⭐ Activer PRO</h2>
             <div class="card text-center">
-                <p class="text-sm text-gray-500 mb-4">ID de votre téléphone :</p>
-                <p id="my-id" class="text-2xl font-mono font-bold text-blue-600 mb-6">----</p>
-                <a href="https://qaasxtqf.mychariow.shop/abonnement-pro-compta-mobile/checkout" target="_blank" class="btn-blue bg-orange-500 mb-4 block">PAYER 3 000 F</a>
-                <input type="number" id="cle-input" placeholder="Entrez la clé reçue">
-                <button onclick="activerCle()" class="btn-blue bg-black">ACTIVER MAINTENANT</button>
+                <p class="text-sm text-gray-500">ID de l'appareil :</p>
+                <p id="uid" class="text-2xl font-mono font-bold text-blue-600 mb-6">0000</p>
+                <a href="https://qaasxtqf.mychariow.shop/abonnement-pro-compta-mobile/checkout" target="_blank" class="block w-full bg-orange-500 text-white p-3 rounded-lg font-bold mb-4">PAYER 3 000 F</a>
+                <input type="number" id="cle" placeholder="Code secret" class="w-full border p-2 mb-2 rounded text-center">
+                <button onclick="valider()" class="w-full bg-black text-white p-3 rounded-lg font-bold">ACTIVER</button>
             </div>
         </div>
     </div>
 
-    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around p-4 shadow-lg">
-        <button onclick="showPage('home')"><i data-lucide="home"></i></button>
-        <button onclick="showPage('stock')"><i data-lucide="package"></i></button>
-        <button onclick="showPage('premium')"><i data-lucide="crown" class="text-orange-500"></i></button>
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t h-20 flex justify-around items-center z-[100] shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
+        <button onclick="showPage('home')" class="nav-btn">🏠<span class="text-[10px]">Accueil</span></button>
+        <button onclick="showPage('stock')" class="nav-btn">📦<span class="text-[10px]">Stock</span></button>
+        <button onclick="showPage('facture')" class="nav-btn">📄<span class="text-[10px]">Factures</span></button>
+        <button onclick="showPage('premium')" class="nav-btn text-orange-500">⭐<span class="text-[10px]">PRO</span></button>
     </nav>
 
     <script>
-        let appData = { stock: [], uid: Math.floor(1000 + Math.random() * 8999) };
-        
-        function init() {
-            lucide.createIcons();
-            document.getElementById('my-id').innerText = appData.uid;
+        // Génération de l'ID unique
+        let myId = Math.floor(1000 + Math.random() * 8999);
+        document.getElementById('uid').innerText = myId;
+
+        // Fonction pour changer de page
+        function showPage(id) {
+            // Cacher toutes les pages
+            const pages = document.querySelectorAll('.page');
+            pages.forEach(p => p.classList.remove('active'));
+            
+            // Afficher la page demandée
+            const target = document.getElementById('page-' + id);
+            if(target) {
+                target.classList.add('active');
+            } else {
+                console.error("Page non trouvée : " + id);
+            }
         }
 
-        function showPage(pageId) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove
+        // Ajouter au stock
+        function ajouter() {
+            const n = document.getElementById('p_name').value;
+            const p = document.getElementById('p_price').value;
+            if(!n || !p) return alert("Remplissez tout !");
+            const div = document.createElement('div');
+            div.className = "card flex justify-between font-bold";
+            div.innerHTML = `<span>${n}</span> <span class="text-blue-600">${p} F</span>`;
+            document.getElementById('liste').appendChild(div);
