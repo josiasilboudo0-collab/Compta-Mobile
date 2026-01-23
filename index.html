@@ -14,7 +14,7 @@
         .page { display: none; } .page.active { display: block; animation: fadeIn 0.3s; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .input-f { width: 100%; padding: 14px; background: #F1F5F9; border-radius: 14px; border: 1px solid #E2E8F0; outline: none; margin-bottom: 12px; font-size: 14px; }
-        .btn-p { background: #2563EB; color: white; padding: 16px; border-radius: 16px; font-weight: 700; width: 100%; transition: 0.2s; text-align: center; }
+        .btn-p { background: #2563EB; color: white; padding: 16px; border-radius: 16px; font-weight: 700; width: 100%; transition: 0.2s; text-align:center; display:block; }
         .btn-p:active { transform: scale(0.97); }
     </style>
 </head>
@@ -33,7 +33,7 @@
             </div>
             <div class="grid grid-cols-2 gap-3"><input type="text" id="u_fname" placeholder="Prénom" class="input-f"><input type="text" id="u_lname" placeholder="Nom" class="input-f"></div>
             <input type="text" id="u_biz" placeholder="Nom de l'entreprise" class="input-f">
-            <input type="email" id="u_email" placeholder="Email" class="input-f">
+            <input type="email" id="u_email" placeholder="Email (Facturation)" class="input-f">
             <input type="tel" id="u_phone" placeholder="Contact Téléphonique" class="input-f">
             <div class="grid grid-cols-2 gap-3">
                 <input type="text" id="u_country" placeholder="Pays" class="input-f">
@@ -43,26 +43,22 @@
         </div>
     </div>
 
-    <div id="page-premium" class="page fixed inset-0 bg-white z-[2500] p-8 flex flex-col items-center justify-center text-center">
-        <div class="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mb-4">
+    <div id="page-premium" class="page fixed inset-0 bg-white z-[2000] p-8 flex flex-col items-center justify-center text-center">
+        <div class="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mb-6">
             <i data-lucide="crown" class="text-amber-500 w-10 h-10"></i>
         </div>
-        <h2 class="text-3xl font-black mb-2">ComptaPro Premium</h2>
-        <p id="premium-msg" class="text-slate-500 mb-8 text-sm">Votre période d'essai de 10 jours est terminée. Activez votre abonnement pour continuer à gérer votre business.</p>
-        
-        <div class="bg-slate-50 p-6 rounded-[2rem] w-full mb-8 border border-slate-100">
+        <h2 class="text-3xl font-black mb-2">Passez au Premium</h2>
+        <p class="text-slate-500 mb-8">Votre période d'essai de 10 jours est terminée ou vous souhaitez débloquer toutes les fonctionnalités.</p>
+        <div class="bg-slate-50 p-6 rounded-3xl w-full mb-8">
             <p class="text-4xl font-black">3 000F <span class="text-sm font-normal text-slate-400">/ mois</span></p>
-            <div class="mt-4 space-y-2 text-left text-xs font-semibold text-slate-600">
-                <div class="flex items-center gap-2"><i data-lucide="check" class="w-4 text-emerald-500"></i> Factures PDF illimitées</div>
-                <div class="flex items-center gap-2"><i data-lucide="check" class="w-4 text-emerald-500"></i> Gestion de stock avancée</div>
-                <div class="flex items-center gap-2"><i data-lucide="check" class="w-4 text-emerald-500"></i> Calcul des profits réels</div>
-            </div>
+            <ul class="text-left mt-4 space-y-2 text-sm">
+                <li class="flex items-center gap-2"><i data-lucide="check-circle" class="w-4 text-emerald-500"></i> Stock illimité</li>
+                <li class="flex items-center gap-2"><i data-lucide="check-circle" class="w-4 text-emerald-500"></i> Factures PDF professionnelles</li>
+                <li class="flex items-center gap-2"><i data-lucide="check-circle" class="w-4 text-emerald-500"></i> Support prioritaire</li>
+            </ul>
         </div>
-
-        <a href="https://me.fedapay.com/sF5bKiUt" target="_blank" class="btn-p w-full bg-amber-500 shadow-xl shadow-amber-200 flex items-center justify-center gap-3">
-            ACTIVER LE PREMIUM <i data-lucide="external-link" class="w-4"></i>
-        </a>
-        <button onclick="showPage('home')" id="btn-back-trial" class="mt-6 text-slate-400 text-[10px] font-bold uppercase tracking-widest">Retour (Période d'essai)</button>
+        <a href="https://me.fedapay.com/sF5bKiUt" target="_blank" class="btn-p w-full bg-amber-500 shadow-xl shadow-amber-100">ACTIVER MAINTENANT</a>
+        <button onclick="showPage('home')" class="mt-6 text-slate-400 text-xs font-bold uppercase tracking-widest underline">Retour</button>
     </div>
 
     <header class="p-5 flex justify-between items-center bg-white border-b sticky top-0 z-50">
@@ -70,29 +66,24 @@
             <img id="headLogo" class="w-8 h-8 rounded-lg object-cover hidden">
             <h1 id="headBiz" class="font-black text-blue-600">ComptaPro</h1>
         </div>
-        <button onclick="showPage('premium')" class="text-amber-500 flex items-center gap-1 font-bold text-xs uppercase">
+        <button onclick="showPage('premium')" id="premiumBadge" class="text-amber-500 flex items-center gap-1 text-[10px] font-bold">
             <i data-lucide="crown" class="w-4"></i> PRO
         </button>
     </header>
 
     <main class="p-5 space-y-6">
-        
         <div id="page-home" class="page active space-y-6">
-            <div class="bg-slate-900 p-8 rounded-[2.5rem] text-white shadow-2xl relative overflow-hidden">
-                <div class="relative z-10">
-                    <p class="text-[10px] uppercase font-bold text-slate-400 mb-1 italic">Profit Réel Estimé</p>
-                    <h2 class="text-4xl font-black"><span id="valProfit">0</span> <span class="cur text-sm font-normal"></span></h2>
-                    <p id="trial-counter" class="text-[9px] mt-4 font-bold text-emerald-400 uppercase tracking-tighter"></p>
-                </div>
-                <div class="absolute -right-4 -bottom-4 opacity-10"><i data-lucide="trending-up" class="w-32 h-32"></i></div>
+            <div class="bg-slate-900 p-8 rounded-[2.5rem] text-white shadow-2xl">
+                <p class="text-[10px] uppercase font-bold text-slate-400 mb-1 italic">Profit Réel Estimé</p>
+                <h2 class="text-4xl font-black"><span id="valProfit">0</span> <span class="cur text-sm font-normal"></span></h2>
+                <p id="trialDays" class="text-[9px] text-emerald-400 mt-4 font-bold"></p>
             </div>
-            
             <div class="grid grid-cols-2 gap-4">
-                <button onclick="showPage('invoice')" class="bg-white p-6 rounded-3xl border flex flex-col items-center gap-2 shadow-sm">
+                <button onclick="showPage('invoice')" class="bg-white p-6 rounded-3xl border flex flex-col items-center gap-2">
                     <i data-lucide="shopping-cart" class="text-blue-600"></i>
                     <span class="text-[10px] font-black uppercase">Vente</span>
                 </button>
-                <button onclick="showPage('stock')" class="bg-white p-6 rounded-3xl border flex flex-col items-center gap-2 shadow-sm">
+                <button onclick="showPage('stock')" class="bg-white p-6 rounded-3xl border flex flex-col items-center gap-2">
                     <i data-lucide="box" class="text-emerald-500"></i>
                     <span class="text-[10px] font-black uppercase">Stock</span>
                 </button>
@@ -118,9 +109,9 @@
             <h2 class="text-2xl font-black italic">Nouvelle Vente</h2>
             <div class="bg-white p-6 rounded-3xl border space-y-4">
                 <input type="text" id="c_name" placeholder="Nom de l'acheteur" class="input-f">
-                <label class="text-[10px] font-bold text-slate-400 uppercase">Article</label>
-                <select id="v_product" class="input-f" onchange="updateMaxQty()"><option value="">-- Choisir --</option></select>
-                <input type="number" id="v_qty" placeholder="Quantité" class="input-f">
+                <label class="text-[10px] font-bold text-slate-400 uppercase">Sélectionner Produit</label>
+                <select id="v_product" class="input-f" onchange="updateMaxQty()"><option value="">-- Choisir un article --</option></select>
+                <input type="number" id="v_qty" placeholder="Quantité à vendre" class="input-f">
                 <p id="qtyHint" class="text-[10px] text-orange-500 font-bold px-2"></p>
                 <button onclick="processSale()" class="btn-p shadow-lg shadow-blue-100 w-full">VALIDER & TÉLÉCHARGER PDF</button>
             </div>
@@ -129,18 +120,18 @@
         <div id="page-settings" class="page space-y-4">
             <h2 class="text-2xl font-black italic">Paramètres</h2>
             <div class="bg-white p-6 rounded-3xl border space-y-4 shadow-sm">
-                <input type="text" id="set_biz" placeholder="Entreprise" class="input-f">
+                <p class="text-[10px] font-bold text-slate-400 uppercase">Identité Entreprise</p>
+                <input type="text" id="set_biz" placeholder="Nom Entreprise" class="input-f">
                 <input type="text" id="set_fname" placeholder="Prénom" class="input-f">
                 <input type="text" id="set_lname" placeholder="Nom" class="input-f">
                 <input type="email" id="set_email" placeholder="Email" class="input-f">
                 <input type="tel" id="set_phone" placeholder="Téléphone" class="input-f">
                 <input type="text" id="set_country" placeholder="Pays" class="input-f">
-                <button onclick="updateSettings()" class="btn-p bg-emerald-600 w-full uppercase text-xs">Mettre à jour</button>
+                <button onclick="updateSettings()" class="btn-p bg-emerald-600 w-full">ENREGISTRER</button>
                 <hr class="my-2">
                 <button onclick="if(confirm('Tout effacer ?')) {localStorage.clear(); location.reload();}" class="w-full text-red-500 text-[10px] font-bold uppercase tracking-widest">Réinitialiser l'application</button>
             </div>
         </div>
-
     </main>
 
     <nav class="fixed bottom-0 left-0 right-0 h-20 bg-white border-t flex justify-around items-center px-8 z-50">
@@ -152,30 +143,23 @@
 
     <script>
         lucide.createIcons();
-        // Ajout de 'createdAt' pour gérer les 10 jours
-        let db = JSON.parse(localStorage.getItem('cp_stock_db')) || { profile: null, inventory: [], sales: [], totalProfit: 0, createdAt: Date.now() };
+        let db = JSON.parse(localStorage.getItem('cp_stock_db')) || { profile: null, inventory: [], sales: [], totalProfit: 0, startDate: Date.now() };
         let logoBase64 = db.profile ? db.profile.logo : "";
 
-        if(!db.profile) {
-            document.getElementById('setup-screen').classList.remove('hidden');
-        } else {
-            init();
-        }
+        if(!db.profile) document.getElementById('setup-screen').classList.remove('hidden'); else init();
 
-        function checkSubscription() {
-            const tenDaysInMs = 10 * 24 * 60 * 60 * 1000;
-            const elapsed = Date.now() - db.createdAt;
-            const remainingDays = Math.max(0, Math.ceil((tenDaysInMs - elapsed) / (24 * 60 * 60 * 1000)));
-
-            if (elapsed > tenDaysInMs) {
-                // Temps écoulé : On force l'écran premium et on cache le bouton retour
+        function checkPremium() {
+            const now = Date.now();
+            const tenDays = 10 * 24 * 60 * 60 * 1000;
+            const diff = now - db.startDate;
+            const remaining = Math.ceil((tenDays - diff) / (24 * 60 * 60 * 1000));
+            
+            if (diff > tenDays) {
                 showPage('premium');
-                document.getElementById('btn-back-trial').classList.add('hidden');
-                document.getElementById('premium-msg').innerText = "Votre période d'essai de 10 jours est terminée.";
-                return false;
+                document.getElementById('trialDays').innerText = "Essai expiré";
+                document.getElementById('trialDays').classList.replace('text-emerald-400', 'text-red-400');
             } else {
-                document.getElementById('trial-counter').innerText = `Essai gratuit : ${remainingDays} jours restants`;
-                return true;
+                document.getElementById('trialDays').innerText = `Période d'essai : ${remaining} jour(s) restant(s)`;
             }
         }
 
@@ -201,9 +185,8 @@
                 country: document.getElementById('u_country').value,
                 logo: logoBase64
             };
-            db.createdAt = Date.now(); // Début de l'essai à la création du profil
-            localStorage.setItem('cp_stock_db', JSON.stringify(db)); 
-            location.reload();
+            db.startDate = Date.now(); // Date de début de l'essai
+            localStorage.setItem('cp_stock_db', JSON.stringify(db)); location.reload();
         }
 
         function init() {
@@ -218,20 +201,18 @@
             document.getElementById('set_phone').value = db.profile.phone;
             document.getElementById('set_country').value = db.profile.country;
 
-            checkSubscription();
-            renderStock(); 
-            renderHome(); 
-            populateProductSelect();
+            checkPremium();
+            renderStock(); renderHome(); populateProductSelect();
         }
 
         function save() { localStorage.setItem('cp_stock_db', JSON.stringify(db)); }
-        function toggleAddProduct() { document.getElementById('addProductForm').classList.toggle('hidden'); }
-        
         function showPage(id) { 
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); 
             document.getElementById('page-'+id).classList.add('active'); 
         }
 
+        function toggleAddProduct() { document.getElementById('addProductForm').classList.toggle('hidden'); }
+        
         function addProduct() {
             const name = document.getElementById('p_name').value;
             const cost = parseInt(document.getElementById('p_cost').value);
@@ -263,8 +244,8 @@
                     <div><p class="font-bold text-sm">${p.name}</p><p class="text-[10px] text-slate-400">P.V: ${p.price} ${db.profile.cur}</p></div>
                     <div class="flex items-center gap-3">
                         <p class="font-black ${p.qty <= 5 ? 'text-red-500' : 'text-blue-600'}">${p.qty}</p>
-                        <button onclick="restock(${p.id})" class="text-slate-300 hover:text-blue-600"><i data-lucide="refresh-cw" class="w-4"></i></button>
-                        <button onclick="deleteProduct(${p.id})" class="text-slate-300 hover:text-red-500"><i data-lucide="trash-2" class="w-4"></i></button>
+                        <button onclick="restock(${p.id})" class="text-slate-300"><i data-lucide="refresh-cw" class="w-4"></i></button>
+                        <button onclick="deleteProduct(${p.id})" class="text-slate-200"><i data-lucide="trash-2" class="w-4"></i></button>
                     </div>
                 </div>
             `).join('');
@@ -272,7 +253,7 @@
         }
 
         function populateProductSelect() {
-            document.getElementById('v_product').innerHTML = '<option value="">-- Choisir --</option>' + 
+            document.getElementById('v_product').innerHTML = '<option value="">-- Choisir un article --</option>' + 
                 db.inventory.filter(p => p.qty > 0).map(p => `<option value="${p.id}">${p.name} (${p.qty})</option>`).join('');
         }
 
@@ -301,7 +282,7 @@
 
         function renderHome() {
             document.getElementById('valProfit').innerText = db.totalProfit.toLocaleString();
-            document.getElementById('historyList').innerHTML = `<h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Ventes Récentes</h3>` + 
+            document.getElementById('historyList').innerHTML = `<h3 class="text-[10px] font-bold text-slate-400 uppercase mb-3 tracking-widest">Ventes Récentes</h3>` + 
                 db.sales.slice(-5).reverse().map(s => `
                 <div class="bg-white p-4 rounded-2xl border flex justify-between items-center mb-2">
                     <div><p class="font-bold text-xs">${s.client}</p><p class="text-[9px] text-slate-400">${s.item} x${s.qty}</p></div>
@@ -317,7 +298,7 @@
             db.profile.email = document.getElementById('set_email').value;
             db.profile.phone = document.getElementById('set_phone').value;
             db.profile.country = document.getElementById('set_country').value;
-            save(); alert("Profil mis à jour !"); location.reload();
+            save(); alert("Modifié !"); location.reload();
         }
 
         function generateProfessionalInvoice(client, item, qty, price, total) {
