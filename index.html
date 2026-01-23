@@ -3,299 +3,295 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Compta Mobile Business</title>
+    <title>Compta Business Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #F8FAFC; padding-bottom: 80px; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAFC; padding-bottom: 90px; }
         .page { display: none; } 
         .page.active { display: block; }
-        .input-group { margin-bottom: 15px; }
-        .input-label { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 5px; display: block; }
-        .field { width: 100%; padding: 14px; background: white; border-radius: 12px; border: 1px solid #E2E8F0; outline: none; transition: 0.2s; }
-        .field:focus { border-color: #2563EB; ring: 2px ring-blue-100; }
-        .btn-main { background: #2563EB; color: white; padding: 16px; border-radius: 12px; font-weight: bold; width: 100%; text-align: center; }
-        .card { background: white; padding: 20px; border-radius: 20px; border: 1px solid #E2E8F0; }
-        #logo-preview { width: 60px; height: 60px; border-radius: 10px; object-fit: cover; background: #F1F5F9; }
+        .field { width: 100%; padding: 14px; background: white; border-radius: 12px; border: 1px solid #E2E8F0; outline: none; margin-bottom: 12px; font-size: 15px; transition: 0.2s; }
+        .field:focus { border-color: #2563EB; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        .btn-main { background: #2563EB; color: white; padding: 16px; border-radius: 15px; font-weight: bold; width: 100%; text-align: center; display: block; transition: 0.3s; }
+        .btn-main:active { transform: scale(0.97); }
+        .card { background: white; padding: 20px; border-radius: 25px; border: 1px solid #E2E8F0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        .label-text { font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 4px; display: block; margin-left: 4px; }
     </style>
 </head>
 <body>
 
     <div id="setup-screen" class="fixed inset-0 bg-slate-50 z-[9999] p-6 overflow-y-auto hidden">
-        <div class="max-w-md mx-auto py-10">
-            <h1 class="text-3xl font-black text-slate-900">Bienvenue 🚀</h1>
-            <p class="text-slate-500 mb-8">Configurez votre compte business</p>
+        <div class="max-w-md mx-auto">
+            <div class="text-center mt-8 mb-8">
+                <h1 class="text-3xl font-extrabold text-slate-900">Bienvenue 🚀</h1>
+                <p class="text-slate-500">Créez votre profil business</p>
+            </div>
             
-            <div class="space-y-4">
-                <div class="flex items-center gap-4 mb-6 p-4 bg-white rounded-2xl border">
-                    <img id="logo-preview" src="#" alt="" class="hidden">
-                    <div id="logo-placeholder" class="w-[60px] h-[60px] bg-slate-100 rounded-xl flex items-center justify-center text-slate-400">
-                        <i data-lucide="image"></i>
-                    </div>
-                    <div>
-                        <span class="input-label">Logo de l'entreprise</span>
-                        <input type="file" id="u_logo" accept="image/*" class="text-xs" onchange="previewLogo(this)">
-                    </div>
+            <div class="card">
+                <label class="label-text text-center">Votre Logo</label>
+                <div class="flex justify-center mb-6">
+                    <label for="u_logo" class="cursor-pointer group relative">
+                        <div id="setup-logo-placeholder" class="w-24 h-24 bg-slate-100 rounded-3xl flex items-center justify-center border-2 border-dashed border-slate-300 group-hover:bg-slate-200 transition">
+                            <i data-lucide="camera" class="text-slate-400"></i>
+                        </div>
+                        <img id="preview-setup" class="w-24 h-24 rounded-3xl object-cover hidden shadow-xl border-2 border-white">
+                    </label>
+                    <input type="file" id="u_logo" accept="image/*" class="hidden" onchange="previewImage(this, 'preview-setup', 'setup-logo-placeholder')">
                 </div>
 
-                <div class="input-group text-left">
-                    <label class="input-label">Nom de l'utilisateur / Boutique</label>
-                    <input type="text" id="u_name" placeholder="Ex: Boutique Horizon" class="field">
-                </div>
+                <label class="label-text">Nom de la Boutique / Utilisateur</label>
+                <input type="text" id="u_name" placeholder="Ex: Boutique Horizon" class="field">
 
-                <div class="input-group text-left">
-                    <label class="input-label">Numéro de Téléphone</label>
-                    <input type="tel" id="u_tel" placeholder="Ex: +226 00 00 00 00" class="field">
-                </div>
+                <label class="label-text">Téléphone</label>
+                <input type="tel" id="u_tel" placeholder="Ex: +226 66 56 61 40" class="field">
 
-                <div class="grid grid-cols-2 gap-4 text-left">
+                <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="input-label">Pays</label>
-                        <input type="text" id="u_country" placeholder="Burkina Faso" class="field">
+                        <label class="label-text">Pays</label>
+                        <input type="text" id="u_country" value="Burkina Faso" class="field">
                     </div>
                     <div>
-                        <label class="input-label">Devise</label>
+                        <label class="label-text">Devise</label>
                         <select id="u_currency" class="field">
                             <option value="FCFA">FCFA</option>
                             <option value="USD">$ USD</option>
-                            <option value="EUR">€ EUR</option>
                         </select>
                     </div>
                 </div>
-
-                <button onclick="saveSetup()" class="btn-main mt-6">CRÉER MON COMPTE</button>
+                <button onclick="saveSetup()" class="btn-main mt-4 shadow-lg shadow-blue-200">LANCER MON BUSINESS</button>
             </div>
         </div>
     </div>
 
     <header class="p-4 flex justify-between items-center bg-white border-b sticky top-0 z-40">
         <div class="flex items-center gap-3">
-            <img id="header-logo" src="" class="w-8 h-8 rounded-md hidden">
-            <h1 id="header-biz-name" class="font-bold text-slate-800 tracking-tight">Compta Mobile</h1>
+            <img id="header-logo" src="" class="w-10 h-10 rounded-xl object-cover hidden border border-slate-100 shadow-sm">
+            <h1 id="header-biz-name" class="font-extrabold text-slate-800 text-lg truncate max-w-[160px]">Compta Pro</h1>
         </div>
-        <div class="flex gap-4">
-            <button onclick="showPage('premium')" id="crown-btn" class="text-slate-300">
-                <i data-lucide="crown"></i>
-            </button>
-        </div>
+        <button onclick="showPage('premium')" id="crown-btn" class="text-slate-300">
+            <i data-lucide="crown" class="w-7 h-7"></i>
+        </button>
     </header>
 
     <main class="p-4">
         
         <div id="page-home" class="page active">
-            <div class="bg-blue-600 p-6 rounded-[2rem] text-white shadow-xl shadow-blue-100 mb-6">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-[10px] uppercase font-bold opacity-70">Profit du mois</p>
-                        <h2 class="text-3xl font-black mt-1"><span id="valProfit">0</span> <small class="text-sm font-normal cur"></small></h2>
-                    </div>
-                    <div id="status-tag" class="bg-white/20 px-3 py-1 rounded-full text-[10px] font-bold">MODE GRATUIT</div>
+            <div class="bg-slate-900 p-8 rounded-[2.5rem] text-white shadow-2xl mb-8 relative overflow-hidden">
+                <div class="relative z-10">
+                    <p class="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Profit du mois</p>
+                    <h2 class="text-4xl font-black mt-1"><span id="valProfit">0</span> <small class="text-sm font-normal cur"></small></h2>
+                    <div id="status-tag" class="mt-4 inline-block px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-tighter">---</div>
                 </div>
+                <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-blue-600 rounded-full blur-3xl opacity-20"></div>
             </div>
 
             <div class="grid grid-cols-2 gap-4">
-                <button onclick="checkSub('invoice')" class="card flex flex-col items-center gap-3 active:scale-95 transition">
-                    <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center">
-                        <i data-lucide="shopping-cart"></i>
-                    </div>
-                    <span class="text-xs font-bold text-slate-600 uppercase">Vendre</span>
+                <button onclick="checkSub('facture')" class="card py-8 flex flex-col items-center gap-4 transition active:bg-slate-50">
+                    <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-[1.5rem] flex items-center justify-center"><i data-lucide="receipt"></i></div>
+                    <span class="text-[11px] font-extrabold text-slate-600 uppercase">Factures</span>
                 </button>
-                <button onclick="checkSub('stock')" class="card flex flex-col items-center gap-3 active:scale-95 transition">
-                    <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center">
-                        <i data-lucide="package"></i>
-                    </div>
-                    <span class="text-xs font-bold text-slate-600 uppercase">Stock</span>
+                <button onclick="checkSub('stock')" class="card py-8 flex flex-col items-center gap-4 transition active:bg-slate-50">
+                    <div class="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-[1.5rem] flex items-center justify-center"><i data-lucide="package"></i></div>
+                    <span class="text-[11px] font-extrabold text-slate-600 uppercase">Gestion Stock</span>
                 </button>
             </div>
         </div>
 
         <div id="page-settings" class="page">
-            <h2 class="text-xl font-black mb-6">Paramètres</h2>
-            <div class="card space-y-4">
-                <div class="input-group">
-                    <label class="input-label">Changer le Nom</label>
-                    <input type="text" id="edit_name" class="field">
-                </div>
-                <div class="input-group">
-                    <label class="input-label">Changer le Téléphone</label>
-                    <input type="tel" id="edit_tel" class="field">
-                </div>
-                <button onclick="updateSettings()" class="btn-main bg-slate-900">ENREGISTRER LES MODIFS</button>
+            <h2 class="text-2xl font-black mb-6 text-slate-800">Paramètres</h2>
+            <div class="card">
+                <label class="label-text">Changer le Logo</label>
+                <input type="file" id="edit_logo" accept="image/*" class="text-xs mb-4" onchange="previewImage(this, 'preview-edit')">
+                <img id="preview-edit" class="w-20 h-20 rounded-2xl object-cover mb-6 hidden border shadow-md">
+
+                <label class="label-text">Nom Boutique</label>
+                <input type="text" id="edit_name" class="field">
+
+                <label class="label-text">Numéro de Téléphone</label>
+                <input type="tel" id="edit_tel" class="field">
+
+                <label class="label-text">Pays d'activité</label>
+                <input type="text" id="edit_country" class="field">
+
+                <button onclick="updateSettings()" class="btn-main bg-slate-900 mt-4 uppercase text-xs tracking-widest">Enregistrer les changements</button>
             </div>
-            
-            <div class="mt-6 p-4 text-center">
-                <p class="text-[10px] text-slate-400 font-bold uppercase">ID de votre appareil</p>
-                <p id="settings-uid" class="text-lg font-mono font-bold text-slate-600 tracking-widest"></p>
+            <div class="text-center mt-10">
+                <p class="text-[10px] font-bold text-slate-300 uppercase tracking-widest mb-1">Votre ID Appareil unique</p>
+                <p id="settings-uid" class="text-xl font-mono font-bold text-slate-400"></p>
             </div>
         </div>
 
         <div id="page-premium" class="page">
-            <div class="text-center card">
-                <div class="w-20 h-20 bg-amber-100 text-amber-600 rounded-3xl flex items-center justify-center mx-auto mb-4">
+            <div class="text-center card py-8 border-amber-200">
+                <div class="w-20 h-20 bg-amber-100 text-amber-600 rounded-[2rem] flex items-center justify-center mx-auto mb-6">
                     <i data-lucide="crown" size="40"></i>
                 </div>
-                <h2 class="text-2xl font-black">Abonnement Pro</h2>
-                <p class="text-slate-500 text-sm mb-6">3 000 FCFA / mois pour tout débloquer.</p>
+                <h2 class="text-3xl font-black mb-2">3 000 FCFA</h2>
+                <p class="text-slate-500 text-sm mb-8 px-6">Accès illimité pendant 30 jours aux fonctions pro.</p>
                 
-                <div class="bg-slate-50 p-6 rounded-3xl mb-6 border">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase mb-2">Votre ID Appareil</p>
-                    <p id="display-uid" class="text-4xl font-mono font-black text-blue-600 tracking-tighter">----</p>
+                <div class="flex items-start gap-4 text-left mb-6 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                    <div class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold shrink-0">1</div>
+                    <div class="flex-1">
+                        <p class="font-bold text-sm text-slate-800">Effectuez le paiement</p>
+                        <p class="text-[11px] text-slate-500 mb-3 text-pretty">Payez via Chariow (Orange/Moov Money).</p>
+                        <a href="https://qaasxtqf.mychariow.shop/abonnement-pro-compta-mobile/checkout" 
+                           target="_blank"
+                           class="inline-block bg-blue-600 text-white px-5 py-2 rounded-xl text-xs font-bold shadow-lg shadow-blue-100">
+                           OUVRIR CHARIOW
+                        </a>
+                    </div>
                 </div>
 
-                <a href="https://wa.me/22666566140?text=Bonjour,%20je%20souhaite%20m'abonner%20à%203000F/mois.%20Mon%20ID%20est%20:" 
-                   class="btn-main bg-amber-500 block shadow-lg shadow-amber-200">PAYER PAR ORANGE/MOOV</a>
-                
-                <div class="mt-8 pt-6 border-t">
-                    <input type="text" id="act-key" placeholder="Entrez la clé reçue" class="field text-center mb-2">
-                    <button onclick="activatePro()" class="btn-main bg-slate-800">ACTIVER MA CLÉ</button>
+                <div class="flex items-start gap-4 text-left mb-8 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                    <div class="w-8 h-8 bg-emerald-600 text-white rounded-full flex items-center justify-center font-bold shrink-0">2</div>
+                    <div class="flex-1">
+                        <p class="font-bold text-sm text-slate-800">Récupérez votre clé</p>
+                        <p class="text-[11px] text-slate-500 mb-3">Envoyez-moi votre ID Appareil : <b class="text-blue-600 font-mono" id="display-uid-step">----</b></p>
+                        <button onclick="contactWhatsApp()" class="w-full bg-emerald-600 text-white px-5 py-3 rounded-xl text-xs font-bold shadow-lg shadow-emerald-100 flex items-center justify-center gap-2">
+                            <i data-lucide="message-circle" size="16"></i> ENVOYER MON ID SUR WHATSAPP
+                        </button>
+                    </div>
+                </div>
+
+                <div class="pt-6 border-t border-dashed">
+                    <label class="label-text">J'ai déjà reçu ma clé :</label>
+                    <div class="flex gap-2">
+                        <input type="number" id="act-key" placeholder="Entrez le code ici" class="field mb-0 text-center font-bold text-xl tracking-widest border-2">
+                        <button onclick="activatePro()" class="bg-slate-900 text-white px-6 rounded-xl font-bold italic">OK</button>
+                    </div>
                 </div>
             </div>
         </div>
 
     </main>
 
-    <nav class="fixed bottom-0 left-0 right-0 h-20 bg-white border-t flex justify-around items-center px-6 z-50">
-        <button onclick="showPage('home')" class="nav-link flex flex-col items-center gap-1 text-blue-600">
-            <i data-lucide="layout-grid"></i>
-            <span class="text-[9px] font-bold uppercase">Accueil</span>
-        </button>
-        <button onclick="showPage('settings')" class="nav-link flex flex-col items-center gap-1 text-slate-400">
-            <i data-lucide="settings"></i>
-            <span class="text-[9px] font-bold uppercase">Profil</span>
-        </button>
-        <button onclick="showPage('premium')" class="nav-link flex flex-col items-center gap-1 text-amber-500">
-            <i data-lucide="crown"></i>
-            <span class="text-[9px] font-bold uppercase">Abo</span>
-        </button>
+    <nav class="fixed bottom-0 left-0 right-0 h-20 bg-white border-t flex justify-around items-center px-8 z-50">
+        <button onclick="showPage('home')" class="nav-icon text-slate-400"><i data-lucide="layout-grid"></i></button>
+        <button onclick="showPage('settings')" class="nav-icon text-slate-400"><i data-lucide="user"></i></button>
+        <button onclick="showPage('premium')" class="nav-icon text-amber-500"><i data-lucide="crown"></i></button>
     </nav>
 
     <script>
-        // --- LOGIQUE CORE ---
-        let db = JSON.parse(localStorage.getItem('compta_pro_v2')) || {
-            user: null, 
-            inventory: [], 
-            sales: [], 
-            profit: 0, 
-            expiryDate: null, 
+        // --- BASE DE DONNÉES LOCALE ---
+        let db = JSON.parse(localStorage.getItem('compta_final_master')) || {
+            user: null, profit: 0, expiryDate: null, 
             uid: Math.floor(1000 + Math.random() * 8999)
         };
 
-        function save() { localStorage.setItem('compta_pro_v2', JSON.stringify(db)); }
+        function save() { localStorage.setItem('compta_final_master', JSON.stringify(db)); }
 
+        // --- INITIALISATION ---
         window.onload = function() {
             lucide.createIcons();
-            if(!db.user) {
-                document.getElementById('setup-screen').classList.remove('hidden');
-            } else {
-                initApp();
-            }
+            if(!db.user) document.getElementById('setup-screen').classList.remove('hidden');
+            else initApp();
         };
 
         function initApp() {
             document.getElementById('header-biz-name').innerText = db.user.name;
             document.getElementById('settings-uid').innerText = db.uid;
-            document.getElementById('display-uid').innerText = db.uid;
+            document.getElementById('display-uid-step').innerText = db.uid;
             document.getElementById('valProfit').innerText = db.profit.toLocaleString();
             document.querySelectorAll('.cur').forEach(el => el.innerText = db.user.currency);
             
-            // Pré-remplir réglages
+            if(db.user.logo) {
+                const logs = document.querySelectorAll('#header-logo, #preview-edit');
+                logs.forEach(l => { l.src = db.user.logo; l.classList.remove('hidden'); });
+            }
             document.getElementById('edit_name').value = db.user.name;
             document.getElementById('edit_tel').value = db.user.tel;
-
-            if(db.user.logo) {
-                document.getElementById('header-logo').src = db.user.logo;
-                document.getElementById('header-logo').classList.remove('hidden');
-            }
-
-            // Vérifier expiration
+            document.getElementById('edit_country').value = db.user.country || "Burkina Faso";
             checkSubscriptionStatus();
         }
 
         // --- GESTION LOGO ---
-        function previewLogo(input) {
+        function previewImage(input, targetId, placeholderId) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('logo-preview').src = e.target.result;
-                    document.getElementById('logo-preview').classList.remove('hidden');
-                    document.getElementById('logo-placeholder').classList.add('hidden');
+                reader.onload = (e) => {
+                    const img = document.getElementById(targetId);
+                    img.src = e.target.result;
+                    img.classList.remove('hidden');
+                    if(placeholderId) document.getElementById(placeholderId).classList.add('hidden');
                     db.tempLogo = e.target.result;
                 };
                 reader.readAsDataURL(input.files[0]);
             }
         }
 
-        // --- INSCRIPTION ---
+        // --- ACTIONS PROFIL ---
         function saveSetup() {
             const name = document.getElementById('u_name').value;
             const tel = document.getElementById('u_tel').value;
-            const country = document.getElementById('u_country').value;
-            const currency = document.getElementById('u_currency').value;
-
-            if(!name || !tel) return alert("Nom et Téléphone obligatoires");
-
-            db.user = { name, tel, country, currency, logo: db.tempLogo || null };
-            save();
-            location.reload();
+            if(!name || !tel) return alert("Nom et Téléphone requis !");
+            db.user = { 
+                name, tel, 
+                country: document.getElementById('u_country').value,
+                currency: document.getElementById('u_currency').value, 
+                logo: db.tempLogo || null 
+            };
+            save(); location.reload();
         }
 
-        // --- MODIFICATION ---
         function updateSettings() {
             db.user.name = document.getElementById('edit_name').value;
             db.user.tel = document.getElementById('edit_tel').value;
-            save();
-            alert("Informations mises à jour !");
-            location.reload();
+            db.user.country = document.getElementById('edit_country').value;
+            if(db.tempLogo) db.user.logo = db.tempLogo;
+            save(); alert("Profil mis à jour !"); location.reload();
         }
 
-        // --- ABONNEMENT ---
+        // --- LOGIQUE ABONNEMENT ---
         function checkSubscriptionStatus() {
             const now = new Date().getTime();
             const tag = document.getElementById('status-tag');
             const crown = document.getElementById('crown-btn');
-
             if (db.expiryDate && now < db.expiryDate) {
-                const daysLeft = Math.ceil((db.expiryDate - now) / (1000 * 60 * 60 * 24));
-                tag.innerText = "PRO : " + daysLeft + " JOURS RESTANTS";
-                tag.className = "bg-emerald-500 px-3 py-1 rounded-full text-[10px] font-bold";
+                const days = Math.ceil((db.expiryDate - now) / (1000 * 60 * 60 * 24));
+                tag.innerText = "ABONNEMENT PRO : " + days + " JOURS RESTANTS";
+                tag.style.background = "#D1FAE5"; tag.style.color = "#065F46";
                 crown.classList.replace('text-slate-300', 'text-amber-500');
             } else {
-                tag.innerText = "ABONNEMENT EXPIRÉ / GRATUIT";
-                tag.className = "bg-rose-500 px-3 py-1 rounded-full text-[10px] font-bold";
+                tag.innerText = "VERSION GRATUITE (LIMITÉE)";
+                tag.style.background = "#FEE2E2"; tag.style.color = "#991B1B";
             }
+        }
+
+        function contactWhatsApp() {
+            const message = encodeURIComponent("Bonjour, j'ai effectué le paiement de 3000 FCFA pour Compta Pro. Voici mon ID Appareil : " + db.uid);
+            window.open("https://wa.me/22666566140?text=" + message, "_blank");
         }
 
         function activatePro() {
             const key = document.getElementById('act-key').value;
             const expected = (parseInt(db.uid) + 42) * 7;
-
             if(key == expected) {
-                // Ajoute 30 jours à partir de maintenant
-                const thirtyDays = 30 * 24 * 60 * 60 * 1000;
-                db.expiryDate = new Date().getTime() + thirtyDays;
-                save();
-                alert("Félicitations ! Version PRO activée pour 30 jours.");
-                location.reload();
+                db.expiryDate = new Date().getTime() + (30 * 24 * 60 * 60 * 1000);
+                save(); alert("Félicitations ! Version PRO activée pour 30 jours."); location.reload();
             } else {
-                alert("Clé invalide.");
+                alert("Clé d'activation incorrecte.");
             }
         }
 
-        function checkSub(page) {
-            const now = new Date().getTime();
-            if(db.expiryDate && now < db.expiryDate) {
-                alert("Accès autorisé ! (Page " + page + " en cours de dev)");
-            } else {
-                showPage('premium');
-                alert("Cette fonction nécessite un abonnement actif (3 000 F)");
-            }
-        }
-
+        // --- NAVIGATION ---
         function showPage(id) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById('page-' + id).classList.add('active');
+            
+            // Mise à jour visuelle des icônes
+            document.querySelectorAll('.nav-icon').forEach(btn => btn.classList.replace('text-blue-600', 'text-slate-400'));
         }
 
+        function checkSub(module) {
+            const now = new Date().getTime();
+            if(db.expiryDate && now < db.expiryDate) {
+                alert("Accès autorisé au module : " + module);
+            } else {
+                showPage('premium');
+                alert("Cet outil nécessite un abonnement PRO actif (3 000 F)");
+            }
+        }
     </script>
 </body>
 </html>
