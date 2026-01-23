@@ -11,12 +11,12 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAFC; padding-bottom: 90px; }
         .page { display: none; } 
         .page.active { display: block; }
-        .field { width: 100%; padding: 14px; background: white; border-radius: 12px; border: 1px solid #E2E8F0; outline: none; margin-bottom: 12px; font-size: 15px; transition: 0.2s; }
-        .field:focus { border-color: #2563EB; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        .field { width: 100%; padding: 14px; background: white; border-radius: 12px; border: 1px solid #E2E8F0; outline: none; margin-bottom: 12px; font-size: 15px; }
         .btn-main { background: #2563EB; color: white; padding: 16px; border-radius: 15px; font-weight: bold; width: 100%; text-align: center; display: block; transition: 0.3s; }
         .btn-main:active { transform: scale(0.97); }
         .card { background: white; padding: 20px; border-radius: 25px; border: 1px solid #E2E8F0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
         .label-text { font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 4px; display: block; margin-left: 4px; }
+        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #F1F5F9; }
     </style>
 </head>
 <body>
@@ -25,163 +25,132 @@
         <div class="max-w-md mx-auto">
             <div class="text-center mt-8 mb-8">
                 <h1 class="text-3xl font-extrabold text-slate-900">Bienvenue 🚀</h1>
-                <p class="text-slate-500">Créez votre profil business</p>
+                <p class="text-slate-500">Configurez votre business</p>
             </div>
-            
             <div class="card">
-                <label class="label-text text-center">Votre Logo</label>
+                <label class="label-text text-center">Logo de l'entreprise</label>
                 <div class="flex justify-center mb-6">
-                    <label for="u_logo" class="cursor-pointer group relative">
-                        <div id="setup-logo-placeholder" class="w-24 h-24 bg-slate-100 rounded-3xl flex items-center justify-center border-2 border-dashed border-slate-300 group-hover:bg-slate-200 transition">
+                    <label for="u_logo" class="cursor-pointer">
+                        <div id="setup-logo-placeholder" class="w-24 h-24 bg-slate-100 rounded-3xl flex items-center justify-center border-2 border-dashed border-slate-300">
                             <i data-lucide="camera" class="text-slate-400"></i>
                         </div>
-                        <img id="preview-setup" class="w-24 h-24 rounded-3xl object-cover hidden shadow-xl border-2 border-white">
+                        <img id="preview-setup" class="w-24 h-24 rounded-3xl object-cover hidden shadow-xl">
                     </label>
                     <input type="file" id="u_logo" accept="image/*" class="hidden" onchange="previewImage(this, 'preview-setup', 'setup-logo-placeholder')">
                 </div>
-
-                <label class="label-text">Nom de la Boutique / Utilisateur</label>
-                <input type="text" id="u_name" placeholder="Ex: Boutique Horizon" class="field">
-
-                <label class="label-text">Téléphone</label>
-                <input type="tel" id="u_tel" placeholder="Ex: +226 66 56 61 40" class="field">
-
+                <input type="text" id="u_name" placeholder="Nom de la Boutique" class="field">
+                <input type="tel" id="u_tel" placeholder="Téléphone (+226...)" class="field">
                 <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="label-text">Pays</label>
-                        <input type="text" id="u_country" value="Burkina Faso" class="field">
-                    </div>
-                    <div>
-                        <label class="label-text">Devise</label>
-                        <select id="u_currency" class="field">
-                            <option value="FCFA">FCFA</option>
-                            <option value="USD">$ USD</option>
-                        </select>
-                    </div>
+                    <input type="text" id="u_country" value="Burkina Faso" class="field">
+                    <select id="u_currency" class="field"><option value="FCFA">FCFA</option><option value="USD">$ USD</option></select>
                 </div>
-                <button onclick="saveSetup()" class="btn-main mt-4 shadow-lg shadow-blue-200">LANCER MON BUSINESS</button>
+                <button onclick="saveSetup()" class="btn-main mt-4">CRÉER MON COMPTE</button>
             </div>
         </div>
     </div>
 
     <header class="p-4 flex justify-between items-center bg-white border-b sticky top-0 z-40">
         <div class="flex items-center gap-3">
-            <img id="header-logo" src="" class="w-10 h-10 rounded-xl object-cover hidden border border-slate-100 shadow-sm">
-            <h1 id="header-biz-name" class="font-extrabold text-slate-800 text-lg truncate max-w-[160px]">Compta Pro</h1>
+            <img id="header-logo" src="" class="w-10 h-10 rounded-xl object-cover hidden border shadow-sm">
+            <h1 id="header-biz-name" class="font-extrabold text-slate-800 text-lg truncate max-w-[160px]">Business</h1>
         </div>
-        <button onclick="showPage('premium')" id="crown-btn" class="text-slate-300">
-            <i data-lucide="crown" class="w-7 h-7"></i>
-        </button>
+        <button onclick="showPage('premium')" id="crown-btn" class="text-slate-300"><i data-lucide="crown" class="w-7 h-7"></i></button>
     </header>
 
     <main class="p-4">
         
         <div id="page-home" class="page active">
-            <div class="bg-slate-900 p-8 rounded-[2.5rem] text-white shadow-2xl mb-8 relative overflow-hidden">
-                <div class="relative z-10">
-                    <p class="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Profit du mois</p>
-                    <h2 class="text-4xl font-black mt-1"><span id="valProfit">0</span> <small class="text-sm font-normal cur"></small></h2>
-                    <div id="status-tag" class="mt-4 inline-block px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-tighter">---</div>
-                </div>
-                <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-blue-600 rounded-full blur-3xl opacity-20"></div>
+            <div class="bg-slate-900 p-8 rounded-[2.5rem] text-white shadow-2xl mb-8 relative">
+                <p class="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Profit du mois</p>
+                <h2 class="text-4xl font-black mt-1"><span id="valProfit">0</span> <small class="text-sm font-normal cur"></small></h2>
+                <div id="status-tag" class="mt-4 inline-block px-3 py-1 rounded-full text-[10px] font-bold uppercase">---</div>
             </div>
-
             <div class="grid grid-cols-2 gap-4">
-                <button onclick="checkSub('facture')" class="card py-8 flex flex-col items-center gap-4 transition active:bg-slate-50">
+                <button onclick="checkSub('facture')" class="card py-8 flex flex-col items-center gap-4">
                     <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-[1.5rem] flex items-center justify-center"><i data-lucide="receipt"></i></div>
                     <span class="text-[11px] font-extrabold text-slate-600 uppercase">Factures</span>
                 </button>
-                <button onclick="checkSub('stock')" class="card py-8 flex flex-col items-center gap-4 transition active:bg-slate-50">
+                <button onclick="checkSub('stock')" class="card py-8 flex flex-col items-center gap-4">
                     <div class="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-[1.5rem] flex items-center justify-center"><i data-lucide="package"></i></div>
-                    <span class="text-[11px] font-extrabold text-slate-600 uppercase">Gestion Stock</span>
+                    <span class="text-[11px] font-extrabold text-slate-600 uppercase">Mon Stock</span>
                 </button>
+            </div>
+        </div>
+
+        <div id="page-stock" class="page">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-black">Mon Stock</h2>
+                <button onclick="addStockItem()" class="bg-blue-600 text-white p-2 rounded-lg"><i data-lucide="plus"></i></button>
+            </div>
+            <div id="stock-list" class="card p-0 overflow-hidden">
+                </div>
+        </div>
+
+        <div id="page-facture" class="page">
+            <h2 class="text-2xl font-black mb-6">Nouvelle Facture</h2>
+            <div class="card mb-6">
+                <input type="text" id="inv-client" placeholder="Nom du client" class="field">
+                <div id="inv-items-list" class="mb-4"></div>
+                <button onclick="addInvRow()" class="text-blue-600 font-bold text-xs mb-4">+ Ajouter un produit</button>
+                <button onclick="generatePDF()" class="btn-main">GÉNÉRER LA FACTURE</button>
             </div>
         </div>
 
         <div id="page-settings" class="page">
-            <h2 class="text-2xl font-black mb-6 text-slate-800">Paramètres</h2>
+            <h2 class="text-2xl font-black mb-6">Paramètres</h2>
             <div class="card">
-                <label class="label-text">Changer le Logo</label>
-                <input type="file" id="edit_logo" accept="image/*" class="text-xs mb-4" onchange="previewImage(this, 'preview-edit')">
-                <img id="preview-edit" class="w-20 h-20 rounded-2xl object-cover mb-6 hidden border shadow-md">
-
-                <label class="label-text">Nom Boutique</label>
+                <label class="label-text">Changer le Nom</label>
                 <input type="text" id="edit_name" class="field">
-
-                <label class="label-text">Numéro de Téléphone</label>
+                <label class="label-text">Changer le Téléphone</label>
                 <input type="tel" id="edit_tel" class="field">
-
-                <label class="label-text">Pays d'activité</label>
-                <input type="text" id="edit_country" class="field">
-
-                <button onclick="updateSettings()" class="btn-main bg-slate-900 mt-4 uppercase text-xs tracking-widest">Enregistrer les changements</button>
+                <button onclick="updateSettings()" class="btn-main bg-slate-900 mt-4">ENREGISTRER</button>
             </div>
-            <div class="text-center mt-10">
-                <p class="text-[10px] font-bold text-slate-300 uppercase tracking-widest mb-1">Votre ID Appareil unique</p>
-                <p id="settings-uid" class="text-xl font-mono font-bold text-slate-400"></p>
-            </div>
+            <p class="text-center mt-10 text-[10px] text-slate-300 uppercase">ID Appareil : <span id="settings-uid"></span></p>
         </div>
 
         <div id="page-premium" class="page">
-            <div class="text-center card py-8 border-amber-200">
-                <div class="w-20 h-20 bg-amber-100 text-amber-600 rounded-[2rem] flex items-center justify-center mx-auto mb-6">
-                    <i data-lucide="crown" size="40"></i>
-                </div>
-                <h2 class="text-3xl font-black mb-2">3 000 FCFA</h2>
-                <p class="text-slate-500 text-sm mb-8 px-6">Accès illimité pendant 30 jours aux fonctions pro.</p>
-                
-                <div class="flex items-start gap-4 text-left mb-6 p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                    <div class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold shrink-0">1</div>
-                    <div class="flex-1">
-                        <p class="font-bold text-sm text-slate-800">Effectuez le paiement</p>
-                        <p class="text-[11px] text-slate-500 mb-3 text-pretty">Payez via Chariow (Orange/Moov Money).</p>
-                        <a href="https://qaasxtqf.mychariow.shop/abonnement-pro-compta-mobile/checkout" 
-                           target="_blank"
-                           class="inline-block bg-blue-600 text-white px-5 py-2 rounded-xl text-xs font-bold shadow-lg shadow-blue-100">
-                           OUVRIR CHARIOW
-                        </a>
+            <div class="text-center card py-8">
+                <div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center mx-auto mb-4"><i data-lucide="crown" size="32"></i></div>
+                <h2 class="text-2xl font-black mb-6">3 000 FCFA / Mois</h2>
+                <div class="space-y-4 mb-8">
+                    <div class="flex items-start gap-4 text-left p-4 bg-slate-50 rounded-2xl border">
+                        <div class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold shrink-0 text-xs">1</div>
+                        <div class="flex-1">
+                            <p class="font-bold text-sm text-slate-800">Payez sur Chariow</p>
+                            <a href="https://qaasxtqf.mychariow.shop/abonnement-pro-compta-mobile/checkout" target="_blank" class="inline-block mt-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-bold">OUVRIR LE LIEN</a>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-4 text-left p-4 bg-slate-50 rounded-2xl border">
+                        <div class="w-8 h-8 bg-emerald-600 text-white rounded-full flex items-center justify-center font-bold shrink-0 text-xs">2</div>
+                        <div class="flex-1">
+                            <p class="font-bold text-sm text-slate-800">Envoyez l'ID sur WhatsApp</p>
+                            <p class="text-[11px] text-slate-500 mb-2">ID : <b class="text-blue-600 font-mono" id="display-uid-step">----</b></p>
+                            <button onclick="contactWhatsApp()" class="w-full bg-emerald-600 text-white px-4 py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-2"><i data-lucide="message-circle" size="14"></i> WHATSAPP</button>
+                        </div>
                     </div>
                 </div>
-
-                <div class="flex items-start gap-4 text-left mb-8 p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                    <div class="w-8 h-8 bg-emerald-600 text-white rounded-full flex items-center justify-center font-bold shrink-0">2</div>
-                    <div class="flex-1">
-                        <p class="font-bold text-sm text-slate-800">Récupérez votre clé</p>
-                        <p class="text-[11px] text-slate-500 mb-3">Envoyez-moi votre ID Appareil : <b class="text-blue-600 font-mono" id="display-uid-step">----</b></p>
-                        <button onclick="contactWhatsApp()" class="w-full bg-emerald-600 text-white px-5 py-3 rounded-xl text-xs font-bold shadow-lg shadow-emerald-100 flex items-center justify-center gap-2">
-                            <i data-lucide="message-circle" size="16"></i> ENVOYER MON ID SUR WHATSAPP
-                        </button>
-                    </div>
-                </div>
-
                 <div class="pt-6 border-t border-dashed">
-                    <label class="label-text">J'ai déjà reçu ma clé :</label>
-                    <div class="flex gap-2">
-                        <input type="number" id="act-key" placeholder="Entrez le code ici" class="field mb-0 text-center font-bold text-xl tracking-widest border-2">
-                        <button onclick="activatePro()" class="bg-slate-900 text-white px-6 rounded-xl font-bold italic">OK</button>
-                    </div>
+                    <input type="number" id="act-key" placeholder="Entrez la clé reçue" class="field text-center font-bold text-xl border-2">
+                    <button onclick="activatePro()" class="bg-slate-900 text-white w-full py-4 rounded-xl font-bold">ACTIVER</button>
                 </div>
             </div>
         </div>
-
     </main>
 
     <nav class="fixed bottom-0 left-0 right-0 h-20 bg-white border-t flex justify-around items-center px-8 z-50">
-        <button onclick="showPage('home')" class="nav-icon text-slate-400"><i data-lucide="layout-grid"></i></button>
-        <button onclick="showPage('settings')" class="nav-icon text-slate-400"><i data-lucide="user"></i></button>
-        <button onclick="showPage('premium')" class="nav-icon text-amber-500"><i data-lucide="crown"></i></button>
+        <button onclick="showPage('home')" class="text-slate-400"><i data-lucide="layout-grid"></i></button>
+        <button onclick="showPage('settings')" class="text-slate-400"><i data-lucide="user"></i></button>
+        <button onclick="showPage('premium')" class="text-amber-500"><i data-lucide="crown"></i></button>
     </nav>
 
     <script>
-        // --- BASE DE DONNÉES LOCALE ---
-        let db = JSON.parse(localStorage.getItem('compta_final_master')) || {
-            user: null, profit: 0, expiryDate: null, 
+        let db = JSON.parse(localStorage.getItem('compta_final_secure')) || {
+            user: null, profit: 0, inventory: [], expiryDate: null, 
             uid: Math.floor(1000 + Math.random() * 8999)
         };
 
-        function save() { localStorage.setItem('compta_final_master', JSON.stringify(db)); }
+        function save() { localStorage.setItem('compta_final_secure', JSON.stringify(db)); }
 
-        // --- INITIALISATION ---
         window.onload = function() {
             lucide.createIcons();
             if(!db.user) document.getElementById('setup-screen').classList.remove('hidden');
@@ -189,109 +158,4 @@
         };
 
         function initApp() {
-            document.getElementById('header-biz-name').innerText = db.user.name;
-            document.getElementById('settings-uid').innerText = db.uid;
-            document.getElementById('display-uid-step').innerText = db.uid;
-            document.getElementById('valProfit').innerText = db.profit.toLocaleString();
-            document.querySelectorAll('.cur').forEach(el => el.innerText = db.user.currency);
-            
-            if(db.user.logo) {
-                const logs = document.querySelectorAll('#header-logo, #preview-edit');
-                logs.forEach(l => { l.src = db.user.logo; l.classList.remove('hidden'); });
-            }
-            document.getElementById('edit_name').value = db.user.name;
-            document.getElementById('edit_tel').value = db.user.tel;
-            document.getElementById('edit_country').value = db.user.country || "Burkina Faso";
-            checkSubscriptionStatus();
-        }
-
-        // --- GESTION LOGO ---
-        function previewImage(input, targetId, placeholderId) {
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const img = document.getElementById(targetId);
-                    img.src = e.target.result;
-                    img.classList.remove('hidden');
-                    if(placeholderId) document.getElementById(placeholderId).classList.add('hidden');
-                    db.tempLogo = e.target.result;
-                };
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-
-        // --- ACTIONS PROFIL ---
-        function saveSetup() {
-            const name = document.getElementById('u_name').value;
-            const tel = document.getElementById('u_tel').value;
-            if(!name || !tel) return alert("Nom et Téléphone requis !");
-            db.user = { 
-                name, tel, 
-                country: document.getElementById('u_country').value,
-                currency: document.getElementById('u_currency').value, 
-                logo: db.tempLogo || null 
-            };
-            save(); location.reload();
-        }
-
-        function updateSettings() {
-            db.user.name = document.getElementById('edit_name').value;
-            db.user.tel = document.getElementById('edit_tel').value;
-            db.user.country = document.getElementById('edit_country').value;
-            if(db.tempLogo) db.user.logo = db.tempLogo;
-            save(); alert("Profil mis à jour !"); location.reload();
-        }
-
-        // --- LOGIQUE ABONNEMENT ---
-        function checkSubscriptionStatus() {
-            const now = new Date().getTime();
-            const tag = document.getElementById('status-tag');
-            const crown = document.getElementById('crown-btn');
-            if (db.expiryDate && now < db.expiryDate) {
-                const days = Math.ceil((db.expiryDate - now) / (1000 * 60 * 60 * 24));
-                tag.innerText = "ABONNEMENT PRO : " + days + " JOURS RESTANTS";
-                tag.style.background = "#D1FAE5"; tag.style.color = "#065F46";
-                crown.classList.replace('text-slate-300', 'text-amber-500');
-            } else {
-                tag.innerText = "VERSION GRATUITE (LIMITÉE)";
-                tag.style.background = "#FEE2E2"; tag.style.color = "#991B1B";
-            }
-        }
-
-        function contactWhatsApp() {
-            const message = encodeURIComponent("Bonjour, j'ai effectué le paiement de 3000 FCFA pour Compta Pro. Voici mon ID Appareil : " + db.uid);
-            window.open("https://wa.me/22666566140?text=" + message, "_blank");
-        }
-
-        function activatePro() {
-            const key = document.getElementById('act-key').value;
-            const expected = (parseInt(db.uid) + 42) * 7;
-            if(key == expected) {
-                db.expiryDate = new Date().getTime() + (30 * 24 * 60 * 60 * 1000);
-                save(); alert("Félicitations ! Version PRO activée pour 30 jours."); location.reload();
-            } else {
-                alert("Clé d'activation incorrecte.");
-            }
-        }
-
-        // --- NAVIGATION ---
-        function showPage(id) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById('page-' + id).classList.add('active');
-            
-            // Mise à jour visuelle des icônes
-            document.querySelectorAll('.nav-icon').forEach(btn => btn.classList.replace('text-blue-600', 'text-slate-400'));
-        }
-
-        function checkSub(module) {
-            const now = new Date().getTime();
-            if(db.expiryDate && now < db.expiryDate) {
-                alert("Accès autorisé au module : " + module);
-            } else {
-                showPage('premium');
-                alert("Cet outil nécessite un abonnement PRO actif (3 000 F)");
-            }
-        }
-    </script>
-</body>
-</html>
+            document.getElementById('header-biz-
