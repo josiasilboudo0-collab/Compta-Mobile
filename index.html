@@ -55,15 +55,15 @@
             </div>
             
             <div class="grid grid-cols-3 gap-3">
-                <button onclick="checkAccess('invoice')" class="bg-white p-4 rounded-3xl border flex flex-col items-center gap-2">
+                <button onclick="checkAccess('invoice')" class="bg-white p-4 rounded-3xl border flex flex-col items-center gap-2 shadow-sm">
                     <i data-lucide="shopping-cart" class="text-blue-600 w-5"></i>
                     <span class="text-[8px] font-black uppercase">Vente</span>
                 </button>
-                <button onclick="checkAccess('stock')" class="bg-white p-4 rounded-3xl border flex flex-col items-center gap-2">
+                <button onclick="checkAccess('stock')" class="bg-white p-4 rounded-3xl border flex flex-col items-center gap-2 shadow-sm">
                     <i data-lucide="box" class="text-emerald-500 w-5"></i>
                     <span class="text-[8px] font-black uppercase">Stock</span>
                 </button>
-                <button onclick="checkAccess('expense')" class="bg-white p-4 rounded-3xl border flex flex-col items-center gap-2">
+                <button onclick="checkAccess('expense')" class="bg-white p-4 rounded-3xl border flex flex-col items-center gap-2 shadow-sm">
                     <i data-lucide="trending-down" class="text-red-500 w-5"></i>
                     <span class="text-[8px] font-black uppercase">Frais</span>
                 </button>
@@ -96,8 +96,8 @@
                     <input type="number" id="p_cost" placeholder="Prix Achat" class="input-f">
                     <input type="number" id="p_price" placeholder="Prix Vente" class="input-f">
                 </div>
-                <input type="number" id="p_qty" placeholder="Quantité en stock" class="input-f">
-                <button onclick="addProduct()" class="btn-p w-full">ENREGISTRER</button>
+                <input type="number" id="p_qty" placeholder="Quantité initiale" class="input-f">
+                <button onclick="addProduct()" class="btn-p w-full uppercase">Ajouter au catalogue</button>
             </div>
 
             <div id="stockList" class="space-y-3"></div>
@@ -105,27 +105,27 @@
 
         <div id="page-expense" class="page space-y-4">
             <h2 class="text-2xl font-black">Nouvelle Dépense</h2>
-            <div class="bg-white p-6 rounded-3xl border">
+            <div class="bg-white p-6 rounded-3xl border shadow-sm">
                 <select id="e_type" class="input-f">
                     <option value="Loyer">Loyer</option>
                     <option value="Salaire">Salaire</option>
                     <option value="Transport">Transport</option>
-                    <option value="Electricité">Electricité</option>
-                    <option value="Autre">Autre</option>
+                    <option value="Electricité/Eau">Electricité/Eau</option>
+                    <option value="Autre">Autre dépense</option>
                 </select>
                 <input type="number" id="e_amount" placeholder="Montant" class="input-f">
                 <input type="text" id="e_note" placeholder="Commentaire" class="input-f">
-                <button onclick="addExpense()" class="btn-p w-full bg-red-500 uppercase">Valider la dépense</button>
+                <button onclick="addExpense()" class="btn-p w-full bg-red-500 uppercase italic">Déduire du profit</button>
             </div>
         </div>
 
         <div id="page-invoice" class="page space-y-4">
-            <h2 class="text-2xl font-black">Faire une vente</h2>
+            <h2 class="text-2xl font-black">Vente Rapide</h2>
             <div class="bg-white p-6 rounded-3xl border space-y-4 shadow-sm">
-                <input type="text" id="c_name" placeholder="Nom Client" class="input-f">
+                <input type="text" id="c_name" placeholder="Nom du Client" class="input-f">
                 <select id="v_product" class="input-f"></select>
                 <input type="number" id="v_qty" placeholder="Quantité" class="input-f">
-                <button onclick="processSale()" class="btn-p w-full uppercase shadow-lg italic">Valider & Imprimer PDF</button>
+                <button onclick="processSale()" class="btn-p w-full uppercase shadow-lg">Générer Facture PDF</button>
             </div>
         </div>
 
@@ -135,12 +135,13 @@
                 <h2 class="text-2xl font-black">Mode PRO</h2>
                 <div class="space-y-3 mt-6">
                     <a href="https://qaasxtqf.mychariow.shop/abonnement-pro-compta-mobile/checkout" target="_blank" class="btn-p block bg-blue-600">PAIEMENT AUTO</a>
-                    <button onclick="payViaWhatsApp()" class="btn-p w-full bg-emerald-600 italic">COMMANDER VIA WHATSAPP</button>
+                    <button onclick="payViaWhatsApp()" class="btn-p w-full bg-emerald-600 italic">PAYER VIA WHATSAPP</button>
                 </div>
-                <div class="mt-6 p-4 bg-slate-50 rounded-2xl border border-dashed border-slate-300">
-                    <p class="text-[10px] font-bold text-slate-400">ID MACHINE : <span id="prem_uid" class="text-blue-600 font-black"></span></p>
+                <div class="mt-6 p-4 bg-slate-50 rounded-2xl border border-dashed">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase">ID Client à envoyer</p>
+                    <p id="prem_uid" class="text-xl font-black text-blue-600 mt-1"></p>
                 </div>
-                <input type="number" id="key-input" placeholder="Clé d'activation" class="input-f mt-4 text-center font-bold text-lg">
+                <input type="number" id="key-input" placeholder="Entrez la clé reçue" class="input-f mt-4 text-center font-bold">
                 <button onclick="activatePro()" class="btn-p w-full bg-slate-900 uppercase">Activer Maintenant</button>
             </div>
         </div>
@@ -154,7 +155,8 @@
     </nav>
 
     <script>
-        let db = JSON.parse(localStorage.getItem('cp_v6_db')) || { 
+        // DB v7 avec fonctions suppression et réapprovisionnement
+        let db = JSON.parse(localStorage.getItem('cp_ultra_db')) || { 
             profile: null, inventory: [], sales: [], expenses: [], totalProfit: 0, 
             uid: Math.floor(1000 + Math.random() * 8999), expiry: null 
         };
@@ -170,28 +172,28 @@
             renderStock(); renderHome(); renderHistory(); renderExpenses(); populateProductSelect(); checkSubscription();
         }
 
-        // --- GESTION STOCK (NOUVEAU: DELETE & RE-STOCK) ---
+        // --- GESTION STOCK (NOUVEAUTÉS ICI) ---
         function addProduct() {
             const name = document.getElementById('p_name').value;
             const cost = parseInt(document.getElementById('p_cost').value);
             const price = parseInt(document.getElementById('p_price').value);
             const qty = parseInt(document.getElementById('p_qty').value);
-            if(!name || isNaN(cost)) return alert("Champs obligatoires !");
+            if(!name || isNaN(cost) || isNaN(price)) return alert("Veuillez remplir les prix et le nom");
             
             db.inventory.push({ id: Date.now(), name, cost, price, qty });
             save(); init(); toggleAddProduct();
         }
 
         function deleteProduct(id) {
-            if(confirm("Supprimer définitivement cet article du stock ?")) {
+            if(confirm("Supprimer définitivement ce produit du catalogue ?")) {
                 db.inventory = db.inventory.filter(p => p.id !== id);
                 save(); init();
             }
         }
 
         function restockProduct(id) {
-            const extra = prompt("Quantité à ajouter au stock actuel :");
-            if(extra && !isNaN(extra)) {
+            const extra = prompt("Quantité à ajouter au stock actuel (ex: 10) :");
+            if(extra !== null && !isNaN(extra)) {
                 const prod = db.inventory.find(p => p.id === id);
                 prod.qty += parseInt(extra);
                 save(); init();
@@ -203,11 +205,12 @@
                 <div class="bg-white p-4 rounded-2xl border flex justify-between items-center shadow-sm">
                     <div class="flex-1">
                         <p class="font-bold text-sm">${p.name}</p>
-                        <p class="text-[10px] text-slate-400">Vente: ${p.price} ${db.profile.cur} • Achat: ${p.cost}</p>
+                        <p class="text-[10px] text-slate-400">Prix : ${p.price} ${db.profile.cur}</p>
                     </div>
                     <div class="flex items-center gap-2">
                         <div class="text-right mr-2">
                             <p class="font-black ${p.qty <= 5 ? 'text-red-500' : 'text-blue-600'} text-lg">${p.qty}</p>
+                            <p class="text-[8px] uppercase font-bold text-slate-300">Unités</p>
                         </div>
                         <button onclick="restockProduct(${p.id})" class="p-2 bg-blue-50 text-blue-600 rounded-lg"><i data-lucide="refresh-cw" class="w-4"></i></button>
                         <button onclick="deleteProduct(${p.id})" class="p-2 bg-red-50 text-red-600 rounded-lg"><i data-lucide="trash-2" class="w-4"></i></button>
@@ -217,7 +220,15 @@
             lucide.createIcons();
         }
 
-        // --- GESTION VENTES ---
+        // --- AUTRES FONCTIONS ---
+        function addExpense() {
+            const amount = parseInt(document.getElementById('e_amount').value);
+            if(!amount) return;
+            db.expenses.push({ type: document.getElementById('e_type').value, amount, note: document.getElementById('e_note').value, date: new Date().toLocaleDateString('fr-FR') });
+            db.totalProfit -= amount;
+            save(); init(); showPage('home');
+        }
+
         function processSale() {
             const pId = document.getElementById('v_product').value;
             const vQty = parseInt(document.getElementById('v_qty').value);
@@ -228,22 +239,12 @@
             const total = prod.price * vQty;
             prod.qty -= vQty;
             db.totalProfit += profit;
-            db.sales.push({ client: document.getElementById('c_name').value || "Client", item: prod.name, qty: vQty, total: total, profit, date: new Date().toLocaleDateString('fr-FR', {day:'numeric', month:'short', hour:'2-digit'}) });
+            db.sales.push({ client: document.getElementById('c_name').value || "Client", item: prod.name, qty: vQty, total, profit, date: new Date().toLocaleDateString() });
             
             save(); generateProfessionalInvoice(document.getElementById('c_name').value, prod.name, vQty, prod.price, total);
             init(); showPage('home');
         }
 
-        // --- GESTION DEPENSES ---
-        function addExpense() {
-            const amount = parseInt(document.getElementById('e_amount').value);
-            if(!amount) return;
-            db.expenses.push({ type: document.getElementById('e_type').value, amount, note: document.getElementById('e_note').value, date: new Date().toLocaleDateString('fr-FR') });
-            db.totalProfit -= amount;
-            save(); init(); showPage('home');
-        }
-
-        // --- AFFICHAGE ACCUEIL ---
         function renderHome() { 
             document.getElementById('valProfit').innerText = db.totalProfit.toLocaleString(); 
             document.querySelectorAll('.cur').forEach(e => e.innerText = db.profile.cur);
@@ -251,11 +252,11 @@
 
         function renderExpenses() {
             const container = document.getElementById('expenseMiniList');
-            if(db.expenses.length === 0) { container.innerHTML = `<p class="text-[10px] text-slate-300 italic">Aucune dépense</p>`; return; }
+            if(db.expenses.length === 0) { container.innerHTML = `<p class="text-[10px] text-slate-400 italic">Aucun frais</p>`; return; }
             container.innerHTML = db.expenses.slice().reverse().slice(0, 3).map(e => `
-                <div class="flex justify-between items-center bg-red-50 p-2 px-3 rounded-xl border border-red-100 text-[11px]">
-                    <span class="font-bold text-red-700">${e.type}</span>
-                    <span class="font-black text-red-600">-${e.amount}</span>
+                <div class="flex justify-between items-center bg-red-50 p-2 px-3 rounded-xl border border-red-100">
+                    <span class="text-[11px] font-bold text-red-700">${e.type}</span>
+                    <span class="text-xs font-black text-red-600">-${e.amount} ${db.profile.cur}</span>
                 </div>
             `).join('');
         }
@@ -263,26 +264,14 @@
         function renderHistory() {
             const container = document.getElementById('historyList');
             container.innerHTML = db.sales.slice().reverse().slice(0, 10).map(s => `
-                <div class="bg-white p-3 rounded-xl border flex justify-between items-center shadow-sm text-[11px]">
+                <div class="bg-white p-3 rounded-xl border flex justify-between items-center shadow-sm">
                     <div class="flex items-center gap-2">
-                        <div class="w-6 h-6 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center font-bold">${s.qty}</div>
-                        <div><p class="font-bold">${s.item}</p><p class="text-[8px] text-slate-400">${s.date}</p></div>
+                        <div class="w-6 h-6 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center font-bold text-[10px]">${s.qty}</div>
+                        <div><p class="font-bold text-xs">${s.item}</p><p class="text-[8px] text-slate-400 uppercase">${s.date}</p></div>
                     </div>
-                    <p class="font-black text-blue-600">+${s.total} ${db.profile.cur}</p>
+                    <p class="font-black text-blue-600 text-xs">+${s.total} ${db.profile.cur}</p>
                 </div>
             `).join('');
-        }
-
-        // --- SYSTEME ---
-        function saveProfile() {
-            db.profile = { biz: document.getElementById('u_biz').value, cur: document.getElementById('u_cur').value, logo: logoBase64 };
-            save(); location.reload();
-        }
-
-        function previewLogo(e) {
-            const reader = new FileReader();
-            reader.onload = () => { logoBase64 = reader.result; document.getElementById('logoPreview').src = reader.result; document.getElementById('logoPreview').classList.remove('hidden'); document.getElementById('logoIcon').classList.add('hidden'); };
-            reader.readAsDataURL(e.target.files[0]);
         }
 
         function showPage(id) {
@@ -295,17 +284,43 @@
 
         function checkAccess(page) {
             if(db.expiry && new Date().getTime() < db.expiry) showPage(page);
-            else { alert("Abonnement PRO requis !"); showPage('premium'); }
+            else { alert("Abonnement PRO requis"); showPage('premium'); }
         }
 
-        function save() { localStorage.setItem('cp_v6_db', JSON.stringify(db)); }
+        function saveProfile() {
+            db.profile = { biz: document.getElementById('u_biz').value, cur: document.getElementById('u_cur').value, logo: logoBase64 };
+            save(); location.reload();
+        }
+
+        function previewLogo(e) {
+            const reader = new FileReader();
+            reader.onload = () => { logoBase64 = reader.result; document.getElementById('logoPreview').src = reader.result; document.getElementById('logoPreview').classList.remove('hidden'); document.getElementById('logoIcon').classList.add('hidden'); };
+            reader.readAsDataURL(e.target.files[0]);
+        }
+
+        function save() { localStorage.setItem('cp_ultra_db', JSON.stringify(db)); }
         function toggleAddProduct() { document.getElementById('addProductForm').classList.toggle('hidden'); }
-        function populateProductSelect() { document.getElementById('v_product').innerHTML = db.inventory.filter(p => p.qty > 0).map(p => `<option value="${p.id}">${p.name} (${p.qty})</option>`).join(''); }
+        function populateProductSelect() { document.getElementById('v_product').innerHTML = db.inventory.filter(p=>p.qty>0).map(p => `<option value="${p.id}">${p.name} (${p.qty})</option>`).join(''); }
         function payViaWhatsApp() { window.open(`https://wa.me/22666566140?text=Activation PRO ID:${db.uid}`, "_blank"); }
         function activatePro() {
             if(document.getElementById('key-input').value == (db.uid + 42 + (new Date().getMonth()+1)) * 7) {
                 db.expiry = new Date().getTime() + (30 * 24 * 60 * 60 * 1000);
-                save(); alert("Activé !"); location.reload();
-            } else alert("Clé incorrecte");
+                save(); location.reload();
+            } else alert("Clé invalide");
         }
-        function
+        function checkSubscription() {
+            if(db.expiry && new Date().getTime() < db.expiry) {
+                document.getElementById('sub-badge').innerText = "PRO ACTIF";
+                document.getElementById('sub-badge').className = "text-[9px] font-bold px-2 py-1 rounded-full bg-green-100 text-green-600";
+            }
+        }
+        function generateProfessionalInvoice(client, item, qty, price, total) {
+            const { jsPDF } = window.jspdf; const doc = new jsPDF();
+            if(db.profile.logo) doc.addImage(db.profile.logo, 'PNG', 15, 10, 20, 20);
+            doc.text(db.profile.biz, 40, 20);
+            doc.autoTable({ startY: 35, head: [['Article', 'Qté', 'Total']], body: [[item, qty, total + " " + db.profile.cur]] });
+            doc.save(`Facture_${client}.pdf`);
+        }
+    </script>
+</body>
+</html>
