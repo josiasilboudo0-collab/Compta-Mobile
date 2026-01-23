@@ -3,156 +3,292 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Compta Mobile Pro</title>
+    <title>Compta Mobile Business</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        body { font-family: sans-serif; background: #F8FAFC; padding-bottom: 80px; }
+        body { font-family: 'Segoe UI', sans-serif; background: #F8FAFC; padding-bottom: 80px; }
         .page { display: none; } 
         .page.active { display: block; }
-        .input-f { width: 100%; padding: 12px; background: #F1F5F9; border-radius: 12px; border: 1px solid #E2E8F0; margin-bottom: 10px; outline: none; }
-        .btn-p { background: #2563EB; color: white; padding: 14px; border-radius: 12px; font-weight: bold; width: 100%; transition: 0.3s; }
+        .input-group { margin-bottom: 15px; }
+        .input-label { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 5px; display: block; }
+        .field { width: 100%; padding: 14px; background: white; border-radius: 12px; border: 1px solid #E2E8F0; outline: none; transition: 0.2s; }
+        .field:focus { border-color: #2563EB; ring: 2px ring-blue-100; }
+        .btn-main { background: #2563EB; color: white; padding: 16px; border-radius: 12px; font-weight: bold; width: 100%; text-align: center; }
         .card { background: white; padding: 20px; border-radius: 20px; border: 1px solid #E2E8F0; }
+        #logo-preview { width: 60px; height: 60px; border-radius: 10px; object-fit: cover; background: #F1F5F9; }
     </style>
 </head>
 <body>
 
-    <div id="setup-screen" class="fixed inset-0 bg-white z-[5000] p-6 hidden">
-        <div class="max-w-md mx-auto text-center mt-20">
-            <h1 class="text-3xl font-black mb-2">Bienvenue !</h1>
-            <p class="text-slate-500 mb-8">Configurez votre profil business.</p>
-            <input type="text" id="u_biz" placeholder="Nom de votre Boutique" class="input-f">
-            <select id="u_cur" class="input-f">
-                <option value="FCFA">FCFA</option>
-                <option value="USD">$ USD</option>
-            </select>
-            <button onclick="saveProfile()" class="btn-p">COMMENCER</button>
+    <div id="setup-screen" class="fixed inset-0 bg-slate-50 z-[9999] p-6 overflow-y-auto hidden">
+        <div class="max-w-md mx-auto py-10">
+            <h1 class="text-3xl font-black text-slate-900">Bienvenue 🚀</h1>
+            <p class="text-slate-500 mb-8">Configurez votre compte business</p>
+            
+            <div class="space-y-4">
+                <div class="flex items-center gap-4 mb-6 p-4 bg-white rounded-2xl border">
+                    <img id="logo-preview" src="#" alt="" class="hidden">
+                    <div id="logo-placeholder" class="w-[60px] h-[60px] bg-slate-100 rounded-xl flex items-center justify-center text-slate-400">
+                        <i data-lucide="image"></i>
+                    </div>
+                    <div>
+                        <span class="input-label">Logo de l'entreprise</span>
+                        <input type="file" id="u_logo" accept="image/*" class="text-xs" onchange="previewLogo(this)">
+                    </div>
+                </div>
+
+                <div class="input-group text-left">
+                    <label class="input-label">Nom de l'utilisateur / Boutique</label>
+                    <input type="text" id="u_name" placeholder="Ex: Boutique Horizon" class="field">
+                </div>
+
+                <div class="input-group text-left">
+                    <label class="input-label">Numéro de Téléphone</label>
+                    <input type="tel" id="u_tel" placeholder="Ex: +226 00 00 00 00" class="field">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 text-left">
+                    <div>
+                        <label class="input-label">Pays</label>
+                        <input type="text" id="u_country" placeholder="Burkina Faso" class="field">
+                    </div>
+                    <div>
+                        <label class="input-label">Devise</label>
+                        <select id="u_currency" class="field">
+                            <option value="FCFA">FCFA</option>
+                            <option value="USD">$ USD</option>
+                            <option value="EUR">€ EUR</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button onclick="saveSetup()" class="btn-main mt-6">CRÉER MON COMPTE</button>
+            </div>
         </div>
     </div>
 
-    <header class="p-5 flex justify-between items-center bg-white border-b sticky top-0 z-40">
-        <h1 id="headBiz" class="font-bold text-blue-600 text-xl italic">Compta Mobile</h1>
-        <button onclick="showPage('premium')" class="text-amber-500">
-            <i data-lucide="crown"></i>
-        </button>
+    <header class="p-4 flex justify-between items-center bg-white border-b sticky top-0 z-40">
+        <div class="flex items-center gap-3">
+            <img id="header-logo" src="" class="w-8 h-8 rounded-md hidden">
+            <h1 id="header-biz-name" class="font-bold text-slate-800 tracking-tight">Compta Mobile</h1>
+        </div>
+        <div class="flex gap-4">
+            <button onclick="showPage('premium')" id="crown-btn" class="text-slate-300">
+                <i data-lucide="crown"></i>
+            </button>
+        </div>
     </header>
 
-    <main class="p-4 space-y-4">
+    <main class="p-4">
         
         <div id="page-home" class="page active">
-            <div class="bg-slate-900 p-8 rounded-[2rem] text-white mb-6">
-                <p class="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Profit Total</p>
-                <h2 class="text-4xl font-black mt-1"><span id="valProfit">0</span> <span class="cur text-sm"></span></h2>
+            <div class="bg-blue-600 p-6 rounded-[2rem] text-white shadow-xl shadow-blue-100 mb-6">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-[10px] uppercase font-bold opacity-70">Profit du mois</p>
+                        <h2 class="text-3xl font-black mt-1"><span id="valProfit">0</span> <small class="text-sm font-normal cur"></small></h2>
+                    </div>
+                    <div id="status-tag" class="bg-white/20 px-3 py-1 rounded-full text-[10px] font-bold">MODE GRATUIT</div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <button onclick="checkSub('invoice')" class="card flex flex-col items-center gap-3 active:scale-95 transition">
+                    <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center">
+                        <i data-lucide="shopping-cart"></i>
+                    </div>
+                    <span class="text-xs font-bold text-slate-600 uppercase">Vendre</span>
+                </button>
+                <button onclick="checkSub('stock')" class="card flex flex-col items-center gap-3 active:scale-95 transition">
+                    <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center">
+                        <i data-lucide="package"></i>
+                    </div>
+                    <span class="text-xs font-bold text-slate-600 uppercase">Stock</span>
+                </button>
+            </div>
+        </div>
+
+        <div id="page-settings" class="page">
+            <h2 class="text-xl font-black mb-6">Paramètres</h2>
+            <div class="card space-y-4">
+                <div class="input-group">
+                    <label class="input-label">Changer le Nom</label>
+                    <input type="text" id="edit_name" class="field">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Changer le Téléphone</label>
+                    <input type="tel" id="edit_tel" class="field">
+                </div>
+                <button onclick="updateSettings()" class="btn-main bg-slate-900">ENREGISTRER LES MODIFS</button>
             </div>
             
-            <div class="grid grid-cols-2 gap-4">
-                <button onclick="checkPro('invoice')" class="card flex flex-col items-center gap-2 hover:bg-blue-50">
-                    <i data-lucide="shopping-cart" class="text-blue-600"></i>
-                    <span class="text-[10px] font-bold uppercase">Vendre</span>
-                </button>
-                <button onclick="checkPro('stock')" class="card flex flex-col items-center gap-2 hover:bg-emerald-50">
-                    <i data-lucide="package" class="text-emerald-500"></i>
-                    <span class="text-[10px] font-bold uppercase">Stock</span>
-                </button>
-            </div>
-
-            <h3 class="font-bold text-slate-800 mt-6 mb-2">Ventes récentes</h3>
-            <div id="historyList" class="space-y-3"></div>
-        </div>
-
-        <div id="page-stock" class="page">
-            <h2 class="text-xl font-black mb-4">Gestion Stock</h2>
-            <div class="card mb-6 border-2 border-dashed border-slate-200">
-                <input type="text" id="p_name" placeholder="Nom du produit" class="input-f">
-                <input type="number" id="p_cost" placeholder="Prix d'achat" class="input-f">
-                <input type="number" id="p_price" placeholder="Prix de vente" class="input-f">
-                <input type="number" id="p_qty" placeholder="Quantité en stock" class="input-f">
-                <button onclick="addProduct()" class="btn-p bg-emerald-600">AJOUTER AU STOCK</button>
-            </div>
-            <div id="stockList" class="space-y-2"></div>
-        </div>
-
-        <div id="page-invoice" class="page">
-            <h2 class="text-xl font-black mb-4">Nouvelle Vente</h2>
-            <div class="card shadow-lg">
-                <label class="text-[10px] font-bold text-slate-400 uppercase">Sélectionner le produit</label>
-                <select id="v_product" class="input-f mt-1"></select>
-                <label class="text-[10px] font-bold text-slate-400 uppercase">Quantité</label>
-                <input type="number" id="v_qty" value="1" class="input-f mt-1">
-                <button onclick="processSale()" class="btn-p">VALIDER LA VENTE</button>
+            <div class="mt-6 p-4 text-center">
+                <p class="text-[10px] text-slate-400 font-bold uppercase">ID de votre appareil</p>
+                <p id="settings-uid" class="text-lg font-mono font-bold text-slate-600 tracking-widest"></p>
             </div>
         </div>
 
         <div id="page-premium" class="page">
-            <div class="text-center card border-2 border-amber-100">
-                <div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i data-lucide="crown" size="32"></i>
+            <div class="text-center card">
+                <div class="w-20 h-20 bg-amber-100 text-amber-600 rounded-3xl flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="crown" size="40"></i>
                 </div>
-                <h2 class="text-2xl font-black mb-2">Version Pro</h2>
-                <p class="text-sm text-slate-500 mb-6">Débloquez le stock et les ventes illimitées.</p>
+                <h2 class="text-2xl font-black">Abonnement Pro</h2>
+                <p class="text-slate-500 text-sm mb-6">3 000 FCFA / mois pour tout débloquer.</p>
                 
-                <div class="bg-slate-50 p-6 rounded-3xl mb-6 border border-slate-100">
-                    <p class="text-[10px] uppercase font-bold text-slate-400 mb-1">Votre ID Appareil</p>
-                    <p id="display-uid" class="text-3xl font-mono font-black text-slate-800 tracking-widest">----</p>
+                <div class="bg-slate-50 p-6 rounded-3xl mb-6 border">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase mb-2">Votre ID Appareil</p>
+                    <p id="display-uid" class="text-4xl font-mono font-black text-blue-600 tracking-tighter">----</p>
                 </div>
 
-                <a href="https://qaasxtqf.mychariow.shop/abonnement-pro-compta-mobile/checkout" target="_blank" class="btn-p bg-amber-500 block shadow-lg shadow-amber-100 mb-4">
-                    ACTIVER POUR 2 000 FCFA
-                </a>
+                <a href="https://wa.me/22666566140?text=Bonjour,%20je%20souhaite%20m'abonner%20à%203000F/mois.%20Mon%20ID%20est%20:" 
+                   class="btn-main bg-amber-500 block shadow-lg shadow-amber-200">PAYER PAR ORANGE/MOOV</a>
                 
-                <div class="mt-8 pt-6 border-t border-slate-100 text-left">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-2 block mb-1">J'ai déjà mon code :</label>
-                    <div class="flex gap-2">
-                        <input type="text" id="activation-key" placeholder="Code d'activation" class="input-f mb-0 font-mono font-bold">
-                        <button onclick="activate()" class="bg-slate-900 text-white px-6 rounded-xl font-bold">OK</button>
-                    </div>
+                <div class="mt-8 pt-6 border-t">
+                    <input type="text" id="act-key" placeholder="Entrez la clé reçue" class="field text-center mb-2">
+                    <button onclick="activatePro()" class="btn-main bg-slate-800">ACTIVER MA CLÉ</button>
                 </div>
             </div>
         </div>
 
     </main>
 
-    <nav class="fixed bottom-0 left-0 right-0 h-16 bg-white border-t flex justify-around items-center z-50">
-        <button onclick="showPage('home')" class="text-slate-400 hover:text-blue-600"><i data-lucide="layout-grid"></i></button>
-        <button onclick="checkPro('stock')" class="text-slate-400 hover:text-blue-600"><i data-lucide="package"></i></button>
-        <button onclick="checkPro('invoice')" class="text-slate-400 hover:text-blue-600"><i data-lucide="receipt"></i></button>
-        <button onclick="showPage('premium')" class="text-amber-500"><i data-lucide="crown"></i></button>
+    <nav class="fixed bottom-0 left-0 right-0 h-20 bg-white border-t flex justify-around items-center px-6 z-50">
+        <button onclick="showPage('home')" class="nav-link flex flex-col items-center gap-1 text-blue-600">
+            <i data-lucide="layout-grid"></i>
+            <span class="text-[9px] font-bold uppercase">Accueil</span>
+        </button>
+        <button onclick="showPage('settings')" class="nav-link flex flex-col items-center gap-1 text-slate-400">
+            <i data-lucide="settings"></i>
+            <span class="text-[9px] font-bold uppercase">Profil</span>
+        </button>
+        <button onclick="showPage('premium')" class="nav-link flex flex-col items-center gap-1 text-amber-500">
+            <i data-lucide="crown"></i>
+            <span class="text-[9px] font-bold uppercase">Abo</span>
+        </button>
     </nav>
 
     <script>
-        // BASE DE DONNÉES
-        let db = JSON.parse(localStorage.getItem('cp_db_pro')) || {
-            profile: null, inventory: [], sales: [], profit: 0, isPro: false, uid: Math.floor(1000 + Math.random() * 8999)
+        // --- LOGIQUE CORE ---
+        let db = JSON.parse(localStorage.getItem('compta_pro_v2')) || {
+            user: null, 
+            inventory: [], 
+            sales: [], 
+            profit: 0, 
+            expiryDate: null, 
+            uid: Math.floor(1000 + Math.random() * 8999)
         };
 
-        function save() { localStorage.setItem('cp_db_pro', JSON.stringify(db)); }
+        function save() { localStorage.setItem('compta_pro_v2', JSON.stringify(db)); }
 
         window.onload = function() {
             lucide.createIcons();
-            if(!db.profile) {
+            if(!db.user) {
                 document.getElementById('setup-screen').classList.remove('hidden');
             } else {
-                init();
+                initApp();
             }
         };
 
-        function init() {
-            document.getElementById('headBiz').innerText = db.profile.biz;
-            document.querySelectorAll('.cur').forEach(e => e.innerText = db.profile.cur);
+        function initApp() {
+            document.getElementById('header-biz-name').innerText = db.user.name;
+            document.getElementById('settings-uid').innerText = db.uid;
             document.getElementById('display-uid').innerText = db.uid;
             document.getElementById('valProfit').innerText = db.profit.toLocaleString();
-            renderStock();
-            renderSales();
-            updateSelect();
+            document.querySelectorAll('.cur').forEach(el => el.innerText = db.user.currency);
+            
+            // Pré-remplir réglages
+            document.getElementById('edit_name').value = db.user.name;
+            document.getElementById('edit_tel').value = db.user.tel;
+
+            if(db.user.logo) {
+                document.getElementById('header-logo').src = db.user.logo;
+                document.getElementById('header-logo').classList.remove('hidden');
+            }
+
+            // Vérifier expiration
+            checkSubscriptionStatus();
         }
 
-        function saveProfile() {
-            const biz = document.getElementById('u_biz').value;
-            const cur = document.getElementById('u_cur').value;
-            if(!biz) return alert("Entrez le nom de votre boutique");
-            db.profile = { biz, cur };
+        // --- GESTION LOGO ---
+        function previewLogo(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('logo-preview').src = e.target.result;
+                    document.getElementById('logo-preview').classList.remove('hidden');
+                    document.getElementById('logo-placeholder').classList.add('hidden');
+                    db.tempLogo = e.target.result;
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // --- INSCRIPTION ---
+        function saveSetup() {
+            const name = document.getElementById('u_name').value;
+            const tel = document.getElementById('u_tel').value;
+            const country = document.getElementById('u_country').value;
+            const currency = document.getElementById('u_currency').value;
+
+            if(!name || !tel) return alert("Nom et Téléphone obligatoires");
+
+            db.user = { name, tel, country, currency, logo: db.tempLogo || null };
             save();
             location.reload();
+        }
+
+        // --- MODIFICATION ---
+        function updateSettings() {
+            db.user.name = document.getElementById('edit_name').value;
+            db.user.tel = document.getElementById('edit_tel').value;
+            save();
+            alert("Informations mises à jour !");
+            location.reload();
+        }
+
+        // --- ABONNEMENT ---
+        function checkSubscriptionStatus() {
+            const now = new Date().getTime();
+            const tag = document.getElementById('status-tag');
+            const crown = document.getElementById('crown-btn');
+
+            if (db.expiryDate && now < db.expiryDate) {
+                const daysLeft = Math.ceil((db.expiryDate - now) / (1000 * 60 * 60 * 24));
+                tag.innerText = "PRO : " + daysLeft + " JOURS RESTANTS";
+                tag.className = "bg-emerald-500 px-3 py-1 rounded-full text-[10px] font-bold";
+                crown.classList.replace('text-slate-300', 'text-amber-500');
+            } else {
+                tag.innerText = "ABONNEMENT EXPIRÉ / GRATUIT";
+                tag.className = "bg-rose-500 px-3 py-1 rounded-full text-[10px] font-bold";
+            }
+        }
+
+        function activatePro() {
+            const key = document.getElementById('act-key').value;
+            const expected = (parseInt(db.uid) + 42) * 7;
+
+            if(key == expected) {
+                // Ajoute 30 jours à partir de maintenant
+                const thirtyDays = 30 * 24 * 60 * 60 * 1000;
+                db.expiryDate = new Date().getTime() + thirtyDays;
+                save();
+                alert("Félicitations ! Version PRO activée pour 30 jours.");
+                location.reload();
+            } else {
+                alert("Clé invalide.");
+            }
+        }
+
+        function checkSub(page) {
+            const now = new Date().getTime();
+            if(db.expiryDate && now < db.expiryDate) {
+                alert("Accès autorisé ! (Page " + page + " en cours de dev)");
+            } else {
+                showPage('premium');
+                alert("Cette fonction nécessite un abonnement actif (3 000 F)");
+            }
         }
 
         function showPage(id) {
@@ -160,77 +296,6 @@
             document.getElementById('page-' + id).classList.add('active');
         }
 
-        function checkPro(page) {
-            if(db.isPro) showPage(page);
-            else { showPage('premium'); }
-        }
-
-        function addProduct() {
-            const name = document.getElementById('p_name').value;
-            const cost = parseInt(document.getElementById('p_cost').value);
-            const price = parseInt(document.getElementById('p_price').value);
-            const qty = parseInt(document.getElementById('p_qty').value);
-            if(!name || isNaN(cost)) return alert("Veuillez remplir tous les champs");
-            
-            db.inventory.push({ id: Date.now(), name, cost, price, qty });
-            save(); renderStock(); updateSelect();
-            alert("Produit ajouté !");
-        }
-
-        function renderStock() {
-            document.getElementById('stockList').innerHTML = db.inventory.map(p => `
-                <div class="card flex justify-between items-center py-3">
-                    <div>
-                        <p class="font-bold text-slate-800">${p.name}</p>
-                        <p class="text-[10px] text-slate-400">Stock: ${p.qty}</p>
-                    </div>
-                    <span class="font-black text-blue-600">${p.price} ${db.profile.cur}</span>
-                </div>
-            `).join('');
-        }
-
-        function updateSelect() {
-            document.getElementById('v_product').innerHTML = db.inventory.map(p => `<option value="${p.id}">${p.name} (Dispo: ${p.qty})</option>`).join('');
-        }
-
-        function processSale() {
-            const id = document.getElementById('v_product').value;
-            const q = parseInt(document.getElementById('v_qty').value);
-            const p = db.inventory.find(i => i.id == id);
-            
-            if(!p || q > p.qty) return alert("Stock insuffisant !");
-            
-            p.qty -= q;
-            const gain = (p.price - p.cost) * q;
-            db.profit += gain;
-            db.sales.push({ name: p.name, q, total: p.price * q, date: new Date().toLocaleTimeString() });
-            
-            save(); init(); showPage('home');
-        }
-
-        function renderSales() {
-            document.getElementById('historyList').innerHTML = db.sales.slice(-5).reverse().map(s => `
-                <div class="bg-white p-4 rounded-2xl flex justify-between items-center shadow-sm border border-slate-100">
-                    <span><b>${s.q}x</b> ${s.name}</span>
-                    <span class="text-emerald-600 font-bold">+ ${s.total}</span>
-                </div>
-            `).join('');
-        }
-
-        function activate() {
-            const key = document.getElementById('activation-key').value;
-            // FORMULE IDENTIQUE AU GÉNÉRATEUR : (UID + 42) * 7
-            const expected = (parseInt(db.uid) + 42) * 7;
-            
-            if(key == expected) {
-                db.isPro = true;
-                save();
-                alert("Félicitations ! Votre version PRO est activée.");
-                location.reload();
-            } else {
-                alert("Code incorrect. Vérifiez votre ID ou contactez le support.");
-            }
-        }
     </script>
 </body>
 </html>
