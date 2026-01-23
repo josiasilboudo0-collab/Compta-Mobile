@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ComptaPro Gold - Burkina Faso</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -14,31 +14,9 @@
         .btn-premium { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); box-shadow: 0 10px 20px -5px rgba(245, 158, 11, 0.4); }
         .animate-gold { animation: pulse-gold 2s infinite; }
         @keyframes pulse-gold { 0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(245, 158, 11, 0); } 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); } }
-        /* Style pour le plein écran de blocage */
-        #lock-screen { z-index: 9999; background-color: #0f172a; }
     </style>
 </head>
 <body class="pb-24">
-
-    <div id="lock-screen" class="fixed inset-0 hidden flex flex-col items-center justify-center p-6 text-center">
-        <div class="glass-card p-8 border-orange-500">
-            <div class="w-20 h-20 bg-orange-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                <i data-lucide="lock" class="text-orange-500 w-10 h-10"></i>
-            </div>
-            <h2 class="text-3xl font-black mb-4">Essai Terminé 🇧🇫</h2>
-            <p class="text-slate-400 mb-8 text-sm">Vos 10 jours de découverte sont terminés. Activez votre licence pour débloquer vos données et continuer.</p>
-            
-            <div class="space-y-4 mb-8">
-                <a href="https://me.fedapay.com/sF5bKiUt" class="block w-full btn-premium py-4 rounded-2xl font-black uppercase text-sm">Activer 1 Mois (3 000 F)</a>
-                <a href="https://me.fedapay.com/804MYb_W" class="block w-full bg-slate-800 py-4 rounded-2xl font-black uppercase text-sm border border-white/10">Pack 3 Mois (6 000 F)</a>
-            </div>
-
-            <div class="pt-6 border-t border-white/10">
-                <input type="text" id="lockCode" placeholder="Code d'activation..." class="bg-slate-900 border border-white/10 rounded-xl px-4 py-3 text-sm w-full mb-3 outline-none focus:border-orange-500">
-                <button onclick="verifierCodeLock()" class="w-full bg-white text-black py-3 rounded-xl font-bold">Valider le code</button>
-            </div>
-        </div>
-    </div>
 
     <header class="p-6 flex justify-between items-center">
         <div>
@@ -54,7 +32,6 @@
                 <i data-lucide="zap" class="text-yellow-400 w-4 h-4"></i> Performance Business
             </h3>
             <div class="h-40 w-full"><canvas id="growthChart"></canvas></div>
-            <p id="trialCountdown" class="text-[10px] text-center mt-4 text-orange-400 font-bold uppercase tracking-widest"></p>
         </section>
 
         <section class="grid grid-cols-2 gap-4">
@@ -73,6 +50,7 @@
         <div class="glass-card w-full max-w-sm p-6 text-center relative border-orange-500/50">
             <button onclick="closePaymentModal()" class="absolute top-4 right-4 text-slate-500"><i data-lucide="x"></i></button>
             <h2 class="text-2xl font-black mb-6">Passez au GOLD 🏆</h2>
+
             <div class="space-y-4 mb-6">
                 <div class="p-4 rounded-2xl bg-white/5 border border-white/10 text-left">
                     <p class="text-orange-400 font-bold text-xs uppercase">Pack 1 Mois</p>
@@ -85,13 +63,62 @@
                     <a href="https://me.fedapay.com/804MYb_W" class="block w-full text-center mt-3 py-2 bg-orange-500 rounded-xl text-xs font-bold">Choisir</a>
                 </div>
             </div>
+
             <div class="pt-4 border-t border-white/10">
-                <input type="text" id="activationCode" placeholder="CODE..." class="bg-slate-800 border border-white/10 rounded-lg px-3 py-2 text-sm w-full outline-none mb-3">
-                <button onclick="verifierCode()" class="w-full bg-white text-black py-2 rounded-lg text-xs font-bold">OK</button>
+                <p class="text-[10px] text-slate-500 mb-3 uppercase">Déjà un code d'activation ?</p>
+                <div class="flex gap-2">
+                    <input type="text" id="activationCode" placeholder="CODE..." class="bg-slate-800 border border-white/10 rounded-lg px-3 py-2 text-sm w-full outline-none">
+                    <button onclick="verifierCode()" class="bg-white text-black px-4 py-2 rounded-lg text-xs font-bold">OK</button>
+                </div>
             </div>
         </div>
     </div>
 
     <nav class="fixed bottom-6 left-6 right-6 h-16 glass-card border-none shadow-2xl flex justify-around items-center px-4">
         <button class="text-purple-400"><i data-lucide="home"></i></button>
-        <button class="text-slate-
+        <button class="text-slate-500"><i data-lucide="plus-circle"></i></button>
+        <button class="text-slate-500"><i data-lucide="settings"></i></button>
+    </nav>
+
+    <script>
+        lucide.createIcons();
+
+        // 1. Vérifier si l'utilisateur revient d'un paiement réussi
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('bravo')) {
+                activerModePro("ACTIVATION AUTO");
+            }
+        };
+
+        function activerModePro(planName) {
+            localStorage.setItem('userStatus', 'PRO');
+            document.getElementById('statusAbonnement').innerText = planName;
+            document.getElementById('statusAbonnement').className = "text-lg font-black mt-1 text-green-400";
+            document.getElementById('badgePro').classList.add('hidden');
+            alert("Accès Premium Activé ! Profitez bien.");
+        }
+
+        function openPaymentModal() { document.getElementById('paymentModal').classList.remove('hidden'); }
+        function closePaymentModal() { document.getElementById('paymentModal').classList.add('hidden'); }
+
+        function verifierCode() {
+            const code = document.getElementById('activationCode').value.toUpperCase();
+            if(code === "PRO3K" || code === "PRO6K") {
+                activerModePro(code);
+                closePaymentModal();
+            } else {
+                alert("Code invalide.");
+            }
+        }
+
+        // Graphique simple
+        const ctx = document.getElementById('growthChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: { labels: ['S1', 'S2', 'S3', 'S4'], datasets: [{ data: [10, 25, 15, 30], borderColor: '#a855f7', tension: 0.4, borderWidth: 3, pointRadius: 0 }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false }, ticks: { color: '#475569' } } } }
+        });
+    </script>
+</body>
+</html>
