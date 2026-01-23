@@ -3,252 +3,220 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ComptaPro - Global Manager</title>
-    
+    <title>ComptaPro Enterprise</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
-    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #F8FAFC; -webkit-tap-highlight-color: transparent; }
-        .page { display: none; }
-        .page.active { display: block; animation: fadeIn 0.2s ease-in; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAFC; color: #1E293B; }
+        .page { display: none; } .page.active { display: block; animation: fadeIn 0.3s; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .fintech-card { background: white; border-radius: 24px; padding: 20px; border: 1px solid #E2E8F0; }
-        .btn-blue { background: #2563EB; color: white; padding: 16px; border-radius: 16px; font-weight: 800; width: 100%; transition: transform 0.1s; }
-        .btn-blue:active { transform: scale(0.95); }
-        .input-box { width: 100%; padding: 16px; background: #F1F5F9; border-radius: 14px; border: 1px solid #E2E8F0; outline: none; margin-bottom: 12px; }
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 2000; align-items: center; justify-content: center; padding: 20px; }
-        .modal.active { display: flex; }
+        .input-f { width: 100%; padding: 12px; background: #F1F5F9; border-radius: 12px; border: 1px solid #E2E8F0; outline: none; margin-bottom: 10px; font-size: 14px; }
+        .btn-p { background: #2563EB; color: white; padding: 14px; border-radius: 14px; font-weight: 700; width: 100%; transition: 0.2s; }
+        .btn-p:active { transform: scale(0.97); }
     </style>
 </head>
 <body class="pb-24">
 
-    <div id="setup-screen" class="fixed inset-0 bg-white z-[3000] flex flex-col p-8 items-center justify-center text-center hidden">
-        <div class="w-20 h-20 bg-blue-600 rounded-[2rem] flex items-center justify-center text-white mb-6 shadow-xl shadow-blue-200">
-            <i data-lucide="globe" class="w-10 h-10"></i>
+    <div id="setup-screen" class="fixed inset-0 bg-white z-[3000] p-6 overflow-y-auto hidden">
+        <h1 class="text-2xl font-black mb-6 text-center">Profil Entreprise</h1>
+        <div class="space-y-4 max-w-md mx-auto">
+            <div class="flex flex-col items-center mb-4">
+                <div onclick="document.getElementById('logoInput').click()" class="w-20 h-20 bg-slate-100 rounded-2xl border-2 border-dashed border-slate-300 flex items-center justify-center overflow-hidden cursor-pointer">
+                    <img id="logoPreview" class="hidden w-full h-full object-cover">
+                    <i id="logoIcon" data-lucide="camera" class="text-slate-400"></i>
+                </div>
+                <input type="file" id="logoInput" accept="image/*" class="hidden" onchange="previewLogo(event)">
+                <p class="text-[10px] mt-2 font-bold text-slate-400">AJOUTER VOTRE LOGO</p>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-2">
+                <input type="text" id="u_fname" placeholder="Prénom" class="input-f">
+                <input type="text" id="u_lname" placeholder="Nom" class="input-f">
+            </div>
+            <input type="text" id="u_biz" placeholder="Nom de l'entreprise" class="input-f">
+            <input type="email" id="u_email" placeholder="Email professionnel" class="input-f">
+            <input type="tel" id="u_phone" placeholder="Contact (ex: +226...)" class="input-f">
+            
+            <div class="grid grid-cols-2 gap-2">
+                <select id="u_lang" class="input-f"><option value="fr">Français 🇫🇷</option><option value="en">English 🇺🇸</option></select>
+                <select id="u_cur" class="input-f"><option value="XOF">FCFA</option><option value="USD">USD ($)</option><option value="EUR">EUR (€)</option></select>
+            </div>
+            <input type="text" id="u_country" placeholder="Pays" class="input-f">
+            
+            <button onclick="saveProfile()" class="btn-p mt-4">CRÉER MON COMPTE</button>
         </div>
-        <h1 class="text-3xl font-black mb-2">ComptaPro</h1>
-        <p class="text-slate-400 mb-8">Ready to go Global?</p>
-        <select id="setupLang" class="input-box"><option value="fr">Français 🇫🇷</option><option value="en">English 🇺🇸</option></select>
-        <select id="setupCur" class="input-box"><option value="XOF">FCFA (CFA)</option><option value="USD">Dollar ($)</option><option value="EUR">Euro (€)</option></select>
-        <button onclick="startApp()" class="btn-blue">START BUSINESS</button>
     </div>
 
-    <div id="modalLimit" class="modal">
-        <div class="bg-white p-8 rounded-[30px] w-full max-w-sm text-center">
-            <h2 class="text-2xl font-black mb-4">Limite Atteinte 🔒</h2>
-            <p class="text-slate-500 mb-6 text-sm">Vous avez atteint 3 ventes aujourd'hui. Passez au pack Gold pour enregistrer en illimité !</p>
-            <button onclick="changePage('gold')" class="btn-blue mb-4">DEVENIR GOLD</button>
-            <button onclick="closeModal()" class="text-slate-400 font-bold text-xs uppercase">Plus tard</button>
+    <header class="p-5 flex justify-between items-center bg-white border-b sticky top-0 z-50">
+        <div class="flex items-center gap-3">
+            <img id="headLogo" class="w-8 h-8 rounded-lg object-cover hidden">
+            <h1 id="headBizName" class="font-bold text-slate-900 text-sm italic">ComptaPro</h1>
         </div>
-    </div>
-
-    <header class="p-5 flex justify-between items-center bg-white/80 sticky top-0 z-50 backdrop-blur-md border-b">
-        <div>
-            <h1 class="font-black text-blue-600 text-xl tracking-tighter">ComptaPro</h1>
-            <p id="subStatus" class="text-[9px] font-bold text-emerald-500 uppercase tracking-widest">Plan Gratuit</p>
-        </div>
-        <button onclick="changePage('gold')" class="w-10 h-10 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center border border-amber-100">
-            <i data-lucide="crown"></i>
-        </button>
+        <button onclick="showPage('premium')" class="text-amber-500"><i data-lucide="crown"></i></button>
     </header>
 
     <main class="p-5 space-y-6">
-
-        <div id="page-home" class="page active space-y-6">
-            <div class="fintech-card bg-slate-900 text-white border-none shadow-2xl shadow-blue-100">
-                <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">Profit Total</p>
-                <p class="text-4xl font-black"><span id="mainProfit">0</span> <span class="text-lg opacity-50 displayCur">USD</span></p>
-                <div class="flex gap-4 mt-6 pt-6 border-t border-slate-800 text-[10px] font-bold">
-                    <span class="text-emerald-400 uppercase">Sales: <span id="mainSales">0</span></span>
-                    <span class="text-red-400 uppercase">Costs: <span id="mainCosts">0</span></span>
-                </div>
+        <div id="page-home" class="page active space-y-4">
+            <div class="bg-slate-900 p-6 rounded-[2rem] text-white shadow-xl">
+                <p class="text-[10px] uppercase font-bold text-slate-400 mb-1">Bénéfice Net</p>
+                <h2 class="text-3xl font-black"><span id="totalProfit">0</span> <span id="curLabel" class="text-sm font-normal opacity-50"></span></h2>
             </div>
-
+            
             <div class="grid grid-cols-2 gap-4">
-                <button onclick="checkLimit('sales')" class="fintech-card flex flex-col items-center gap-3 py-8">
-                    <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center"><i data-lucide="plus-square"></i></div>
-                    <span class="text-[10px] font-black uppercase">Vendre</span>
+                <button onclick="showPage('invoice')" class="bg-white p-6 rounded-3xl border flex flex-col items-center gap-2">
+                    <i data-lucide="file-text" class="text-blue-600"></i>
+                    <span class="text-[10px] font-black uppercase">Facture PDF</span>
                 </button>
-                <button onclick="changePage('costs')" class="fintech-card flex flex-col items-center gap-3 py-8">
-                    <div class="w-12 h-12 bg-red-50 text-red-600 rounded-2xl flex items-center justify-center"><i data-lucide="minus-square"></i></div>
+                <button onclick="showPage('cost')" class="bg-white p-6 rounded-3xl border flex flex-col items-center gap-2">
+                    <i data-lucide="minus-circle" class="text-red-500"></i>
                     <span class="text-[10px] font-black uppercase">Dépense</span>
                 </button>
             </div>
 
-            <div class="space-y-4">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest">Dernières Activités</h3>
-                    <input type="text" id="searchBar" oninput="renderHistory()" placeholder="Chercher..." class="text-[10px] bg-white border px-3 py-1 rounded-full outline-none">
+            <div id="recentList" class="space-y-2"></div>
+        </div>
+
+        <div id="page-invoice" class="page space-y-4">
+            <h2 class="text-xl font-black italic">Édition Facture</h2>
+            <div class="bg-white p-5 rounded-3xl border space-y-4">
+                <input type="text" id="client_name" placeholder="Nom de l'acheteur" class="input-f">
+                <div class="border-t pt-4">
+                    <p class="text-[10px] font-bold text-slate-400 mb-2 uppercase tracking-widest">Détails Produits</p>
+                    <input type="text" id="prod_name" placeholder="Désignation (ex: Sac de Riz)" class="input-f">
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="number" id="prod_qty" placeholder="Quantité" class="input-f">
+                        <input type="number" id="prod_price" placeholder="Prix Unitaire" class="input-f">
+                    </div>
                 </div>
-                <div id="historyList" class="space-y-3"></div>
-                <button onclick="exportCSV()" class="w-full text-[10px] font-bold text-blue-600 uppercase py-2">Exporter le rapport (CSV)</button>
+                <button onclick="generateProfessionalInvoice()" class="btn-p shadow-lg shadow-blue-100">GÉNÉRER LE PDF</button>
             </div>
         </div>
-
-        <div id="page-sales" class="page space-y-4">
-            <h2 class="text-2xl font-black italic">Nouvelle Vente</h2>
-            <div class="fintech-card space-y-4">
-                <input type="text" id="v_client" placeholder="Nom du Client" class="input-box">
-                <input type="number" id="v_amount" placeholder="Montant" class="input-box font-bold">
-                <button onclick="saveTx('sale')" class="btn-blue shadow-lg shadow-blue-200">VALIDER & REÇU PDF</button>
-            </div>
-        </div>
-
-        <div id="page-costs" class="page space-y-4">
-            <h2 class="text-2xl font-black italic text-red-600">Encaisser Dépense</h2>
-            <div class="fintech-card space-y-4">
-                <input type="text" id="d_motif" placeholder="Motif (Loyer, Stock, Carburant)" class="input-box">
-                <input type="number" id="d_amount" placeholder="Montant" class="input-box font-bold">
-                <button onclick="saveTx('cost')" class="btn-blue bg-slate-900 shadow-lg shadow-slate-200 uppercase text-xs">Enregistrer l'achat</button>
-            </div>
-        </div>
-
-        <div id="page-gold" class="page space-y-6">
-            <div class="text-center py-8">
-                <div class="w-20 h-20 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4"><i data-lucide="crown" class="w-10 h-10"></i></div>
-                <h2 class="text-3xl font-black">ComptaPro GOLD</h2>
-                <p class="text-slate-500 text-sm">Débloquez votre plein potentiel.</p>
-            </div>
-            <div class="fintech-card border-2 border-blue-600">
-                <p class="text-blue-600 font-black text-xs uppercase">Pack Business Mondial</p>
-                <p class="text-3xl font-black mt-2">3 000 F / $5 <span class="text-sm font-normal text-slate-400">/ mois</span></p>
-                <ul class="mt-6 space-y-3 text-xs font-bold text-slate-600">
-                    <li class="flex items-center gap-2 text-emerald-500"><i data-lucide="check" class="w-4 h-4"></i> Ventes illimitées</li>
-                    <li class="flex items-center gap-2 text-emerald-500"><i data-lucide="check" class="w-4 h-4"></i> Rapports PDF pro</li>
-                    <li class="flex items-center gap-2 text-emerald-500"><i data-lucide="check" class="w-4 h-4"></i> Support prioritaire</li>
-                </ul>
-                <a href="https://me.fedapay.com/sF5bKiUt" class="btn-blue mt-8 block text-center">S'ABONNER MAINTENANT</a>
-            </div>
-        </div>
-
     </main>
 
-    <nav class="fixed bottom-0 left-0 right-0 h-20 bg-white border-t border-slate-100 flex justify-around items-center px-8 z-[1000]">
-        <button onclick="changePage('home')" class="text-blue-600"><i data-lucide="home"></i></button>
-        <button onclick="checkLimit('sales')" class="text-slate-300"><i data-lucide="plus-circle"></i></button>
-        <button onclick="changePage('gold')" class="text-slate-300"><i data-lucide="crown"></i></button>
+    <nav class="fixed bottom-0 left-0 right-0 h-20 bg-white/90 backdrop-blur-md border-t flex justify-around items-center px-8">
+        <button onclick="showPage('home')"><i data-lucide="home"></i></button>
+        <button onclick="showPage('invoice')"><i data-lucide="plus-circle"></i></button>
+        <button onclick="localStorage.clear(); location.reload();" class="text-red-400"><i data-lucide="log-out"></i></button>
     </nav>
 
     <script>
-        const { jsPDF } = window.jspdf;
         lucide.createIcons();
+        let db = JSON.parse(localStorage.getItem('cp_enterprise_db')) || { profile: null, tx: [], profit: 0 };
+        let logoBase64 = "";
 
-        // 1. DATABASE
-        let app = JSON.parse(localStorage.getItem('cp_final_db')) || {
-            user: null,
-            sales: 0, costs: 0,
-            logs: [],
-            daily: { date: new Date().toLocaleDateString(), count: 0 }
-        };
+        if(!db.profile) { document.getElementById('setup-screen').classList.remove('hidden'); }
+        else { initApp(); }
 
-        // 2. INITIALISATION
-        if(!app.user) { document.getElementById('setup-screen').classList.remove('hidden'); }
-        else { updateUI(); }
-
-        function startApp() {
-            app.user = { lang: document.getElementById('setupLang').value, currency: document.getElementById('setupCur').value, isGold: false };
-            save();
-            document.getElementById('setup-screen').classList.add('hidden');
-            updateUI();
+        function previewLogo(e) {
+            const reader = new FileReader();
+            reader.onload = () => { 
+                logoBase64 = reader.result;
+                document.getElementById('logoPreview').src = reader.result;
+                document.getElementById('logoPreview').classList.remove('hidden');
+                document.getElementById('logoIcon').classList.add('hidden');
+            };
+            reader.readAsDataURL(e.target.files[0]);
         }
 
-        function save() { localStorage.setItem('cp_final_db', JSON.stringify(app)); }
-
-        function updateUI() {
-            document.getElementById('mainProfit').innerText = (app.sales - app.costs).toLocaleString();
-            document.getElementById('mainSales').innerText = app.sales.toLocaleString();
-            document.getElementById('mainCosts').innerText = app.costs.toLocaleString();
-            document.querySelectorAll('.displayCur').forEach(e => e.innerText = app.user.currency);
-            renderHistory();
+        function saveProfile() {
+            db.profile = {
+                fname: document.getElementById('u_fname').value,
+                lname: document.getElementById('u_lname').value,
+                biz: document.getElementById('u_biz').value,
+                email: document.getElementById('u_email').value,
+                phone: document.getElementById('u_phone').value,
+                lang: document.getElementById('u_lang').value,
+                cur: document.getElementById('u_cur').value,
+                country: document.getElementById('u_country').value,
+                logo: logoBase64
+            };
+            localStorage.setItem('cp_enterprise_db', JSON.stringify(db));
+            location.reload();
         }
 
-        // 3. LOGIQUE METIER
-        function changePage(id) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById('page-' + id).classList.add('active');
-            window.scrollTo(0,0);
-        }
-
-        function checkLimit(page) {
-            const today = new Date().toLocaleDateString();
-            if(app.daily.date !== today) { app.daily = { date: today, count: 0 }; }
-            
-            if(!app.user.isGold && app.daily.count >= 3) {
-                document.getElementById('modalLimit').classList.add('active');
-            } else {
-                changePage(page);
+        function initApp() {
+            document.getElementById('headBizName').innerText = db.profile.biz;
+            document.getElementById('curLabel').innerText = db.profile.cur;
+            if(db.profile.logo) {
+                document.getElementById('headLogo').src = db.profile.logo;
+                document.getElementById('headLogo').classList.remove('hidden');
             }
+            updateHome();
         }
 
-        function saveTx(type) {
-            const name = type === 'sale' ? document.getElementById('v_client').value : document.getElementById('d_motif').value;
-            const amt = parseInt(type === 'sale' ? document.getElementById('v_amount').value : document.getElementById('d_amount').value);
-            
-            if(!amt || !name) return alert("Remplissez les champs !");
-
-            if(type === 'sale') {
-                app.sales += amt;
-                app.daily.count++;
-                generatePDF(name, amt);
-            } else {
-                app.costs += amt;
-            }
-
-            app.logs.push({ title: name, amount: amt, type: type, date: new Date().toLocaleTimeString() });
-            save();
-            updateUI();
-            changePage('home');
-            
-            // Clear inputs
-            document.querySelectorAll('input').forEach(i => i.value = "");
-        }
-
-        function renderHistory() {
-            const search = document.getElementById('searchBar').value.toLowerCase();
-            const list = document.getElementById('historyList');
-            const filtered = app.logs.filter(l => l.title.toLowerCase().includes(search));
-            
-            list.innerHTML = filtered.slice(-10).reverse().map(l => `
-                <div class="fintech-card flex justify-between items-center py-4">
-                    <div>
-                        <p class="font-bold text-sm">${l.title}</p>
-                        <p class="text-[9px] text-slate-400 uppercase">${l.date}</p>
-                    </div>
-                    <p class="font-black ${l.type==='sale'?'text-emerald-500':'text-red-500'}">
-                        ${l.type==='sale'?'+':'-'}${l.amount.toLocaleString()}
-                    </p>
+        function updateHome() {
+            document.getElementById('totalProfit').innerText = db.profit.toLocaleString();
+            const list = document.getElementById('recentList');
+            list.innerHTML = db.tx.slice(-5).reverse().map(t => `
+                <div class="bg-white p-4 rounded-2xl border flex justify-between items-center">
+                    <div><p class="font-bold text-xs">${t.client}</p><p class="text-[9px] text-slate-400">${t.date}</p></div>
+                    <p class="font-black text-blue-600">${t.total} ${db.profile.cur}</p>
                 </div>
             `).join('');
         }
 
-        function generatePDF(name, amt) {
+        function showPage(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-'+id).classList.add('active');
+        }
+
+        function generateProfessionalInvoice() {
+            const client = document.getElementById('client_name').value;
+            const item = document.getElementById('prod_name').value;
+            const qty = parseInt(document.getElementById('prod_qty').value);
+            const price = parseInt(document.getElementById('prod_price').value);
+            
+            if(!client || !item || !qty || !price) return alert("Complétez tous les champs");
+
+            const total = qty * price;
+            const now = new Date();
+            const dateStr = now.toLocaleDateString();
+            const timeStr = now.toLocaleTimeString();
+
+            // 1. Sauvegarde DATA
+            db.tx.push({ client, total, date: dateStr });
+            db.profit += total;
+            localStorage.setItem('cp_enterprise_db', JSON.stringify(db));
+
+            // 2. Génération PDF STYLE WORD
+            const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
-            doc.setFont("helvetica", "bold");
-            doc.text("FACTURE COMPTAPRO", 105, 20, { align: "center" });
+            
+            // LOGO & NOM ENTREPRISE
+            if(db.profile.logo) { doc.addImage(db.profile.logo, 'PNG', 15, 15, 25, 25); }
+            doc.setFontSize(20); doc.setFont(undefined, 'bold');
+            doc.text(db.profile.biz, 50, 25);
+            doc.setFontSize(9); doc.setFont(undefined, 'normal');
+            doc.text(`${db.profile.country} | Email: ${db.profile.email} | Tél: ${db.profile.phone}`, 50, 32);
+
+            // INFOS FACTURE
+            doc.setFontSize(14); doc.text("FACTURE COMMERCIALE", 15, 55);
             doc.setFontSize(10);
-            doc.text(`DATE: ${new Date().toLocaleDateString()}`, 20, 40);
-            doc.text(`CLIENT: ${name.toUpperCase()}`, 20, 50);
-            doc.line(20, 60, 190, 60);
-            doc.text("TOTAL PAYÉ", 20, 80);
-            doc.text(`${amt} ${app.user.currency}`, 170, 80);
-            doc.text("Merci de votre confiance.", 105, 120, { align: "center" });
-            doc.save(`Facture_${name}.pdf`);
-        }
+            doc.text(`Acheteur: ${client}`, 15, 65);
+            doc.text(`Vendeur: ${db.profile.fname} ${db.profile.lname}`, 15, 70);
+            doc.text(`Date: ${dateStr} à ${timeStr}`, 140, 65);
 
-        function exportCSV() {
-            let csv = "Item,Montant,Type,Heure\n";
-            app.logs.forEach(l => { csv += `${l.title},${l.amount},${l.type},${l.date}\n` });
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url; a.download = 'Rapport_ComptaPro.csv';
-            a.click();
-        }
+            // TABLEAU COLONNES
+            doc.autoTable({
+                startY: 80,
+                head: [['Désignation', 'Quantité', 'Prix Unitaire', 'Total']],
+                body: [[item, qty, `${price} ${db.profile.cur}`, `${total} ${db.profile.cur}`]],
+                theme: 'striped',
+                headStyles: { fillColor: [37, 99, 235] }
+            });
 
-        function closeModal() { document.getElementById('modalLimit').classList.remove('active'); }
+            const finalY = doc.lastAutoTable.finalY;
+            doc.setFont(undefined, 'bold');
+            doc.text(`MONTANT TOTAL À PAYER: ${total} ${db.profile.cur}`, 15, finalY + 20);
+            doc.setFontSize(8); doc.text("Facture générée numériquement via ComptaPro Enterprise.", 105, 280, {align: "center"});
+
+            doc.save(`Facture_${client}.pdf`);
+            updateHome();
+            showPage('home');
+        }
     </script>
 </body>
 </html>
