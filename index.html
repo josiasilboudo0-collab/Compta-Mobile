@@ -15,36 +15,179 @@
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .input-f { width: 100%; padding: 14px; background: #F1F5F9; border-radius: 14px; border: 1px solid #E2E8F0; outline: none; margin-bottom: 12px; font-size: 14px; }
         .btn-p { background: #2563EB; color: white; padding: 16px; border-radius: 16px; font-weight: 700; width: 100%; transition: 0.2s; text-align: center; display: block; }
-        .btn-p:active { transform: scale(0.97); }
     </style>
 </head>
 <body class="pb-28">
 
-    <div id="setup-screen" class="fixed inset-0 bg-white z-[4000] p-6 overflow-y-auto hidden">
+    <div id="setup-screen" class="fixed inset-0 bg-white z-[5000] p-6 hidden">
         <div class="max-w-md mx-auto text-center">
             <h1 class="text-3xl font-black mb-6 text-blue-600">Bienvenue</h1>
-            <p class="text-slate-500 mb-8 text-sm">Configurez votre entreprise pour commencer vos 10 jours d'essai gratuit.</p>
-            
-            <div onclick="document.getElementById('logoInput').click()" class="w-24 h-24 bg-slate-100 rounded-3xl border-2 border-dashed border-slate-300 mx-auto flex items-center justify-center overflow-hidden cursor-pointer mb-6">
-                <img id="logoPreview" class="hidden w-full h-full object-cover">
-                <i id="logoIcon" data-lucide="camera" class="text-slate-400"></i>
-            </div>
-            <input type="file" id="logoInput" accept="image/*" class="hidden" onchange="previewLogo(event)">
-
-            <input type="text" id="u_biz" placeholder="Nom de votre Business" class="input-f">
-            <div class="grid grid-cols-2 gap-3">
-                <input type="text" id="u_fname" placeholder="Prénom" class="input-f">
-                <input type="text" id="u_lname" placeholder="Nom" class="input-f">
-            </div>
-            <input type="email" id="u_email" placeholder="Email de facturation" class="input-f">
-            <input type="tel" id="u_phone" placeholder="Numéro de téléphone" class="input-f">
-            <div class="grid grid-cols-2 gap-3">
-                <input type="text" id="u_country" placeholder="Pays" class="input-f">
-                <select id="u_cur" class="input-f"><option value="XOF">FCFA</option><option value="USD">USD ($)</option></select>
-            </div>
-            <button onclick="saveProfile()" class="btn-p mt-4 w-full shadow-xl shadow-blue-100 uppercase tracking-widest">Démarrer l'essai (10 jours)</button>
+            <input type="text" id="u_biz" placeholder="Nom de l'entreprise" class="input-f">
+            <select id="u_cur" class="input-f"><option value="XOF">FCFA</option><option value="USD">USD ($)</option></select>
+            <button onclick="saveProfile()" class="btn-p w-full">DÉMARRER MON ESSAI 10 JOURS</button>
         </div>
     </div>
 
-    <div id="page-premium" class="page fixed inset-0 bg-white z-[3500] p-8 flex flex-col items-center justify-center text-center">
-        <div class="w-
+    <div id="premium-screen" class="fixed inset-0 bg-white z-[4000] p-8 flex flex-col items-center justify-center text-center hidden">
+        <div class="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mb-6">
+            <i data-lucide="crown" class="text-amber-500 w-10 h-10"></i>
+        </div>
+        <h2 class="text-3xl font-black mb-4">Essai Terminé</h2>
+        <p class="text-slate-500 mb-8">Votre période de 10 jours est finie. Abonnez-vous pour 3000F/mois pour continuer.</p>
+        <a href="https://me.fedapay.com/sF5bKiUt" target="_blank" class="btn-p w-full bg-amber-500 shadow-xl shadow-amber-200">ACTIVER LE PREMIUM (3000F)</a>
+    </div>
+
+    <header class="p-5 flex justify-between items-center bg-white border-b">
+        <h1 id="headBiz" class="font-black text-blue-600">ComptaPro</h1>
+        <div id="trialDays" class="text-[10px] font-bold bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full"></div>
+    </header>
+
+    <main class="p-5">
+        <div id="page-home" class="page active">
+            <div class="bg-slate-900 p-8 rounded-[2rem] text-white shadow-xl mb-6">
+                <p class="text-[10px] text-slate-400 font-bold uppercase">Profit Total</p>
+                <h2 class="text-4xl font-black"><span id="valProfit">0</span> <span class="cur text-sm"></span></h2>
+            </div>
+            <div class="grid grid-cols-2 gap-4" id="menu">
+                <button onclick="showPage('invoice')" class="bg-white p-6 rounded-3xl border shadow-sm flex flex-col items-center gap-2">
+                    <i data-lucide="shopping-cart" class="text-blue-600"></i><span class="text-[10px] font-black uppercase">Vente</span>
+                </button>
+                <button onclick="showPage('stock')" class="bg-white p-6 rounded-3xl border shadow-sm flex flex-col items-center gap-2">
+                    <i data-lucide="box" class="text-emerald-500"></i><span class="text-[10px] font-black uppercase">Stock</span>
+                </button>
+            </div>
+            <div id="historyList" class="mt-8 space-y-3"></div>
+        </div>
+
+        <div id="page-stock" class="page">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-black">Mon Stock</h2>
+                <button onclick="toggleAdd()" class="bg-blue-600 text-white p-2 rounded-full"><i data-lucide="plus"></i></button>
+            </div>
+            <div id="addForm" class="hidden mb-4 bg-white p-4 rounded-2xl border">
+                <input type="text" id="p_name" placeholder="Nom" class="input-f">
+                <input type="number" id="p_cost" placeholder="Prix d'achat" class="input-f">
+                <input type="number" id="p_price" placeholder="Prix de vente" class="input-f">
+                <input type="number" id="p_qty" placeholder="Quantité" class="input-f">
+                <button onclick="addProduct()" class="btn-p w-full">AJOUTER</button>
+            </div>
+            <div id="stockList" class="space-y-2"></div>
+        </div>
+
+        <div id="page-invoice" class="page">
+            <h2 class="text-2xl font-black mb-4">Nouvelle Vente</h2>
+            <div class="bg-white p-6 rounded-3xl border shadow-sm">
+                <input type="text" id="c_name" placeholder="Nom du Client" class="input-f">
+                <select id="v_product" class="input-f"></select>
+                <input type="number" id="v_qty" placeholder="Quantité" class="input-f">
+                <button onclick="processSale()" class="btn-p w-full">VENDRE & PDF</button>
+            </div>
+        </div>
+    </main>
+
+    <nav class="fixed bottom-0 left-0 right-0 h-20 bg-white border-t flex justify-around items-center z-50">
+        <button onclick="showPage('home')"><i data-lucide="home"></i></button>
+        <button onclick="showPage('stock')"><i data-lucide="package"></i></button>
+        <button onclick="showPage('invoice')"><i data-lucide="receipt"></i></button>
+    </nav>
+
+    <script>
+        lucide.createIcons();
+        // Utilisation de la base de données d'origine
+        let db = JSON.parse(localStorage.getItem('cp_stock_db')) || { profile: null, inventory: [], sales: [], totalProfit: 0, startDate: null };
+
+        function saveProfile() {
+            const biz = document.getElementById('u_biz').value;
+            if(!biz) return alert("Nom requis");
+            db.profile = { biz: biz, cur: document.getElementById('u_cur').value };
+            db.startDate = Date.now(); // On enregistre la date de départ
+            save();
+            location.reload();
+        }
+
+        function checkPremium() {
+            if(!db.profile) {
+                document.getElementById('setup-screen').classList.remove('hidden');
+                return false;
+            }
+            
+            const TEN_DAYS = 10 * 24 * 60 * 60 * 1000;
+            const elapsed = Date.now() - db.startDate;
+            
+            if(elapsed > TEN_DAYS) {
+                document.getElementById('premium-screen').classList.remove('hidden');
+                return false;
+            } else {
+                const daysLeft = Math.ceil((TEN_DAYS - elapsed) / (24 * 60 * 60 * 1000));
+                document.getElementById('trialDays').innerText = daysLeft + " jours restants";
+                return true;
+            }
+        }
+
+        function init() {
+            if(!checkPremium()) return;
+            document.getElementById('headBiz').innerText = db.profile.biz;
+            document.querySelectorAll('.cur').forEach(e => e.innerText = db.profile.cur);
+            renderHome();
+            renderStock();
+            populateSelect();
+        }
+
+        function showPage(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-'+id).classList.add('active');
+        }
+
+        function toggleAdd() { document.getElementById('addForm').classList.toggle('hidden'); }
+        function save() { localStorage.setItem('cp_stock_db', JSON.stringify(db)); }
+
+        function addProduct() {
+            const n = document.getElementById('p_name').value;
+            const c = parseInt(document.getElementById('p_cost').value);
+            const p = parseInt(document.getElementById('p_price').value);
+            const q = parseInt(document.getElementById('p_qty').value);
+            if(!n || isNaN(c)) return alert("Infos manquantes");
+            db.inventory.push({ id: Date.now(), name: n, cost: c, price: p, qty: q });
+            save(); renderStock(); populateSelect(); toggleAdd();
+        }
+
+        function renderStock() {
+            document.getElementById('stockList').innerHTML = db.inventory.map(p => `
+                <div class="bg-white p-4 rounded-xl border flex justify-between items-center">
+                    <div><p class="font-bold">${p.name}</p><p class="text-[10px] text-slate-400">PV: ${p.price}</p></div>
+                    <div class="flex items-center gap-4">
+                        <span class="font-black text-blue-600">${p.qty}</span>
+                        <button onclick="deleteProd(${p.id})" class="text-red-400"><i data-lucide="trash" class="w-4"></i></button>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function deleteProd(id) {
+            db.inventory = db.inventory.filter(p => p.id !== id);
+            save(); renderStock(); populateSelect();
+        }
+
+        function populateSelect() {
+            document.getElementById('v_product').innerHTML = db.inventory.map(p => `<option value="${p.id}">${p.name} (${p.qty})</option>`).join('');
+        }
+
+        function processSale() {
+            const pid = document.getElementById('v_product').value;
+            const qty = parseInt(document.getElementById('v_qty').value);
+            const product = db.inventory.find(p => p.id == pid);
+            if(!product || qty > product.qty) return alert("Erreur stock");
+
+            product.qty -= qty;
+            const profit = (product.price - product.cost) * qty;
+            db.totalProfit += profit;
+            db.sales.push({ client: document.getElementById('c_name').value, item: product.name, total: qty * product.price });
+            
+            save();
+            alert("Vente enregistrée !");
+            location.reload();
+        }
+
+        function renderHome() {
+            document.getElementById('valProfit').innerText = db.
