@@ -1,210 +1,1197 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ComptaPro - Solution Business</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; background-color: #F8FAFC; color: #1E293B; }
-        .fintech-card { background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .btn-primary { background-color: #2563EB; color: white; transition: all 0.2s; }
-        .btn-primary:hover { background-color: #1D4ED8; }
-        .nav-active { color: #2563EB !important; border-top: 2px solid #2563EB; }
-        .page { display: none; }
-        .page.active { display: block; }
-        header { background: #FFFFFF; border-bottom: 1px solid #E2E8F0; }
-    </style>
-</head>
-<body class="pb-24">
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { DollarSign, TrendingUp, TrendingDown, FileText, Download, CreditCard, Smartphone, Crown, Building2, User, Plus, Receipt, Users, Package, Bell, LogOut, LogIn, UserPlus, Shield, Key, BarChart3, Mail, Send, Share2 } from 'lucide-react';
 
-    <header class="p-4 flex justify-between items-center sticky top-0 z-40">
-        <div class="flex items-center gap-3">
-            <div id="mainLogo" class="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center border border-slate-200 overflow-hidden text-blue-600">
-                <img id="displayLogo" class="hidden w-full h-full object-cover">
-                <i data-lucide="shield-check" id="placeholderIcon"></i>
+type Currency = "XOF" | "USD" | "EUR";
+type PlanType = "FREE" | "PRO" | "BUSINESS";
+
+interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  company: string;
+  plan: PlanType;
+  currency: Currency;
+  country: string;
+  locale: string;
+  subscriptionStart: Date | null;
+  subscriptionEnd: Date | null;
+  trialEnd?: Date | null;
+}
+
+const PRICING = {
+  PRO: {
+    month: 3000,
+    quarter: 7500,
+    half: 15000,
+    year: 30000,
+  },
+  BUSINESS: {
+    month: 6000,
+    quarter: 16000,
+    half: 32000,
+    year: 64000,
+  },
+};
+
+const PLANS = {
+  FREE: { name: "Gratuit", features: ['10 transactions/mois', 'Rapports basiques', '7 jours d\'essai'] },
+  PRO: { name: "Pro", features: ['Transactions illimitées', 'Génération PDF', 'Export Excel', 'Support prioritaire'] },
+  BUSINESS: { name: "Business", features: ['Tout Pro +', 'Multi-devises', 'Rapports avancés', 'API Access', 'Support dédié'] }
+};
+
+// Fonction pour ajouter des mois en UTC
+function addMonthsUTC(date: Date, months: number): Date {
+  const d = new Date(date);
+  const day = d.getUTCDate();
+  d.setUTCMonth(d.getUTCMonth() + months);
+  // Gestion des fins de mois (ex: 31 → 30)
+  if (d.getUTCDate() < day) {
+    d.setUTCDate(0);
+  }
+  return d;
+}
+
+// Fonction pour ajouter des jours en UTC
+function addDaysUTC(date: Date, days: number): Date {
+  const d = new Date(date);
+  d.setUTCDate(d.getUTCDate() + days);
+  return d;
+}
+
+// Vérifier si l'abonnement est actif
+function hasActiveSubscription(user: UserProfile | null): boolean {
+  if (!user || !user.subscriptionEnd) return false;
+  return user.subscriptionEnd > new Date();
+}
+
+// Vérifier si l'essai est actif
+function hasActiveTrial(user: UserProfile | null): boolean {
+  if (!user || !user.trialEnd) return false;
+  return user.trialEnd > new Date() && user.plan === 'FREE';
+}
+
+// Obtenir le nombre de mois selon la durée
+function getDurationInMonths(duration: string): number {
+  switch(duration) {
+    case 'month': return 1;
+    case 'quarter': return 3;
+    case 'half': return 6;
+    case 'year': return 12;
+    default: return 1;
+  }
+}
+
+function getRegionalMultiplier(country: string): number {
+  // Pas de réduction pour le Burkina Faso et pays de la région
+  // Prix pleins pour tous les pays
+  return 1;
+}
+
+function formatAmount(amount: number, currency: string): string {
+  return new Intl.NumberFormat('fr-FR', { style: "currency", currency }).format(amount);
+}
+
+function getRegionalPrice(plan: PlanType, duration: string, country: string): number {
+  if (plan === "FREE") return 0;
+  const basePrice = PRICING[plan][duration as keyof typeof PRICING[typeof plan]];
+  return basePrice * getRegionalMultiplier(country);
+}
+
+const ComptabiliteApp = () => {
+  const [currentView, setCurrentView] = useState('dashboard');
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [authenticated, setAuthenticated] = useState(false);
+  const [authMode, setAuthMode] = useState('login');
+  const [duration, setDuration] = useState<'month' | 'quarter' | 'half' | 'year'>('month');
+  const [transactions, setTransactions] = useState([]);
+  const [clients, setClients] = useState([]);
+  const [invoices, setInvoices] = useState([]);
+  const [showModal, setShowModal] = useState('');
+  const [showAddTransaction, setShowAddTransaction] = useState(false);
+  const [showQuoteModal, setShowQuoteModal] = useState(false);
+  const [newQuote, setNewQuote] = useState({
+    client: '',
+    description: '',
+    amount: '',
+    validUntil: new Date(Date.now() + 30*24*60*60*1000).toISOString().split('T')[0]
+  });
+  const [newTransaction, setNewTransaction] = useState({
+    description: '',
+    amount: '',
+    type: 'expense',
+    category: '',
+    date: new Date().toISOString().split('T')[0]
+  });
+  const [authForm, setAuthForm] = useState({ email: '', password: '', name: '', company: '', country: 'BF', currency: 'XOF' as Currency });
+
+  const categories = [
+    { id: 1, name: 'Ventes', type: 'revenue', color: '#10b981' },
+    { id: 2, name: 'Services', type: 'revenue', color: '#3b82f6' },
+    { id: 3, name: 'Achats', type: 'expense', color: '#ef4444' },
+    { id: 4, name: 'Salaires', type: 'expense', color: '#f59e0b' }
+  ];
+
+  useEffect(() => {
+    setTransactions([
+      { id: 1, date: '2026-01-20', description: 'Vente produit A', amount: 50000, type: 'revenue', category: 'Ventes' },
+      { id: 2, date: '2026-01-19', description: 'Achat fournitures', amount: -15000, type: 'expense', category: 'Achats' },
+      { id: 3, date: '2026-01-18', description: 'Service consulting', amount: 75000, type: 'revenue', category: 'Services' },
+      { id: 4, date: '2026-01-17', description: 'Salaire employé', amount: -30000, type: 'expense', category: 'Salaires' }
+    ]);
+
+    setClients([
+      { id: 1, name: 'ABC Sarl', email: 'contact@abc.bf', phone: '+226 70 12 34 56' },
+      { id: 2, name: 'XYZ Industries', email: 'info@xyz.bf', phone: '+226 71 23 45 67' }
+    ]);
+
+    setInvoices([
+      { id: 1, client: 'ABC Sarl', date: '2026-01-20', amount: 75000, status: 'paid' },
+      { id: 2, client: 'XYZ Industries', date: '2026-01-18', amount: 50000, status: 'pending' }
+    ]);
+  }, []);
+
+  const totalRevenue = transactions.filter(t => t.type === 'revenue').reduce((sum, t) => sum + t.amount, 0);
+  const totalExpenses = Math.abs(transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0));
+  const balance = totalRevenue - totalExpenses;
+
+  const categoryData = categories.map(cat => {
+    const total = transactions
+      .filter(t => t.category === cat.name)
+      .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+    return { name: cat.name, value: total, color: cat.color };
+  }).filter(d => d.value > 0);
+
+  const monthlyData = [
+    { month: 'Nov', revenus: 120000, dépenses: 80000 },
+    { month: 'Déc', revenus: 150000, dépenses: 95000 },
+    { month: 'Jan', revenus: totalRevenue, dépenses: totalExpenses },
+  ];
+
+  const handleAuth = () => {
+    if (authForm.email && authForm.password) {
+      const now = new Date();
+      setUser({
+        id: '1',
+        email: authForm.email,
+        name: authForm.name || 'Demo User',
+        company: authForm.company || 'Ma Société',
+        plan: 'FREE',
+        currency: authForm.currency,
+        country: authForm.country,
+        locale: 'fr-FR',
+        subscriptionStart: null,
+        subscriptionEnd: null,
+        trialEnd: addDaysUTC(now, 7) // 7 jours d'essai gratuit
+      });
+      setAuthenticated(true);
+    }
+  };
+
+  const handleAddTransaction = () => {
+    if (!newTransaction.description || !newTransaction.amount || !newTransaction.category) {
+      alert('Veuillez remplir tous les champs');
+      return;
+    }
+
+    const transaction = {
+      id: Date.now(),
+      ...newTransaction,
+      amount: newTransaction.type === 'expense' 
+        ? -Math.abs(parseFloat(newTransaction.amount)) 
+        : Math.abs(parseFloat(newTransaction.amount))
+    };
+
+    setTransactions([transaction, ...transactions]);
+    setNewTransaction({
+      description: '',
+      amount: '',
+      type: 'expense',
+      category: '',
+      date: new Date().toISOString().split('T')[0]
+    });
+    setShowAddTransaction(false);
+  };
+
+  const generatePDF = (type: string, data?: any) => {
+    if (user?.plan === 'FREE' && !hasActiveTrial(user)) {
+      alert('La génération de PDF est disponible avec les plans payants');
+      setCurrentView('plans');
+      return;
+    }
+
+    // Créer un contenu PDF simulé
+    const pdfContent = `
+╔════════════════════════════════════════╗
+║         ${type.toUpperCase()}                    ║
+║                                        ║
+║  ${user?.company || 'ComptaPro'}           ║
+║  ${user?.email || ''}                      ║
+║                                        ║
+${data ? `║  Client: ${data.client}              ║
+║  Date: ${new Date(data.date).toLocaleDateString('fr-FR')}            ║
+║  Montant: ${data.amount?.toLocaleString()} FCFA      ║` : ''}
+╚════════════════════════════════════════╝
+    `.trim();
+
+    // Créer un blob pour simuler le PDF
+    const blob = new Blob([pdfContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    
+    // Télécharger le fichier
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${type}_${Date.now()}.txt`;
+    a.click();
+    
+    alert(`✅ ${type} généré(e) avec succès!\n\n(En production, ceci serait un vrai PDF)`);
+    return url;
+  };
+
+  const shareOnWhatsApp = (type: string, data?: any) => {
+    if (user?.plan === 'FREE' && !hasActiveTrial(user)) {
+      alert('Le partage sur WhatsApp est disponible avec les plans payants');
+      setCurrentView('plans');
+      return;
+    }
+
+    const message = data 
+      ? `📄 ${type} de ${user?.company}\n\nClient: ${data.client}\nDate: ${new Date(data.date).toLocaleDateString('fr-FR')}\nMontant: ${data.amount?.toLocaleString()} FCFA\n\nGénéré avec ComptaPro`
+      : `📄 ${type} de ${user?.company}\n\nGénéré avec ComptaPro`;
+    
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+  };
+
+  const shareOnFacebook = (type: string, data?: any) => {
+    if (user?.plan === 'FREE' && !hasActiveTrial(user)) {
+      alert('Le partage sur Facebook est disponible avec les plans payants');
+      setCurrentView('plans');
+      return;
+    }
+
+    const message = data 
+      ? `📄 ${type} - ${user?.company}\nClient: ${data.client}\nMontant: ${data.amount?.toLocaleString()} FCFA`
+      : `📄 ${type} - ${user?.company}`;
+    
+    const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}&quote=${encodeURIComponent(message)}`;
+    window.open(facebookUrl, '_blank');
+  };
+
+  const sendByEmail = (type: string, data?: any) => {
+    if (user?.plan === 'FREE' && !hasActiveTrial(user)) {
+      alert('L\'envoi par email est disponible avec les plans payants');
+      setCurrentView('plans');
+      return;
+    }
+
+    const subject = `${type} de ${user?.company}`;
+    const body = data 
+      ? `Bonjour,\n\nVeuillez trouver ci-joint votre ${type.toLowerCase()}.\n\nClient: ${data.client}\nDate: ${new Date(data.date).toLocaleDateString('fr-FR')}\nMontant: ${data.amount?.toLocaleString()} FCFA\n\nCordialement,\n${user?.company}`
+      : `Bonjour,\n\nVeuillez trouver ci-joint votre ${type.toLowerCase()}.\n\nCordialement,\n${user?.company}`;
+    
+    const mailtoUrl = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailtoUrl;
+  };
+
+  const exportExcel = () => {
+    if (user?.plan === 'FREE' && !hasActiveTrial(user)) {
+      alert('L\'export Excel est disponible avec les plans payants');
+      setCurrentView('plans');
+      return;
+    }
+    alert('✅ Export Excel en cours...\n\n(Fonctionnalité de démonstration)');
+  };
+    if (!user) return;
+    
+    const now = new Date();
+    const durationInMonths = getDurationInMonths(dur);
+    const price = getRegionalPrice(planId, dur, user.country);
+    
+    // Si l'utilisateur a déjà un abonnement actif, on prolonge à partir de la fin
+    // Sinon, on commence maintenant
+    const baseDate = user.subscriptionEnd && user.subscriptionEnd > now 
+      ? user.subscriptionEnd 
+      : now;
+    
+    const newSubscriptionEnd = addMonthsUTC(baseDate, durationInMonths);
+    
+    setUser({ 
+      ...user, 
+      plan: planId,
+      subscriptionStart: user.subscriptionStart || now,
+      subscriptionEnd: newSubscriptionEnd,
+      trialEnd: null // L'essai se termine quand on souscrit
+    });
+    
+    const formattedDate = new Intl.DateTimeFormat(user.locale || 'fr-FR', { 
+      dateStyle: 'long' 
+    }).format(newSubscriptionEnd);
+    
+    alert(`✅ Paiement de ${formatAmount(price, user.currency)} confirmé!\n\nVotre abonnement ${PLANS[planId].name} est actif jusqu'au ${formattedDate}`);
+    setShowModal('');
+  };
+
+  if (!authenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-500 to-purple-600">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <CardTitle className="text-3xl font-bold">ComptaPro</CardTitle>
+            <CardDescription>Gestion comptable pour l'Afrique</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex gap-2">
+              <button onClick={() => setAuthMode('login')} className={`flex-1 py-2 rounded ${authMode === 'login' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}>
+                <LogIn size={18} className="inline mr-2" />Connexion
+              </button>
+              <button onClick={() => setAuthMode('register')} className={`flex-1 py-2 rounded ${authMode === 'register' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}>
+                <UserPlus size={18} className="inline mr-2" />Inscription
+              </button>
             </div>
+
+            {authMode === 'register' && (
+              <>
+                <input type="text" placeholder="Nom" value={authForm.name} onChange={e => setAuthForm({...authForm, name: e.target.value})} className="w-full px-4 py-2 border rounded" />
+                <input type="text" placeholder="Entreprise" value={authForm.company} onChange={e => setAuthForm({...authForm, company: e.target.value})} className="w-full px-4 py-2 border rounded" />
+                <select value={authForm.country} onChange={e => setAuthForm({...authForm, country: e.target.value})} className="w-full px-4 py-2 border rounded">
+                  <option value="BF">🇧🇫 Burkina Faso</option>
+                  <option value="CI">🇨🇮 Côte d'Ivoire</option>
+                  <option value="US">🇺🇸 États-Unis</option>
+                </select>
+              </>
+            )}
+
+            <input type="email" placeholder="Email" value={authForm.email} onChange={e => setAuthForm({...authForm, email: e.target.value})} className="w-full px-4 py-2 border rounded" />
+            <input type="password" placeholder="Mot de passe" value={authForm.password} onChange={e => setAuthForm({...authForm, password: e.target.value})} className="w-full px-4 py-2 border rounded" />
+            <button onClick={handleAuth} className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+              {authMode === 'login' ? 'Se connecter' : 'Créer un compte'}
+            </button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
             <div>
-                <h1 class="text-lg font-bold text-slate-900 tracking-tight">ComptaPro</h1>
-                <div class="flex items-center gap-1.5">
-                    <span class="w-2 h-2 bg-emerald-500 rounded-full"></span>
-                    <p id="daysLeft" class="text-[10px] text-slate-500 font-medium">Essai : 10 jours restants</p>
-                </div>
+              <h1 className="text-2xl font-bold">ComptaPro</h1>
+              <p className="text-sm text-gray-600">{user?.company}</p>
             </div>
+            <div className="flex items-center gap-3">
+              <button onClick={() => setCurrentView('notifications')} className="p-2 hover:bg-gray-100 rounded relative">
+                <Bell size={20} />
+              </button>
+              <div className="text-right text-sm">
+                <div className="font-semibold">{user?.name}</div>
+                <div className="text-xs text-gray-500">{user?.email}</div>
+              </div>
+              <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">{PLANS[user!.plan].name}</span>
+              <button onClick={() => setAuthenticated(false)} className="p-2 hover:bg-gray-100 rounded text-red-600">
+                <LogOut size={20} />
+              </button>
+            </div>
+          </div>
         </div>
-        <button onclick="openPaymentModal()" class="text-xs font-semibold text-blue-600 bg-blue-50 px-4 py-2 rounded-lg hover:bg-blue-100 transition">
-            S'abonner
-        </button>
-    </header>
+      </div>
 
-    <main class="px-5 pt-6">
-        
-        <div id="page-home" class="page active space-y-5">
-            <section class="fintech-card p-6">
-                <div class="flex justify-between items-start mb-2">
-                    <p class="text-slate-500 text-xs font-medium uppercase tracking-wider">Solde disponible</p>
-                    <i data-lucide="trending-up" class="text-emerald-500 w-4 h-4"></i>
+      <div className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex gap-1 overflow-x-auto">
+            {[
+              { id: 'dashboard', label: 'Dashboard', icon: TrendingUp },
+              { id: 'transactions', label: 'Transactions', icon: FileText },
+              { id: 'invoices', label: 'Factures', icon: Receipt },
+              { id: 'quotes', label: 'Devis', icon: FileText },
+              { id: 'clients', label: 'Clients', icon: Users },
+              { id: 'plans', label: 'Plans', icon: Crown }
+            ].map(item => (
+              <button
+                key={item.id}
+                onClick={() => setCurrentView(item.id)}
+                className={`px-4 py-3 flex items-center gap-2 border-b-2 ${currentView === item.id ? 'border-blue-500 text-blue-600' : 'border-transparent'}`}
+              >
+                <item.icon size={18} />
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        {currentView === 'dashboard' && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm">Revenus</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold">{totalRevenue.toLocaleString()} FCFA</div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-red-500 to-red-600 text-white">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm">Dépenses</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold">{totalExpenses.toLocaleString()} FCFA</div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm">Solde</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold">{balance.toLocaleString()} FCFA</div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Évolution mensuelle</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={250}>
+                    <LineChart data={monthlyData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="month" />
+                      <YAxis />
+                      <Tooltip />
+                      <Legend />
+                      <Line type="monotone" dataKey="revenus" stroke="#10b981" strokeWidth={2} />
+                      <Line type="monotone" dataKey="dépenses" stroke="#ef4444" strokeWidth={2} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Répartition par catégorie</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={250}>
+                    <PieChart>
+                      <Pie
+                        data={categoryData}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                        outerRadius={80}
+                        fill="#8884d8"
+                        dataKey="value"
+                      >
+                        {categoryData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Actions rapides</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <button
+                    onClick={() => setShowAddTransaction(true)}
+                    className="p-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition flex flex-col items-center gap-2"
+                  >
+                    <Plus size={24} />
+                    <span className="text-sm">Nouvelle vente</span>
+                  </button>
+                  <button
+                    onClick={() => generatePDF('Facture', invoice)}
+                    className="p-4 bg-green-500 text-white rounded-lg hover:bg-green-600 transition flex flex-col items-center gap-2"
+                  >
+                    <Receipt size={24} />
+                    <span className="text-sm">Créer facture</span>
+                  </button>
+                  <button
+                    onClick={() => generatePDF('Devis', null)}
+                    className="p-4 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition flex flex-col items-center gap-2"
+                  >
+                    <FileText size={24} />
+                    <span className="text-sm">Créer devis</span>
+                  </button>
+                  <button
+                    onClick={exportExcel}
+                    className="p-4 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition flex flex-col items-center gap-2"
+                  >
+                    <Download size={24} />
+                    <span className="text-sm">Export Excel</span>
+                  </button>
                 </div>
-                <p class="text-3xl font-bold text-slate-900" id="caisseDisplay">0 <span class="text-base font-medium text-slate-400">FCFA</span></p>
-            </section>
-            
-            <div class="grid grid-cols-2 gap-4">
-                <button onclick="showPage('factures')" class="fintech-card p-5 flex flex-col items-start gap-4 hover:bg-slate-50 transition">
-                    <div class="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center text-blue-600">
-                        <i data-lucide="plus" class="w-5 h-5"></i>
+              </CardContent>
+            </Card>
+
+            {user?.subscriptionEnd && hasActiveSubscription(user) && (
+              <Alert className="bg-green-50 border-green-500">
+                <AlertDescription>
+                  <strong>✅ Abonnement actif :</strong> Plan {PLANS[user.plan].name} - Expire le {new Intl.DateTimeFormat(user.locale || 'fr-FR', { dateStyle: 'long' }).format(user.subscriptionEnd)}
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {user?.trialEnd && hasActiveTrial(user) && (
+              <Alert className="bg-blue-50 border-blue-500">
+                <AlertDescription>
+                  <strong>🎁 Essai gratuit :</strong> Profitez de toutes les fonctionnalités jusqu'au {new Intl.DateTimeFormat(user.locale || 'fr-FR', { dateStyle: 'long' }).format(user.trialEnd)}
+                  <button onClick={() => setCurrentView('plans')} className="ml-2 text-blue-600 underline">
+                    Passer à un plan payant
+                  </button>
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {user?.subscriptionEnd && !hasActiveSubscription(user) && user.plan !== 'FREE' && (
+              <Alert className="bg-orange-50 border-orange-500">
+                <AlertDescription className="flex items-center justify-between">
+                  <span><strong>⚠️ Abonnement expiré :</strong> Votre abonnement a expiré le {new Intl.DateTimeFormat(user.locale || 'fr-FR', { dateStyle: 'long' }).format(user.subscriptionEnd)}</span>
+                  <button onClick={() => setCurrentView('plans')} className="px-4 py-1 bg-orange-500 text-white rounded hover:bg-orange-600 text-sm ml-4">
+                    Renouveler
+                  </button>
+                </AlertDescription>
+              </Alert>
+            )}
+          </div>
+        )}
+
+        {currentView === 'transactions' && (
+          <div className="space-y-4">
+            <h2 className="text-2xl font-bold">Transactions</h2>
+            <Card>
+              <CardContent className="p-0">
+                <table className="w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-3 text-left">Date</th>
+                      <th className="px-4 py-3 text-left">Description</th>
+                      <th className="px-4 py-3 text-right">Montant</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {transactions.map(t => (
+                      <tr key={t.id} className="border-t">
+                        <td className="px-4 py-3">{t.date}</td>
+                        <td className="px-4 py-3">{t.description}</td>
+                        <td className={`px-4 py-3 text-right font-semibold ${t.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {t.amount > 0 ? '+' : ''}{t.amount.toLocaleString()} FCFA
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {currentView === 'invoices' && (
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold">Factures</h2>
+              <button
+                onClick={() => {
+                  const newInvoice = {
+                    id: invoices.length + 1,
+                    client: 'Nouveau Client',
+                    date: new Date().toISOString(),
+                    amount: 0,
+                    status: 'pending'
+                  };
+                  setInvoices([...invoices, newInvoice]);
+                  alert('✅ Nouvelle facture créée!\n\nModifiez les détails et téléchargez-la.');
+                }}
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center gap-2"
+              >
+                <Plus size={18} />
+                Nouvelle facture
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4">
+              {invoices.map(invoice => (
+                <Card key={invoice.id}>
+                  <CardContent className="p-4">
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <h3 className="font-semibold text-lg">Facture #{invoice.id.toString().padStart(4, '0')}</h3>
+                        <p className="text-sm text-gray-600">{invoice.client}</p>
+                        <p className="text-xs text-gray-500">{new Date(invoice.date).toLocaleDateString('fr-FR')}</p>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-2xl font-bold">{invoice.amount.toLocaleString()} FCFA</div>
+                        <span className={`px-3 py-1 rounded-full text-xs ${
+                          invoice.status === 'paid' 
+                            ? 'bg-green-100 text-green-700' 
+                            : 'bg-orange-100 text-orange-700'
+                        }`}>
+                          {invoice.status === 'paid' ? 'Payée' : 'En attente'}
+                        </span>
+                      </div>
                     </div>
-                    <span class="text-sm font-semibold text-slate-700">Facturation</span>
+                    
+                    <div className="border-t pt-4">
+                      <p className="text-sm font-semibold mb-3">Télécharger & Partager</p>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                        <button
+                          onClick={() => generatePDF('Facture', invoice)}
+                          className="px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm flex items-center justify-center gap-2"
+                        >
+                          <Download size={14} />
+                          PDF
+                        </button>
+                        <button
+                          onClick={() => sendByEmail('Facture', invoice)}
+                          className="px-3 py-2 bg-gray-700 text-white rounded hover:bg-gray-800 text-sm flex items-center justify-center gap-2"
+                        >
+                          <Mail size={14} />
+                          Email
+                        </button>
+                        <button
+                          onClick={() => shareOnWhatsApp('Facture', invoice)}
+                          className="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm flex items-center justify-center gap-2"
+                        >
+                          <Send size={14} />
+                          WhatsApp
+                        </button>
+                        <button
+                          onClick={() => shareOnFacebook('Facture', invoice)}
+                          className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm flex items-center justify-center gap-2"
+                        >
+                          <Share2 size={14} />
+                          Facebook
+                        </button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {currentView === 'quotes' && (
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold">Devis</h2>
+              <button
+                onClick={() => setShowQuoteModal(true)}
+                className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 flex items-center gap-2"
+              >
+                <Plus size={18} />
+                Nouveau devis
+              </button>
+            </div>
+
+            <Alert className="bg-blue-50 border-blue-500">
+              <AlertDescription>
+                💡 <strong>Astuce :</strong> Créez des devis professionnels et partagez-les directement sur WhatsApp ou Facebook avec vos clients !
+              </AlertDescription>
+            </Alert>
+
+            <div className="grid grid-cols-1 gap-4">
+              <Card>
+                <CardContent className="p-6 text-center text-gray-500">
+                  <FileText size={48} className="mx-auto mb-4 text-gray-300" />
+                  <p className="mb-4">Aucun devis pour le moment</p>
+                  <button
+                    onClick={() => setShowQuoteModal(true)}
+                    className="px-6 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600"
+                  >
+                    Créer votre premier devis
+                  </button>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        )}
+
+        {currentView === 'clients' && (
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold">Clients</h2>
+              <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center gap-2">
+                <Plus size={18} />
+                Nouveau client
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {clients.map(client => (
+                <Card key={client.id}>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Users size={20} />
+                      {client.name}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2 text-sm">
+                    <div className="flex items-center gap-2">
+                      <Mail size={16} className="text-gray-400" />
+                      {client.email}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Smartphone size={16} className="text-gray-400" />
+                      {client.phone}
+                    </div>
+                    <button
+                      onClick={() => generatePDF('Facture', client)}
+                      className="mt-2 w-full px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-sm"
+                    >
+                      Créer une facture
+                    </button>
+                    <button
+                      onClick={() => generatePDF('Devis', client)}
+                      className="mt-2 w-full px-3 py-1 bg-purple-500 text-white rounded hover:bg-purple-600 text-sm"
+                    >
+                      Créer un devis
+                    </button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {currentView === 'plans' && (
+          <div className="space-y-6">
+            <div className="text-center">
+              <h2 className="text-3xl font-bold mb-2">Plans tarifaires</h2>
+              <p className="text-gray-600">Tarifs adaptés à votre région ({user?.country})</p>
+            </div>
+
+            <div className="flex justify-center gap-2">
+              {['month', 'quarter', 'half', 'year'].map(d => (
+                <button
+                  key={d}
+                  onClick={() => setDuration(d as any)}
+                  className={`px-4 py-2 rounded ${duration === d ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                >
+                  {d === 'month' ? 'Mensuel' : d === 'quarter' ? 'Trimestriel' : d === 'half' ? 'Semestriel' : 'Annuel'}
                 </button>
-                <button onclick="showPage('stats')" class="fintech-card p-5 flex flex-col items-start gap-4 hover:bg-slate-50 transition">
-                    <div class="w-10 h-10 bg-indigo-50 rounded-full flex items-center justify-center text-indigo-600">
-                        <i data-lucide="pie-chart" class="w-5 h-5"></i>
-                    </div>
-                    <span class="text-sm font-semibold text-slate-700">Analyses</span>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {(['FREE', 'PRO', 'BUSINESS'] as PlanType[]).map(planId => {
+                const plan = PLANS[planId];
+                const price = planId === 'FREE' ? 0 : getRegionalPrice(planId, duration, user!.country);
+                const isActive = user?.plan === planId;
+                const canAccess = planId === 'FREE' || hasActiveSubscription(user) || hasActiveTrial(user);
+
+                return (
+                  <Card key={planId} className={`${isActive ? 'border-2 border-blue-500' : ''} ${planId === 'PRO' ? 'relative' : ''}`}>
+                    {planId === 'PRO' && (
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-blue-500 text-white text-sm rounded-full">
+                        Populaire
+                      </div>
+                    )}
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        {planId === 'FREE' && <User size={20} />}
+                        {planId === 'PRO' && <Crown size={20} className="text-blue-500" />}
+                        {planId === 'BUSINESS' && <Building2 size={20} className="text-purple-500" />}
+                        {plan.name}
+                      </CardTitle>
+                      <div className="text-3xl font-bold mt-2">
+                        {planId === 'FREE' ? 'Gratuit' : formatAmount(price, user!.currency)}
+                        {planId !== 'FREE' && (
+                          <span className="text-sm font-normal text-gray-600 ml-1">
+                            /{duration === 'month' ? 'mois' : duration === 'quarter' ? 'trimestre' : duration === 'half' ? 'semestre' : 'an'}
+                          </span>
+                        )}
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="space-y-2 mb-4">
+                        {plan.features.map((f, i) => (
+                          <li key={i} className="text-sm flex gap-2">
+                            <span className="text-green-500">✓</span>{f}
+                          </li>
+                        ))}
+                      </ul>
+                      {!isActive && planId !== 'FREE' ? (
+                        <div className="space-y-2">
+                          <button onClick={() => handlePayment(planId, duration)} className="w-full px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 flex items-center justify-center gap-2">
+                            <CreditCard size={16} />Carte bancaire
+                          </button>
+                          <button onClick={() => handlePayment(planId, duration)} className="w-full px-3 py-2 bg-green-500 text-white rounded hover:bg-green-600 flex items-center justify-center gap-2">
+                            <Smartphone size={16} />Mobile Money
+                          </button>
+                        </div>
+                      ) : isActive ? (
+                        <div className="px-3 py-2 bg-gray-100 text-center rounded">
+                          <div className="font-semibold">Plan actuel</div>
+                          {user?.subscriptionEnd && hasActiveSubscription(user) && (
+                            <div className="text-xs mt-1 text-gray-600">
+                              Expire: {new Intl.DateTimeFormat(user.locale || 'fr-FR', { dateStyle: 'medium' }).format(user.subscriptionEnd)}
+                            </div>
+                          )}
+                          {user?.trialEnd && hasActiveTrial(user) && (
+                            <div className="text-xs mt-1 text-blue-600">
+                              Essai jusqu'au: {new Intl.DateTimeFormat(user.locale || 'fr-FR', { dateStyle: 'medium' }).format(user.trialEnd)}
+                            </div>
+                          )}
+                        </div>
+                      ) : null}
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+
+            <Alert>
+              <AlertDescription>
+                <div className="space-y-2">
+                  <div><strong>💳 Modes de paiement :</strong> Carte bancaire (Stripe) • Mobile Money (Orange, Moov, Wave)</div>
+                  <div className="text-sm text-gray-600">
+                    🎁 Nouvel utilisateur ? Profitez de 7 jours d'essai gratuit pour tester toutes les fonctionnalités !
+                  </div>
+                </div>
+              </AlertDescription>
+            </Alert>
+          </div>
+        )}
+      </div>
+
+      {/* Modal Ajouter Transaction */}
+      {showAddTransaction && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <Card className="w-full max-w-md">
+            <CardHeader>
+              <CardTitle>Nouvelle transaction</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Type</label>
+                <select
+                  value={newTransaction.type}
+                  onChange={(e) => setNewTransaction({...newTransaction, type: e.target.value})}
+                  className="w-full px-3 py-2 border rounded-lg"
+                >
+                  <option value="expense">Dépense</option>
+                  <option value="revenue">Revenu</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1">Description</label>
+                <input
+                  type="text"
+                  value={newTransaction.description}
+                  onChange={(e) => setNewTransaction({...newTransaction, description: e.target.value})}
+                  className="w-full px-3 py-2 border rounded-lg"
+                  placeholder="Description de la transaction"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Catégorie</label>
+                <select
+                  value={newTransaction.category}
+                  onChange={(e) => setNewTransaction({...newTransaction, category: e.target.value})}
+                  className="w-full px-3 py-2 border rounded-lg"
+                >
+                  <option value="">Sélectionner...</option>
+                  {categories
+                    .filter(c => c.type === newTransaction.type)
+                    .map(c => (
+                      <option key={c.id} value={c.name}>{c.name}</option>
+                    ))
+                  }
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Montant (FCFA)</label>
+                <input
+                  type="number"
+                  value={newTransaction.amount}
+                  onChange={(e) => setNewTransaction({...newTransaction, amount: e.target.value})}
+                  className="w-full px-3 py-2 border rounded-lg"
+                  placeholder="0"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Date</label>
+                <input
+                  type="date"
+                  value={newTransaction.date}
+                  onChange={(e) => setNewTransaction({...newTransaction, date: e.target.value})}
+                  className="w-full px-3 py-2 border rounded-lg"
+                />
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={handleAddTransaction}
+                  className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                >
+                  Ajouter
                 </button>
-            </div>
-        </div>
-
-        <div id="page-factures" class="page space-y-6">
-            <div class="flex flex-col gap-1">
-                <h2 class="text-xl font-bold text-slate-900">Nouveau Reçu</h2>
-                <p class="text-xs text-slate-500">Envoyez une preuve de paiement à votre client.</p>
-            </div>
-            <div class="fintech-card p-6 space-y-5">
-                <div class="space-y-2">
-                    <label class="text-xs font-semibold text-slate-700">Client</label>
-                    <input type="text" id="clientName" placeholder="Nom complet" class="w-full bg-slate-50 rounded-xl px-4 py-3 text-sm border border-slate-200 outline-none focus:border-blue-500 transition">
-                </div>
-                <div class="space-y-2">
-                    <label class="text-xs font-semibold text-slate-700">Montant total</label>
-                    <input type="number" id="clientAmount" placeholder="Montant en FCFA" class="w-full bg-slate-50 rounded-xl px-4 py-3 text-sm border border-slate-200 outline-none focus:border-blue-500 transition">
-                </div>
-                <button onclick="partagerWhatsApp()" class="w-full btn-primary py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-200">
-                    <i data-lucide="share-2" class="w-4 h-4"></i> Partager via WhatsApp
+                <button
+                  onClick={() => setShowAddTransaction(false)}
+                  className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                >
+                  Annuler
                 </button>
-            </div>
-        </div>
-
-        <div id="page-stats" class="page space-y-6">
-            <h2 class="text-xl font-bold text-slate-900">Activité</h2>
-            <div class="fintech-card p-6 h-64">
-                <canvas id="mainChart"></canvas>
-            </div>
-        </div>
-
-        <div id="page-settings" class="page space-y-6">
-            <h2 class="text-xl font-bold text-slate-900">Paramètres</h2>
-            <div class="fintech-card p-8 text-center space-y-4">
-                <div class="w-24 h-24 bg-slate-50 rounded-3xl mx-auto flex items-center justify-center border-2 border-dashed border-slate-200 overflow-hidden" id="previewBox">
-                    <img id="settingLogoPreview" class="hidden w-full h-full object-cover">
-                    <i data-lucide="image" class="text-slate-300 w-8 h-8"></i>
+              </div>
+            </CardContent>
+            <Alert>
+              <AlertDescription>
+                <div className="space-y-2">
+                  <div><strong>💳 Modes de paiement :</strong> Carte bancaire (Stripe) • Mobile Money (Orange, Moov, Wave)</div>
+                  <div className="text-sm text-gray-600">
+                    🎁 Nouvel utilisateur ? Profitez de 7 jours d'essai gratuit pour tester toutes les fonctionnalités !
+                  </div>
                 </div>
-                <input type="file" id="logoInput" accept="image/*" class="hidden">
-                <button onclick="document.getElementById('logoInput').click()" class="text-sm font-bold text-blue-600">Modifier le logo business</button>
-            </div>
-        </div>
-    </main>
+              </AlertDescription>
+            </Alert>
+          </div>
+        )}
+      </div>
 
-    <div id="paymentModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-        <div class="bg-white w-full max-w-sm rounded-t-3xl sm:rounded-3xl p-8 shadow-2xl relative">
-            <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-6 sm:hidden"></div>
-            <button onclick="closePaymentModal()" class="absolute top-6 right-6 text-slate-400"><i data-lucide="x"></i></button>
-            
-            <h2 class="text-xl font-bold text-slate-900 mb-2">Choisir un forfait</h2>
-            <p class="text-sm text-slate-500 mb-8">Débloquez la puissance de ComptaPro.</p>
-            
-            <div class="space-y-4">
-                <a href="https://me.fedapay.com/sF5bKiUt" target="_blank" class="block p-5 rounded-2xl border-2 border-slate-100 hover:border-blue-500 transition-all group">
-                    <p class="text-blue-600 font-bold text-xs mb-1">Premium PRO</p>
-                    <div class="flex items-baseline gap-1">
-                        <span class="text-2xl font-bold text-slate-900">3 000F</span>
-                        <span class="text-slate-400 text-sm">/ mois</span>
-                    </div>
-                </a>
+      {/* Modal Ajouter Transaction */}
+      {showAddTransaction && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <Card className="w-full max-w-md">
+            <CardHeader>
+              <CardTitle>Nouvelle transaction</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Type</label>
+                <select
+                  value={newTransaction.type}
+                  onChange={(e) => setNewTransaction({...newTransaction, type: e.target.value})}
+                  className="w-full px-3 py-2 border rounded-lg"
+                >
+                  <option value="expense">Dépense</option>
+                  <option value="revenue">Revenu</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1">Description</label>
+                <input
+                  type="text"
+                  value={newTransaction.description}
+                  onChange={(e) => setNewTransaction({...newTransaction, description: e.target.value})}
+                  className="w-full px-3 py-2 border rounded-lg"
+                  placeholder="Description de la transaction"
+                />
+              </div>
 
-                <a href="https://me.fedapay.com/804MYb_W" target="_blank" class="block p-5 rounded-2xl border-2 border-blue-600 bg-blue-50 text-left relative">
-                    <span class="absolute -top-3 right-4 bg-blue-600 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase">Conseillé</span>
-                    <p class="text-blue-700 font-bold text-xs mb-1">Premium Entreprise</p>
-                    <div class="flex items-baseline gap-1">
-                        <span class="text-2xl font-bold text-slate-900">6 000F</span>
-                        <span class="text-slate-400 text-sm">/ mois</span>
-                    </div>
-                </a>
-            </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Catégorie</label>
+                <select
+                  value={newTransaction.category}
+                  onChange={(e) => setNewTransaction({...newTransaction, category: e.target.value})}
+                  className="w-full px-3 py-2 border rounded-lg"
+                >
+                  <option value="">Sélectionner...</option>
+                  {categories
+                    .filter(c => c.type === newTransaction.type)
+                    .map(c => (
+                      <option key={c.id} value={c.name}>{c.name}</option>
+                    ))
+                  }
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Montant (FCFA)</label>
+                <input
+                  type="number"
+                  value={newTransaction.amount}
+                  onChange={(e) => setNewTransaction({...newTransaction, amount: e.target.value})}
+                  className="w-full px-3 py-2 border rounded-lg"
+                  placeholder="0"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Date</label>
+                <input
+                  type="date"
+                  value={newTransaction.date}
+                  onChange={(e) => setNewTransaction({...newTransaction, date: e.target.value})}
+                  className="w-full px-3 py-2 border rounded-lg"
+                />
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={handleAddTransaction}
+                  className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                >
+                  Ajouter
+                </button>
+                <button
+                  onClick={() => setShowAddTransaction(false)}
+                  className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                >
+                  Annuler
+                </button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
+      )}
+
+      {/* Modal Nouveau Devis */}
+      {showQuoteModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <Card className="w-full max-w-md">
+            <CardHeader>
+              <CardTitle>Nouveau devis</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Client</label>
+                <select
+                  value={newQuote.client}
+                  onChange={(e) => setNewQuote({...newQuote, client: e.target.value})}
+                  className="w-full px-3 py-2 border rounded-lg"
+                >
+                  <option value="">Sélectionner un client...</option>
+                  {clients.map(c => (
+                    <option key={c.id} value={c.name}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Description</label>
+                <textarea
+                  value={newQuote.description}
+                  onChange={(e) => setNewQuote({...newQuote, description: e.target.value})}
+                  className="w-full px-3 py-2 border rounded-lg"
+                  rows={3}
+                  placeholder="Description des services/produits"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Montant (FCFA)</label>
+                <input
+                  type="number"
+                  value={newQuote.amount}
+                  onChange={(e) => setNewQuote({...newQuote, amount: e.target.value})}
+                  className="w-full px-3 py-2 border rounded-lg"
+                  placeholder="0"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Valide jusqu'au</label>
+                <input
+                  type="date"
+                  value={newQuote.validUntil}
+                  onChange={(e) => setNewQuote({...newQuote, validUntil: e.target.value})}
+                  className="w-full px-3 py-2 border rounded-lg"
+                />
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    if (!newQuote.client || !newQuote.amount) {
+                      alert('Veuillez remplir tous les champs requis');
+                      return;
+                    }
+                    const quoteData = {
+                      client: newQuote.client,
+                      amount: parseFloat(newQuote.amount),
+                      description: newQuote.description,
+                      validUntil: newQuote.validUntil,
+                      date: new Date().toISOString()
+                    };
+                    generatePDF('Devis', quoteData);
+                    setShowQuoteModal(false);
+                    setNewQuote({
+                      client: '',
+                      description: '',
+                      amount: '',
+                      validUntil: new Date(Date.now() + 30*24*60*60*1000).toISOString().split('T')[0]
+                    });
+                  }}
+                  className="flex-1 px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600"
+                >
+                  Créer & Télécharger
+                </button>
+                <button
+                  onClick={() => setShowQuoteModal(false)}
+                  className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                >
+                  Annuler
+                </button>
+              </div>
+
+              <div className="pt-4 border-t">
+                <p className="text-sm text-gray-600 mb-3">Partager directement :</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => {
+                      if (!newQuote.client || !newQuote.amount) {
+                        alert('Veuillez remplir tous les champs requis');
+                        return;
+                      }
+                      shareOnWhatsApp('Devis', {
+                        client: newQuote.client,
+                        amount: parseFloat(newQuote.amount)
+                      });
+                    }}
+                    className="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm flex items-center justify-center gap-2"
+                  >
+                    <Send size={14} />
+                    WhatsApp
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (!newQuote.client || !newQuote.amount) {
+                        alert('Veuillez remplir tous les champs requis');
+                        return;
+                      }
+                      shareOnFacebook('Devis', {
+                        client: newQuote.client,
+                        amount: parseFloat(newQuote.amount)
+                      });
+                    }}
+                    className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm flex items-center justify-center gap-2"
+                  >
+                    <Share2 size={14} />
+                    Facebook
+                  </button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
+  );
+};
 
-    <nav class="fixed bottom-0 left-0 right-0 h-20 bg-white border-t border-slate-200 flex justify-around items-center px-6 z-40">
-        <button onclick="showPage('home')" class="nav-btn flex flex-col items-center gap-1 text-blue-600"><i data-lucide="layout-grid" class="w-6 h-6"></i><span class="text-[10px] font-medium">Accueil</span></button>
-        <button onclick="showPage('factures')" class="nav-btn flex flex-col items-center gap-1 text-slate-400"><i data-lucide="file-text" class="w-6 h-6"></i><span class="text-[10px] font-medium">Factures</span></button>
-        <button onclick="showPage('stats')" class="nav-btn flex flex-col items-center gap-1 text-slate-400"><i data-lucide="activity" class="w-6 h-6"></i><span class="text-[10px] font-medium">Stats</span></button>
-        <button onclick="showPage('settings')" class="nav-btn flex flex-col items-center gap-1 text-slate-400"><i data-lucide="settings" class="w-6 h-6"></i><span class="text-[10px] font-medium">Réglages</span></button>
-    </nav>
-
-    <script>
-        lucide.createIcons();
-
-        function showPage(pageId) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById('page-' + pageId).classList.add('active');
-            document.querySelectorAll('.nav-btn').forEach(b => {
-                b.classList.remove('text-blue-600');
-                b.classList.add('text-slate-400');
-            });
-            event.currentTarget.classList.replace('text-slate-400', 'text-blue-600');
-        }
-
-        function partagerWhatsApp() {
-            const nom = document.getElementById('clientName').value;
-            const montant = document.getElementById('clientAmount').value;
-            if(!nom || !montant) { alert("Détails manquants"); return; }
-            const texte = `✅ *REÇU DE PAIEMENT*\n\nClient : *${nom}*\nMontant : *${montant} FCFA*\n\n_Généré par ComptaPro_ 🇧🇫`;
-            window.open(`https://wa.me/?text=${encodeURIComponent(texte)}`, '_blank');
-        }
-
-        const logoInput = document.getElementById('logoInput');
-        logoInput.onchange = function() {
-            const [file] = logoInput.files;
-            if (file) {
-                const url = URL.createObjectURL(file);
-                document.getElementById('displayLogo').src = url;
-                document.getElementById('settingLogoPreview').src = url;
-                document.getElementById('displayLogo').classList.remove('hidden');
-                document.getElementById('settingLogoPreview').classList.remove('hidden');
-                document.getElementById('placeholderIcon').classList.add('hidden');
-                document.getElementById('previewBox').style.borderStyle = 'solid';
-            }
-        };
-
-        let start = localStorage.getItem('start') || new Date().getTime();
-        localStorage.setItem('start', start);
-        let left = 10 - Math.floor((new Date().getTime() - start) / 86400000);
-        document.getElementById('daysLeft').innerText = left > 0 ? `Essai : ${left} jours restants` : "Essai expiré";
-
-        function openPaymentModal() { document.getElementById('paymentModal').classList.remove('hidden'); }
-        function closePaymentModal() { document.getElementById('paymentModal').classList.add('hidden'); }
-
-        const ctx = document.getElementById('mainChart').getContext('2d');
-        new Chart(ctx, { 
-            type: 'bar', 
-            data: { 
-                labels: ['L', 'M', 'M', 'J', 'V', 'S', 'D'], 
-                datasets: [{ 
-                    label: 'Ventes', 
-                    data: [4000, 7000, 5000, 9000, 12000, 15000, 8000], 
-                    backgroundColor: '#2563EB',
-                    borderRadius: 8
-                }] 
-            }, 
-            options: { 
-                responsive: true, 
-                maintainAspectRatio: false, 
-                plugins: { legend: { display: false } },
-                scales: { y: { border: { display: false }, grid: { color: '#F1F5F9' } }, x: { grid: { display: false } } }
-            } 
-        });
-    </script>
-</body>
-</html>
+export default ComptabiliteApp;
