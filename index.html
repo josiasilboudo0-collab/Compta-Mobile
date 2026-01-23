@@ -2,218 +2,54 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Compta Mobile Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activation Compta Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-    <style>
-        body { font-family: sans-serif; background: #F8FAFC; padding-bottom: 100px; }
-        .page { display: none; } 
-        .page.active { display: block; }
-        .input-f { width: 100%; padding: 12px; background: #F1F5F9; border-radius: 12px; border: 1px solid #E2E8F0; margin-bottom: 10px; }
-        .btn-p { background: #2563EB; color: white; padding: 14px; border-radius: 12px; font-weight: bold; width: 100%; }
-        .card { background: white; padding: 20px; border-radius: 20px; border: 1px solid #E2E8F0; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-    </style>
 </head>
-<body>
+<body class="bg-slate-50 flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white p-8 rounded-[2rem] shadow-2xl max-w-sm w-full border border-slate-100">
+        <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+            </svg>
+        </div>
 
-    <div id="setup-screen" class="fixed inset-0 bg-white z-[5000] p-6 hidden">
-        <div class="max-w-md mx-auto text-center">
-            <h1 class="text-2xl font-bold mb-6">Mon Profil Business</h1>
-            <input type="text" id="u_biz" placeholder="Nom de l'entreprise" class="input-f">
-            <select id="u_cur" class="input-f">
-                <option value="FCFA">FCFA</option>
-                <option value="USD">$ USD</option>
-            </select>
-            <button onclick="saveProfile()" class="btn-p">DÉMARRER</button>
+        <h1 class="text-2xl font-black text-slate-800 text-center mb-2">Paiement Confirmé !</h1>
+        <p class="text-slate-500 text-center text-sm mb-8">Suivez les étapes ci-dessous pour activer votre version Pro.</p>
+        
+        <div class="space-y-4">
+            <div>
+                <label class="text-[10px] font-bold text-slate-400 uppercase ml-2">1. Votre ID Appareil</label>
+                <input type="number" id="uid" placeholder="Ex: 1234" 
+                    class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl text-center text-2xl font-black text-blue-600 focus:border-blue-500 outline-none transition-all">
+            </div>
+            
+            <button onclick="generer()" class="w-full bg-slate-900 text-white p-4 rounded-2xl font-bold hover:bg-blue-600 transition-colors shadow-lg">
+                GÉNÉRER MA CLÉ PRO
+            </button>
+
+            <div id="resultat" class="hidden animate-bounce mt-6 p-6 bg-blue-600 rounded-3xl text-white text-center">
+                <p class="text-[10px] uppercase font-bold opacity-80">Votre Clé d'activation :</p>
+                <p id="key" class="text-4xl font-mono font-black"></p>
+                <p class="text-[10px] mt-2 italic text-blue-100">Copiez ce code dans votre application</p>
+            </div>
+        </div>
+
+        <div class="mt-8 pt-6 border-t border-dashed border-slate-200">
+            <p class="text-[10px] text-slate-400 text-center uppercase font-bold mb-2">Besoin d'aide ?</p>
+            <a href="https://wa.me/VOTRE_NUMERO" class="flex items-center justify-center gap-2 text-sm font-bold text-emerald-600">
+                Contactez le support WhatsApp
+            </a>
         </div>
     </div>
 
-    <header class="p-5 flex justify-between items-center bg-white border-b sticky top-0 z-40">
-        <h1 id="headBiz" class="font-bold text-blue-600 italic text-xl">Compta Mobile</h1>
-        <button onclick="showPage('premium')" id="crown-btn" class="text-amber-500">
-            <i data-lucide="crown"></i>
-        </button>
-    </header>
-
-    <main class="p-4 space-y-4">
-        
-        <div id="page-home" class="page active">
-            <div class="bg-slate-900 p-6 rounded-3xl text-white mb-4">
-                <p class="text-xs text-slate-400">Profit Estimé</p>
-                <h2 class="text-3xl font-bold"><span id="valProfit">0</span> <span class="cur text-sm"></span></h2>
-            </div>
-            <div class="grid grid-cols-2 gap-3">
-                <button onclick="checkPro('invoice')" class="card flex flex-col items-center">
-                    <i data-lucide="shopping-cart" class="text-blue-600 mb-2"></i>
-                    <span class="text-xs font-bold uppercase">Vente</span>
-                </button>
-                <button onclick="checkPro('stock')" class="card flex flex-col items-center">
-                    <i data-lucide="box" class="text-emerald-500 mb-2"></i>
-                    <span class="text-xs font-bold uppercase">Stock</span>
-                </button>
-            </div>
-            <div id="historyList" class="mt-4 space-y-2"></div>
-        </div>
-
-        <div id="page-stock" class="page">
-            <h2 class="text-xl font-bold mb-4">Stock</h2>
-            <div class="card mb-4">
-                <input type="text" id="p_name" placeholder="Nom produit" class="input-f">
-                <input type="number" id="p_cost" placeholder="Prix d'achat" class="input-f">
-                <input type="number" id="p_price" placeholder="Prix de vente" class="input-f">
-                <input type="number" id="p_qty" placeholder="Quantité" class="input-f">
-                <button onclick="addProduct()" class="btn-p">AJOUTER</button>
-            </div>
-            <div id="stockList" class="space-y-2"></div>
-        </div>
-
-        <div id="page-invoice" class="page">
-            <h2 class="text-xl font-bold mb-4">Nouvelle Vente</h2>
-            <div class="card">
-                <select id="v_product" class="input-f"></select>
-                <input type="number" id="v_qty" placeholder="Quantité à vendre" class="input-f">
-                <button onclick="processSale()" class="btn-p">VALIDER LA VENTE</button>
-            </div>
-        </div>
-
-        <div id="page-premium" class="page">
-            <div class="text-center card">
-                <h2 class="text-2xl font-bold mb-2">Version PRO</h2>
-                <p class="text-sm text-slate-500 mb-6">Accès illimité aux fonctions Stock et Vente.</p>
-                
-                <div class="bg-blue-50 p-4 rounded-xl mb-4 border border-blue-100">
-                    <p class="text-[10px] uppercase font-bold text-blue-400">Votre ID Appareil</p>
-                    <p id="display-uid" class="text-2xl font-mono font-bold">----</p>
-                </div>
-
-                <a href="https://qaasxtqf.mychariow.shop/abonnement-pro-compta-mobile/checkout" target="_blank" class="btn-p bg-emerald-600 block mb-4">PAYER 2 000 FCFA</a>
-                
-                <hr class="my-4">
-                <input type="text" id="activation-key" placeholder="Entrez votre clé ici" class="input-f text-center">
-                <button onclick="activate()" class="btn-p bg-slate-800">ACTIVER</button>
-            </div>
-        </div>
-
-    </main>
-
-    <nav class="fixed bottom-0 left-0 right-0 h-16 bg-white border-t flex justify-around items-center z-50">
-        <button onclick="showPage('home')"><i data-lucide="home"></i></button>
-        <button onclick="checkPro('stock')"><i data-lucide="package"></i></button>
-        <button onclick="checkPro('invoice')"><i data-lucide="receipt"></i></button>
-        <button onclick="showPage('premium')"><i data-lucide="crown" class="text-amber-500"></i></button>
-    </nav>
-
     <script>
-        // --- BASE DE DONNÉES ---
-        let db = JSON.parse(localStorage.getItem('cp_db')) || {
-            profile: null, inventory: [], sales: [], profit: 0, isPro: false, uid: Math.floor(1000 + Math.random() * 9000)
-        };
-
-        function save() { localStorage.setItem('cp_db', JSON.stringify(db)); }
-
-        // --- DEMARRAGE ---
-        window.onload = function() {
-            lucide.createIcons();
-            if(!db.profile) {
-                document.getElementById('setup-screen').classList.remove('hidden');
-            } else {
-                init();
-            }
-        };
-
-        function init() {
-            document.getElementById('headBiz').innerText = db.profile.biz;
-            document.querySelectorAll('.cur').forEach(e => e.innerText = db.profile.cur);
-            document.getElementById('display-uid').innerText = db.uid;
-            document.getElementById('valProfit').innerText = db.profit;
-            renderStock();
-            renderSales();
-            updateSelect();
-        }
-
-        // --- FONCTIONS ---
-        function saveProfile() {
-            const biz = document.getElementById('u_biz').value;
-            const cur = document.getElementById('u_cur').value;
-            if(!biz) return alert("Nom manquant");
-            db.profile = { biz, cur };
-            save();
-            location.reload();
-        }
-
-        function showPage(id) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById('page-' + id).classList.add('active');
-        }
-
-        function checkPro(page) {
-            if(db.isPro) showPage(page);
-            else { alert("Activez la version PRO pour accéder à cette fonction."); showPage('premium'); }
-        }
-
-        function addProduct() {
-            const name = document.getElementById('p_name').value;
-            const cost = parseInt(document.getElementById('p_cost').value);
-            const price = parseInt(document.getElementById('p_price').value);
-            const qty = parseInt(document.getElementById('p_qty').value);
-            if(!name || isNaN(cost)) return alert("Infos manquantes");
-            
-            db.inventory.push({ id: Date.now(), name, cost, price, qty });
-            save(); renderStock(); updateSelect();
-            alert("Produit ajouté !");
-        }
-
-        function renderStock() {
-            document.getElementById('stockList').innerHTML = db.inventory.map(p => `
-                <div class="card flex justify-between">
-                    <span>${p.name} (x${p.qty})</span>
-                    <span class="font-bold">${p.price} ${db.profile.cur}</span>
-                </div>
-            `).join('');
-        }
-
-        function updateSelect() {
-            document.getElementById('v_product').innerHTML = db.inventory.map(p => `<option value="${p.id}">${p.name} (${p.qty})</option>`).join('');
-        }
-
-        function processSale() {
-            const id = document.getElementById('v_product').value;
-            const q = parseInt(document.getElementById('v_qty').value);
-            const p = db.inventory.find(i => i.id == id);
-            
-            if(!p || q > p.qty) return alert("Stock insuffisant !");
-            
-            p.qty -= q;
-            db.profit += (p.price - p.cost) * q;
-            db.sales.push({ name: p.name, q, total: p.price * q });
-            
-            save(); init(); showPage('home');
-        }
-
-        function renderSales() {
-            document.getElementById('historyList').innerHTML = db.sales.slice(-5).reverse().map(s => `
-                <div class="card text-sm flex justify-between">
-                    <span>${s.name} x${s.q}</span>
-                    <span class="text-blue-600 font-bold">${s.total}</span>
-                </div>
-            `).join('');
-        }
-
-        function activate() {
-            const key = document.getElementById('activation-key').value;
-            // Formule de calcul : (UID + 42) * 7
-            const correct = (parseInt(db.uid) + 42) * 7;
-            if(key == correct) {
-                db.isPro = true;
-                save();
-                alert("Version PRO activée !");
-                location.reload();
-            } else {
-                alert("Clé incorrecte !");
-            }
+        function generer() {
+            const id = document.getElementById('uid').value;
+            if(!id) { alert("Veuillez entrer l'ID affiché dans l'application"); return; }
+            const cle = (parseInt(id) + 42) * 7;
+            document.getElementById('key').innerText = cle;
+            document.getElementById('resultat').classList.remove('hidden');
         }
     </script>
 </body>
