@@ -1,96 +1,97 @@
-<script>
-    lucide.createIcons();
-    // On ajoute 'trialStarted' dans la base de données
-    let db = JSON.parse(localStorage.getItem('cp_stock_db')) || { profile: null, inventory: [], sales: [], totalProfit: 0, trialStarted: null };
-    let logoBase64 = db.profile ? db.profile.logo : "";
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ComptaPro Gold - Burkina Faso</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; color: #f8fafc; }
+        .glass-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; }
+        .btn-premium { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); box-shadow: 0 10px 20px -5px rgba(245, 158, 11, 0.4); }
+        .animate-gold { animation: pulse-gold 2s infinite; }
+        @keyframes pulse-gold { 0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(245, 158, 11, 0); } 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); } }
+        /* Style pour le plein écran de blocage */
+        #lock-screen { z-index: 9999; background-color: #0f172a; }
+    </style>
+</head>
+<body class="pb-24">
 
-    // FONCTION DE VÉRIFICATION DU BLOCAGE
-    function checkTrialStatus() {
-        if (!db.profile) return; // Pas encore de profil, on laisse le setup s'afficher
+    <div id="lock-screen" class="fixed inset-0 hidden flex flex-col items-center justify-center p-6 text-center">
+        <div class="glass-card p-8 border-orange-500">
+            <div class="w-20 h-20 bg-orange-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i data-lucide="lock" class="text-orange-500 w-10 h-10"></i>
+            </div>
+            <h2 class="text-3xl font-black mb-4">Essai Terminé 🇧🇫</h2>
+            <p class="text-slate-400 mb-8 text-sm">Vos 10 jours de découverte sont terminés. Activez votre licence pour débloquer vos données et continuer.</p>
+            
+            <div class="space-y-4 mb-8">
+                <a href="https://me.fedapay.com/sF5bKiUt" class="block w-full btn-premium py-4 rounded-2xl font-black uppercase text-sm">Activer 1 Mois (3 000 F)</a>
+                <a href="https://me.fedapay.com/804MYb_W" class="block w-full bg-slate-800 py-4 rounded-2xl font-black uppercase text-sm border border-white/10">Pack 3 Mois (6 000 F)</a>
+            </div>
 
-        const TEN_DAYS_IN_MS = 10 * 24 * 60 * 60 * 1000;
-        const now = Date.now();
-        const expiryDate = db.trialStarted + TEN_DAYS_IN_MS;
+            <div class="pt-6 border-t border-white/10">
+                <input type="text" id="lockCode" placeholder="Code d'activation..." class="bg-slate-900 border border-white/10 rounded-xl px-4 py-3 text-sm w-full mb-3 outline-none focus:border-orange-500">
+                <button onclick="verifierCodeLock()" class="w-full bg-white text-black py-3 rounded-xl font-bold">Valider le code</button>
+            </div>
+        </div>
+    </div>
 
-        if (now > expiryDate) {
-            // BLOCAGE : On remplace le contenu du body par l'écran Premium
-            document.body.innerHTML = `
-                <div class="fixed inset-0 bg-white z-[9999] p-8 flex flex-col items-center justify-center text-center">
-                    <div class="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mb-6">
-                        <i data-lucide="crown" class="text-amber-500 w-10 h-10"></i>
-                    </div>
-                    <h2 class="text-3xl font-black mb-4">Essai Terminé</h2>
-                    <p class="text-slate-500 mb-8 text-sm">Vos 10 jours d'essai gratuit sont terminés. Pour continuer à gérer votre stock et accéder à vos données, activez votre abonnement.</p>
-                    <div class="bg-slate-50 p-6 rounded-[2rem] w-full mb-8 border border-amber-100">
-                        <p class="text-4xl font-black text-slate-900">3 000F <span class="text-sm font-normal text-slate-400">/ mois</span></p>
-                    </div>
-                    <a href="https://me.fedapay.com/sF5bKiUt" target="_blank" class="btn-p w-full bg-amber-500 shadow-xl shadow-amber-200 text-center flex items-center justify-center">
-                        S'ABONNER MAINTENANT
-                    </a>
-                    <p class="mt-8 text-[10px] text-slate-400 uppercase font-bold tracking-widest">Paiement sécurisé via FedaPay</p>
+    <header class="p-6 flex justify-between items-center">
+        <div>
+            <h1 class="text-2xl font-extrabold bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent italic">ComptaPro Gold</h1>
+            <p class="text-[9px] text-slate-500 uppercase tracking-[3px] font-bold">L'outil des champions 🇧🇫</p>
+        </div>
+        <button onclick="openPaymentModal()" id="badgePro" class="btn-premium px-4 py-2 rounded-xl text-[10px] font-black uppercase text-white animate-gold">Devenir Pro</button>
+    </header>
+
+    <main class="px-6 space-y-6">
+        <section class="glass-card p-6">
+            <h3 class="text-slate-300 font-bold mb-4 flex items-center gap-2 text-sm italic">
+                <i data-lucide="zap" class="text-yellow-400 w-4 h-4"></i> Performance Business
+            </h3>
+            <div class="h-40 w-full"><canvas id="growthChart"></canvas></div>
+            <p id="trialCountdown" class="text-[10px] text-center mt-4 text-orange-400 font-bold uppercase tracking-widest"></p>
+        </section>
+
+        <section class="grid grid-cols-2 gap-4">
+            <div class="glass-card p-5 border-l-4 border-l-green-500">
+                <p class="text-slate-400 text-[9px] font-bold uppercase">Mes Ventes</p>
+                <p class="text-lg font-black mt-1">0 <span class="text-[10px]">FCFA</span></p>
+            </div>
+            <div class="glass-card p-5 border-l-4 border-l-orange-500">
+                <p class="text-slate-400 text-[9px] font-bold uppercase">Statut</p>
+                <p id="statusAbonnement" class="text-lg font-black mt-1 text-orange-400 uppercase">Gratuit</p>
+            </div>
+        </section>
+    </main>
+
+    <div id="paymentModal" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden z-50 flex items-center justify-center p-4">
+        <div class="glass-card w-full max-w-sm p-6 text-center relative border-orange-500/50">
+            <button onclick="closePaymentModal()" class="absolute top-4 right-4 text-slate-500"><i data-lucide="x"></i></button>
+            <h2 class="text-2xl font-black mb-6">Passez au GOLD 🏆</h2>
+            <div class="space-y-4 mb-6">
+                <div class="p-4 rounded-2xl bg-white/5 border border-white/10 text-left">
+                    <p class="text-orange-400 font-bold text-xs uppercase">Pack 1 Mois</p>
+                    <p class="text-xl font-black">3 000 FCFA</p>
+                    <a href="https://me.fedapay.com/sF5bKiUt" class="block w-full text-center mt-3 py-2 bg-slate-700 rounded-xl text-xs font-bold">Choisir</a>
                 </div>
-            `;
-            lucide.createIcons();
-            return false;
-        }
-        return true;
-    }
+                <div class="p-4 rounded-2xl bg-orange-500/10 border border-orange-500 text-left">
+                    <p class="text-orange-500 font-bold text-xs uppercase">Pack 3 Mois (Premium)</p>
+                    <p class="text-xl font-black">6 000 FCFA</p>
+                    <a href="https://me.fedapay.com/804MYb_W" class="block w-full text-center mt-3 py-2 bg-orange-500 rounded-xl text-xs font-bold">Choisir</a>
+                </div>
+            </div>
+            <div class="pt-4 border-t border-white/10">
+                <input type="text" id="activationCode" placeholder="CODE..." class="bg-slate-800 border border-white/10 rounded-lg px-3 py-2 text-sm w-full outline-none mb-3">
+                <button onclick="verifierCode()" class="w-full bg-white text-black py-2 rounded-lg text-xs font-bold">OK</button>
+            </div>
+        </div>
+    </div>
 
-    // On affiche le setup si pas de profil, sinon on lance l'init
-    if(!db.profile) {
-        document.getElementById('setup-screen').classList.remove('hidden');
-    } else {
-        if (checkTrialStatus()) {
-            init();
-        }
-    }
-
-    function previewLogo(e) {
-        const reader = new FileReader();
-        reader.onload = () => { 
-            logoBase64 = reader.result;
-            document.getElementById('logoPreview').src = reader.result;
-            document.getElementById('logoPreview').classList.remove('hidden');
-            document.getElementById('logoIcon').classList.add('hidden');
-        };
-        reader.readAsDataURL(e.target.files[0]);
-    }
-
-    function saveProfile() {
-        db.profile = { 
-            biz: document.getElementById('u_biz').value, 
-            fname: document.getElementById('u_fname').value,
-            lname: document.getElementById('u_lname').value,
-            cur: document.getElementById('u_cur').value,
-            email: document.getElementById('u_email').value,
-            phone: document.getElementById('u_phone').value,
-            country: document.getElementById('u_country').value,
-            logo: logoBase64
-        };
-        // ON ENREGISTRE LA DATE DE DÉBUT ICI
-        db.trialStarted = Date.now(); 
-        
-        localStorage.setItem('cp_stock_db', JSON.stringify(db)); 
-        location.reload();
-    }
-
-    // ... (Le reste de tes fonctions : updateSettings, init, addProduct, processSale, etc. restent identiques)
-    // Assure-toi juste que l'appel à checkTrialStatus() est présent au début de tes fonctions importantes si tu veux une sécurité maximale.
-
-    function init() {
-        document.getElementById('headBiz').innerText = db.profile.biz;
-        if(db.profile.logo) { document.getElementById('headLogo').src = db.profile.logo; document.getElementById('headLogo').classList.remove('hidden'); }
-        document.querySelectorAll('.cur').forEach(e => e.innerText = db.profile.cur);
-        
-        document.getElementById('set_biz').value = db.profile.biz;
-        document.getElementById('set_fname').value = db.profile.fname;
-        document.getElementById('set_lname').value = db.profile.lname;
-        document.getElementById('set_email').value = db.profile.email;
-        document.getElementById('set_phone').value = db.profile.phone;
-        document.getElementById('set_country').value = db.profile.country;
-
-        renderStock(); renderHome(); populateProductSelect();
-    }
-    
-    // N'oublie pas de copier toutes tes autres fonctions (save, addProduct, processSale, etc.) en dessous
-</script>
+    <nav class="fixed bottom-6 left-6 right-6 h-16 glass-card border-none shadow-2xl flex justify-around items-center px-4">
+        <button class="text-purple-400"><i data-lucide="home"></i></button>
+        <button class="text-slate-
