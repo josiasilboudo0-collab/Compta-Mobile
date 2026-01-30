@@ -3,123 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ComptaPro Simple</title>
+    <title>ComptaPro Cloud Direct</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
-        body { font-family: sans-serif; background: #f3f4f6; }
-        .btn { padding: 12px; border-radius: 8px; font-weight: bold; width: 100%; color: white; margin-top: 10px; }
-        .input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; margin-bottom: 8px; }
-        nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 15px; border-top: 1px solid #ddd; }
-        .page { display: none; padding: 20px; }
-        .active { display: block; }
+        body { font-family: sans-serif; background: #f1f5f9; padding-bottom: 80px; }
+        .card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 12px; }
+        .input { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; margin-bottom: 10px; outline: none; }
+        nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; padding: 15px; border-top: 1px solid #e2e8f0; z-index: 100; }
+        .page { display: none; padding: 15px; }
+        .active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .btn { width: 100%; padding: 12px; border-radius: 8px; color: white; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div id="page-config" class="page active">
-        <h2 class="text-xl font-bold mb-4">Connexion Cloud</h2>
-        <input id="url" type="text" placeholder="URL NocoDB (Projet)" class="input">
-        <button onclick="saveConfig()" class="btn bg-blue-600">DÉMARRER</button>
+        <div class="card mt-10">
+            <h2 class="text-xl font-bold text-blue-600 mb-4">Initialisation Cloud</h2>
+            <input id="url" type="text" placeholder="Coller l'URL API ici" class="input" value="https://app.nocodb.com/api/v1/db/data/noco/psqprrfkrdcyu56">
+            <button onclick="saveConfig()" class="btn bg-blue-600">SE CONNECTER</button>
+        </div>
     </div>
 
     <div id="page-vente" class="page">
-        <h2 class="text-xl font-bold mb-4">Nouvelle Vente</h2>
-        <input id="cli" type="text" placeholder="Nom du Client" class="input">
-        <select id="prod-select" class="input"></select>
-        <input id="qte" type="number" value="1" class="input">
-        <button onclick="vendre()" class="btn bg-green-600">VENDRE & PDF</button>
+        <h2 class="text-lg font-bold mb-4">Nouvelle Vente</h2>
+        <div class="card">
+            <input id="cli" type="text" placeholder="Nom du Client" class="input">
+            <select id="prod-select" class="input"></select>
+            <input id="qte" type="number" value="1" class="input">
+            <button onclick="vendre()" class="btn bg-green-600">VALIDER & FACTURE PDF</button>
+        </div>
     </div>
 
     <div id="page-stock" class="page">
-        <h2 class="text-xl font-bold mb-4">Gestion Stock</h2>
-        <input id="p_nom" type="text" placeholder="Produit" class="input">
-        <input id="p_prix" type="number" placeholder="Prix" class="input">
-        <input id="p_stock" type="number" placeholder="Quantité" class="input">
-        <button onclick="ajouterStock()" class="btn bg-blue-600">AJOUTER AU CLOUD</button>
-        <div id="liste-stock" class="mt-4"></div>
+        <h2 class="text-lg font-bold mb-4">Stock en temps réel</h2>
+        <div class="card">
+            <input id="p_nom" type="text" placeholder="Produit" class="input">
+            <input id="p_prix" type="number" placeholder="Prix Vente" class="input">
+            <input id="p_stock" type="number" placeholder="Quantité" class="input">
+            <button onclick="ajouterStock()" class="btn bg-blue-600">AJOUTER AU CLOUD</button>
+        </div>
+        <div id="liste-stock"></div>
     </div>
 
     <div id="page-frais" class="page">
-        <h2 class="text-xl font-bold mb-4">Dépenses</h2>
-        <input id="f_motif" type="text" placeholder="Motif" class="input">
-        <input id="f_montant" type="number" placeholder="Montant" class="input">
-        <button onclick="ajouterFrais()" class="btn bg-red-500">ENREGISTRER FRAIS</button>
+        <h2 class="text-lg font-bold mb-4">Dépenses</h2>
+        <div class="card">
+            <input id="f_motif" type="text" placeholder="Motif (Loyer...)" class="input">
+            <input id="f_montant" type="number" placeholder="Montant" class="input">
+            <button onclick="ajouterFrais()" class="btn bg-red-500">ENREGISTRER</button>
+        </div>
     </div>
 
     <nav id="menu" style="display: none;">
-        <button onclick="show('page-vente')">Vente</button>
-        <button onclick="show('page-stock')">Stock</button>
-        <button onclick="show('page-frais')">Frais</button>
+        <button onclick="show('page-vente')" class="font-bold text-blue-600">Ventes</button>
+        <button onclick="show('page-stock')" class="font-bold text-gray-500">Stock</button>
+        <button onclick="show('page-frais')" class="font-bold text-gray-500">Frais</button>
     </nav>
 
     <script>
         const TOKEN = "1WLL5zRuBwK3nLuq4YBNZ8f2KHCXgzdgBXURpOKJ";
-        let config = JSON.parse(localStorage.getItem('conf'));
+        let conf = JSON.parse(localStorage.getItem('conf_simple'));
 
-        if(config) show('page-vente');
+        if(conf) show('page-vente');
 
         function saveConfig() {
-            let url = document.getElementById('url').value;
-            localStorage.setItem('conf', JSON.stringify({url}));
+            let u = document.getElementById('url').value.trim();
+            if(!u) return alert("URL vide !");
+            localStorage.setItem('conf_simple', JSON.stringify({url: u}));
             location.reload();
         }
 
         async function api(table, method="GET", body=null) {
-            let res = await fetch(`${JSON.parse(localStorage.getItem('conf')).url}/${table}`, {
-                method, headers: {'xc-token': TOKEN, 'Content-Type': 'application/json'},
-                body: body ? JSON.stringify(body) : null
-            });
-            return res.json();
+            try {
+                let res = await fetch(`${conf.url}/${table}`, {
+                    method, 
+                    headers: {'xc-token': TOKEN, 'Content-Type': 'application/json'},
+                    body: body ? JSON.stringify(body) : null
+                });
+                return await res.json();
+            } catch(e) { console.error(e); }
         }
 
         async function show(id) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById(id).classList.add('active');
+            document.getElementById('menu').style.display = 'flex';
             if(id === 'page-vente') loadProds();
             if(id === 'page-stock') listStock();
-            document.getElementById('menu').style.display = 'flex';
         }
 
         async function loadProds() {
             let data = await api('Produits');
-            document.getElementById('prod-select').innerHTML = data.list.map(p => `<option value="${p.Prix}">${p.Nom} (${p.Stock})</option>`).join('');
+            let list = data.list || data;
+            document.getElementById('prod-select').innerHTML = list.map(p => `<option value="${p.Prix}">${p.Nom} (${p.Stock})</option>`).join('');
         }
 
         async function ajouterStock() {
             await api('Produits', 'POST', {
                 Nom: document.getElementById('p_nom').value,
-                Prix: document.getElementById('p_prix').value,
-                Stock: document.getElementById('p_stock').value
+                Prix: parseInt(document.getElementById('p_prix').value),
+                Stock: parseInt(document.getElementById('p_stock').value)
             });
-            alert("Ajouté !"); listStock();
+            alert("Stock synchronisé !"); listStock();
         }
 
         async function listStock() {
             let data = await api('Produits');
-            document.getElementById('liste-stock').innerHTML = data.list.map(p => `<div class='bg-white p-2 mb-2 rounded'>${p.Nom} - ${p.Stock} en stock</div>`).join('');
+            let list = data.list || data;
+            document.getElementById('liste-stock').innerHTML = list.map(p => `
+                <div class='card flex justify-between items-center'>
+                    <span><b>${p.Nom}</b><br><small>${p.Prix} FCFA</small></span>
+                    <span class="font-bold text-blue-600">${p.Stock}</span>
+                </div>
+            `).join('');
         }
 
         async function ajouterFrais() {
             await api('Frais', 'POST', {
                 Motif: document.getElementById('f_motif').value,
-                Montant: document.getElementById('f_montant').value
+                Montant: parseInt(document.getElementById('f_montant').value)
             });
-            alert("Frais enregistré !");
+            alert("Frais enregistré dans le Cloud !");
         }
 
         async function vendre() {
             let sel = document.getElementById('prod-select');
-            let total = sel.value * document.getElementById('qte').value;
-            await api('Ventes', 'POST', { Client: document.getElementById('cli').value, Total: total });
+            let total = parseInt(sel.value) * parseInt(document.getElementById('qte').value);
             
-            // Générer PDF simple
+            await api('Ventes', 'POST', { 
+                Client: document.getElementById('cli').value || "Client Cash", 
+                Total: total 
+            });
+            
             const { jsPDF } = window.jspdf;
             let doc = new jsPDF();
-            doc.text(`Client: ${document.getElementById('cli').value}`, 10, 10);
-            doc.text(`Total: ${total} FCFA`, 10, 20);
+            doc.text("FACTURE COMPTAPRO", 10, 20);
+            doc.text(`Client: ${document.getElementById('cli').value}`, 10, 40);
+            doc.text(`Total: ${total} FCFA`, 10, 50);
             doc.save("Facture.pdf");
-            alert("Vendu !");
+            alert("Vente enregistrée !");
         }
     </script>
 </body>
