@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ComptaPro Ultra</title>
+    <title>ComptaPro Ultra - Version Complète</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -46,7 +46,7 @@
     <header class="p-5 flex justify-between items-center bg-white border-b sticky top-0 z-50">
         <div class="flex items-center gap-3">
             <img id="headLogo" class="w-8 h-8 rounded-lg object-cover hidden">
-            <h1 id="headBiz" class="font-black text-blue-600 text-sm italic">ComptaPro</h1>
+            <h1 id="headBiz" class="font-black text-blue-600 text-sm italic uppercase">ComptaPro</h1>
         </div>
         <span id="sub-badge" class="text-[9px] font-bold px-2 py-1 rounded-full bg-red-100 text-red-600 uppercase">Gratuit</span>
     </header>
@@ -54,17 +54,17 @@
     <main class="p-5 space-y-6">
         <div id="page-home" class="page active space-y-6">
             <div class="bg-slate-900 p-8 rounded-[2.5rem] text-white shadow-2xl">
-                <p class="text-[10px] uppercase font-bold text-slate-400 mb-1">Profit Net Actuel</p>
+                <p class="text-[10px] uppercase font-bold text-slate-400 mb-1 italic">Profit Net Estimé</p>
                 <h2 class="text-4xl font-black"><span id="valProfit">0</span> <span class="cur text-sm font-normal"></span></h2>
             </div>
             
             <div class="grid grid-cols-3 gap-3">
                 <button onclick="showPage('invoice')" class="bg-white p-4 rounded-3xl border flex flex-col items-center gap-2 shadow-sm">
                     <i data-lucide="shopping-cart" class="text-blue-600 w-5"></i>
-                    <span class="text-[8px] font-black uppercase">Vente</span>
+                    <span class="text-[8px] font-black uppercase">Vendre</span>
                 </button>
                 <button onclick="checkAccess('stock')" class="bg-white p-4 rounded-3xl border flex flex-col items-center gap-2 shadow-sm">
-                    <i data-lucide="box" class="text-emerald-500 w-5"></i>
+                    <i data-lucide="package" class="text-emerald-500 w-5"></i>
                     <span class="text-[8px] font-black uppercase">Stock</span>
                 </button>
                 <button onclick="checkAccess('expense')" class="bg-white p-4 rounded-3xl border flex flex-col items-center gap-2 shadow-sm">
@@ -74,61 +74,70 @@
             </div>
 
             <div class="pt-2">
-                <h3 class="text-sm font-black mb-3 italic text-slate-500">Historique Récent</h3>
+                <h3 class="text-sm font-black mb-3 italic text-slate-500">Activités Récentes</h3>
                 <div id="historyList" class="space-y-3"></div>
             </div>
         </div>
 
         <div id="page-stock" class="page space-y-4">
             <div class="flex justify-between items-center">
-                <h2 class="text-2xl font-black">Mon Stock</h2>
+                <h2 class="text-2xl font-black italic">Mon Stock</h2>
                 <button onclick="toggleAddProduct()" class="bg-blue-600 text-white p-2 rounded-full"><i data-lucide="plus"></i></button>
             </div>
-            <div id="addProductForm" class="hidden bg-white p-5 rounded-3xl border shadow-sm">
+            <div id="addProductForm" class="hidden bg-white p-5 rounded-3xl border shadow-lg space-y-2">
                 <input type="text" id="p_name" placeholder="Nom du produit" class="input-f">
-                <input type="number" id="p_cost" placeholder="Prix Achat (Unitaire)" class="input-f">
-                <input type="number" id="p_price" placeholder="Prix Vente (Unitaire)" class="input-f">
-                <input type="number" id="p_qty" placeholder="Quantité initiale" class="input-f">
-                <button onclick="addProduct()" class="btn-p uppercase">Enregistrer</button>
+                <input type="number" id="p_cost" placeholder="Prix d'Achat (Unitaire)" class="input-f">
+                <input type="number" id="p_price" placeholder="Prix de Vente (Unitaire)" class="input-f">
+                <input type="number" id="p_qty" placeholder="Quantité en stock" class="input-f">
+                <button onclick="addProduct()" class="btn-p uppercase">Ajouter au Stock</button>
             </div>
             <div id="stockList" class="space-y-3"></div>
         </div>
 
         <div id="page-invoice" class="page space-y-4">
-            <h2 class="text-2xl font-black">Nouvelle Vente</h2>
+            <h2 class="text-2xl font-black italic">Nouvelle Vente</h2>
             <div class="bg-white p-6 rounded-3xl border space-y-4 shadow-sm">
-                <input type="text" id="c_name" placeholder="Nom du client" class="input-f">
+                <input type="text" id="c_name" placeholder="Nom de l'acheteur" class="input-f">
                 <select id="v_product" class="input-f"></select>
-                <input type="number" id="v_qty" placeholder="Quantité vendue" class="input-f">
-                <button onclick="processSale()" class="btn-p uppercase shadow-lg">Générer Facture PDF</button>
+                <input type="number" id="v_qty" placeholder="Quantité à vendre" class="input-f">
+                <button onclick="processSale()" class="btn-p uppercase shadow-lg">Valider & Facturer</button>
             </div>
         </div>
 
         <div id="page-expense" class="page space-y-4">
-            <h2 class="text-2xl font-black">Dépense</h2>
+            <h2 class="text-2xl font-black italic">Sortie de Caisse</h2>
             <div class="bg-white p-6 rounded-3xl border shadow-sm">
                 <select id="e_type" class="input-f">
                     <option value="Loyer">Loyer</option>
-                    <option value="Salaire">Salaire</option>
-                    <option value="Transport">Transport</option>
-                    <option value="Autre">Autre</option>
+                    <option value="Salaire">Salaire / Main d'oeuvre</option>
+                    <option value="Transport">Transport / Logistique</option>
+                    <option value="Communication">Communication / Internet</option>
+                    <option value="Autre">Autre dépense</option>
                 </select>
-                <input type="number" id="e_amount" placeholder="Montant" class="input-f">
-                <button onclick="addExpense()" class="btn-p bg-red-500 uppercase">Valider</button>
+                <input type="number" id="e_amount" placeholder="Montant du frais" class="input-f">
+                <button onclick="addExpense()" class="btn-p bg-red-500 uppercase">Enregistrer le Frais</button>
             </div>
         </div>
 
-        <div id="page-premium" class="page space-y-4 text-center">
-            <div class="bg-white p-8 rounded-3xl border shadow-sm">
-                <i data-lucide="crown" class="mx-auto text-amber-500 w-12 h-12 mb-4"></i>
+        <div id="page-premium" class="page space-y-6 text-center">
+            <div class="bg-white p-8 rounded-[2.5rem] border shadow-sm">
+                <i data-lucide="crown" class="mx-auto text-amber-500 w-16 h-16 mb-4"></i>
                 <h2 class="text-2xl font-black italic">Version PRO</h2>
-                <div class="mt-6 p-4 bg-slate-50 rounded-2xl border border-dashed">
-                    <p class="text-[10px] font-bold text-slate-400">VOTRE ID CLIENT :</p>
+                <p class="text-xs text-slate-500 mb-6">Débloquez le Stock, les Frais et l'exportation de vos données.</p>
+                
+                <div class="space-y-3">
+                    <a href="https://qaasxtqf.mychariow.shop/abonnement-pro-compta-mobile/checkout" target="_blank" class="btn-p block bg-blue-600 uppercase flex items-center justify-center gap-2">
+                        <i data-lucide="credit-card" class="w-4"></i> Payer via Chariow
+                    </a>
+                    <button onclick="payViaWhatsApp()" class="btn-p w-full bg-emerald-600 uppercase italic">Acheter par WhatsApp</button>
+                </div>
+
+                <div class="mt-8 p-4 bg-slate-50 rounded-2xl border border-dashed">
+                    <p class="text-[10px] font-bold text-slate-400">VOTRE IDENTIFIANT CLIENT :</p>
                     <p id="prem_uid" class="text-2xl font-black text-blue-600"></p>
                 </div>
-                <input type="number" id="key-input" placeholder="Clé d'activation" class="input-f mt-4 text-center font-bold">
-                <button onclick="activatePro()" class="btn-p bg-slate-900 uppercase mb-4">Activer</button>
-                <button onclick="window.open('https://wa.me/22666566140?text=Activation%20PRO%20ID:'+db.uid)" class="btn-p bg-green-600 uppercase italic">Contacter WhatsApp</button>
+                <input type="number" id="key-input" placeholder="Entrez votre clé ici" class="input-f mt-4 text-center font-bold">
+                <button onclick="activatePro()" class="btn-p bg-slate-900 uppercase">Activer Maintenant</button>
             </div>
         </div>
     </main>
@@ -141,8 +150,8 @@
     </nav>
 
     <script>
-        // Initialisation Base de données
-        let db = JSON.parse(localStorage.getItem('cp_ultra_db')) || { 
+        // Configuration de la base de données
+        let db = JSON.parse(localStorage.getItem('cp_final_db')) || { 
             profile: null, inventory: [], sales: [], expenses: [], totalProfit: 0, 
             uid: Math.floor(1000 + Math.random() * 8999), expiry: null 
         };
@@ -164,7 +173,7 @@
             renderHome();
             renderStock();
             renderHistory();
-            updateSelect();
+            updateProductList();
             checkSubscription();
         }
 
@@ -192,29 +201,138 @@
             reader.readAsDataURL(e.target.files[0]);
         }
 
+        // --- GESTION DU STOCK ---
         function addProduct() {
-            const name = document.getElementById('p_name').value;
-            const cost = parseInt(document.getElementById('p_cost').value);
-            const price = parseInt(document.getElementById('p_price').value);
-            const qty = parseInt(document.getElementById('p_qty').value);
-            if(!name || isNaN(cost)) return alert("Remplissez tout");
-            db.inventory.push({ id: Date.now(), name, cost, price, qty });
-            save(); renderStock(); updateSelect(); toggleAddProduct();
+            const n = document.getElementById('p_name').value;
+            const c = parseInt(document.getElementById('p_cost').value);
+            const p = parseInt(document.getElementById('p_price').value);
+            const q = parseInt(document.getElementById('p_qty').value);
+            if(!n || isNaN(c)) return alert("Remplissez tout");
+            db.inventory.push({ id: Date.now(), name: n, cost: c, price: p, qty: q });
+            save(); renderStock(); updateProductList(); toggleAddProduct();
+        }
+
+        function deleteProduct(id) {
+            if(confirm("Supprimer ce produit ?")) {
+                db.inventory = db.inventory.filter(p => p.id !== id);
+                save(); renderStock(); updateProductList();
+            }
         }
 
         function renderStock() {
             document.getElementById('stockList').innerHTML = db.inventory.map(p => `
                 <div class="bg-white p-4 rounded-2xl border flex justify-between items-center shadow-sm">
-                    <div><p class="font-bold text-sm">${p.name}</p><p class="text-[10px] text-slate-400">${p.price} ${db.profile.cur}</p></div>
-                    <div class="flex items-center gap-3">
-                        <span class="font-black ${p.qty <= 3 ? 'text-red-500' : 'text-blue-600'}">${p.qty}</span>
-                        <button onclick="deleteProd(${p.id})" class="text-red-300"><i data-lucide="trash-2" class="w-4"></i></button>
+                    <div>
+                        <p class="font-bold text-sm">${p.name}</p>
+                        <p class="text-[10px] text-slate-400">PV: ${p.price} ${db.profile.cur}</p>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <span class="font-black ${p.qty <= 3 ? 'text-red-500' : 'text-blue-600'} text-lg">${p.qty}</span>
+                        <button onclick="deleteProduct(${p.id})" class="text-red-300"><i data-lucide="trash-2" class="w-4"></i></button>
                     </div>
                 </div>
             `).join('');
             lucide.createIcons();
         }
 
+        // --- GESTION DES VENTES ---
         function processSale() {
-            const pId = document.getElementById('v
-                                                
+            const pId = document.getElementById('v_product').value;
+            const q = parseInt(document.getElementById('v_qty').value);
+            const client = document.getElementById('c_name').value || "Client";
+            const prod = db.inventory.find(p => p.id == pId);
+
+            if(!prod || q > prod.qty) return alert("Stock insuffisant !");
+
+            const total = prod.price * q;
+            const profit = (prod.price - prod.cost) * q;
+
+            prod.qty -= q;
+            db.totalProfit += profit;
+            db.sales.push({ client, item: prod.name, qty: q, total, date: new Date().toLocaleDateString() });
+
+            save();
+            generatePDF(client, prod.name, q, prod.price, total);
+            location.reload();
+        }
+
+        function generatePDF(client, item, qty, price, total) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            if(db.profile.logo) doc.addImage(db.profile.logo, 'PNG', 15, 10, 20, 20);
+            doc.setFontSize(18); doc.text(db.profile.biz, 40, 20);
+            doc.setFontSize(10); doc.text("Facture pour : " + client, 15, 45);
+            doc.autoTable({
+                startY: 50,
+                head: [['Désignation', 'Prix Unitaire', 'Quantité', 'Sous-total']],
+                body: [[item, price, qty, total + " " + db.profile.cur]],
+                theme: 'grid', headStyles: { fillColor: [37, 99, 235] }
+            });
+            doc.setFontSize(14); doc.text("TOTAL : " + total + " " + db.profile.cur, 140, doc.lastAutoTable.finalY + 15);
+            doc.save(`Facture_${client}.pdf`);
+        }
+
+        // --- DEPENSES ---
+        function addExpense() {
+            const amt = parseInt(document.getElementById('e_amount').value);
+            if(!amt) return;
+            db.expenses.push({ type: document.getElementById('e_type').value, amount: amt, date: new Date().toLocaleDateString() });
+            db.totalProfit -= amt;
+            save(); location.reload();
+        }
+
+        // --- INTERFACE ---
+        function renderHome() {
+            document.getElementById('valProfit').innerText = db.totalProfit.toLocaleString();
+            document.querySelectorAll('.cur').forEach(e => e.innerText = db.profile.cur);
+        }
+
+        function renderHistory() {
+            const hist = [...db.sales, ...db.expenses.map(e=>({...e, isExp:true}))].reverse().slice(0,10);
+            document.getElementById('historyList').innerHTML = hist.map(h => `
+                <div class="bg-white p-4 rounded-2xl border flex justify-between items-center text-xs">
+                    <span class="font-bold uppercase text-slate-600">${h.isExp ? h.type : h.item}</span>
+                    <span class="${h.isExp ? 'text-red-500' : 'text-blue-600'} font-black">${h.isExp ? '-' : '+'}${h.amount || h.total}</span>
+                </div>
+            `).join('');
+        }
+
+        function showPage(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+            document.getElementById('page-'+id).classList.add('active');
+            document.getElementById('nav-'+id)?.classList.add('active');
+            lucide.createIcons();
+        }
+
+        function checkAccess(p) {
+            if(db.expiry && new Date().getTime() < db.expiry) showPage(p);
+            else showPage('premium');
+        }
+
+        function payViaWhatsApp() {
+            window.open(`https://wa.me/22666566140?text=Activation%20PRO%20ID:${db.uid}`);
+        }
+
+        function activatePro() {
+            const key = document.getElementById('key-input').value;
+            // Algorithme de clé : ID x 7 (Simple pour le test)
+            if(key == (db.uid * 7)) {
+                db.expiry = new Date().getTime() + (365 * 24 * 60 * 60 * 1000); // 1 an
+                save(); location.reload();
+            } else alert("Clé incorrecte.");
+        }
+
+        function checkSubscription() {
+            if(db.expiry && new Date().getTime() < db.expiry) {
+                document.getElementById('sub-badge').innerText = "PRO ACTIF";
+                document.getElementById('sub-badge').className = "text-[9px] font-bold px-2 py-1 rounded-full bg-green-100 text-green-600";
+            }
+        }
+
+        function save() { localStorage.setItem('cp_final_db', JSON.stringify(db)); }
+        function toggleAddProduct() { document.getElementById('addProductForm').classList.toggle('hidden'); }
+        function updateProductList() { document.getElementById('v_product').innerHTML = db.inventory.map(p => `<option value="${p.id}">${p.name} (Reste: ${p.qty})</option>`).join(''); }
+    </script>
+</body>
+</html>
