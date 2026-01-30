@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ComptaPro Cloud Master</title>
+    <title>ComptaPro Ultra - Cloud Master</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -16,6 +16,7 @@
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .input-f { width: 100%; padding: 14px; background: #F1F5F9; border-radius: 14px; border: 1px solid #E2E8F0; outline: none; margin-bottom: 12px; font-size: 14px; }
         .btn-p { background: #2563EB; color: white; padding: 16px; border-radius: 16px; font-weight: 700; width: 100%; border: none; cursor: pointer; transition: 0.2s; text-align: center; }
+        .btn-p:active { transform: scale(0.98); }
         nav button.active { color: #2563EB; }
     </style>
 </head>
@@ -23,17 +24,19 @@
 
     <div id="setup-screen" class="fixed inset-0 bg-white z-[3000] p-6 overflow-y-auto hidden">
         <div class="max-w-md mx-auto text-center">
-            <h1 class="text-3xl font-black mb-6 italic text-blue-600">ComptaPro Cloud</h1>
-            <div onclick="document.getElementById('logoInput').click()" class="w-24 h-24 bg-slate-100 mx-auto rounded-3xl border-2 border-dashed border-slate-300 flex items-center justify-center overflow-hidden mb-6 cursor-pointer">
-                <img id="logoPreview" class="hidden w-full h-full object-cover">
-                <i id="logoIcon" data-lucide="camera" class="text-slate-400"></i>
+            <h1 class="text-3xl font-black mb-6 italic text-blue-600">ComptaPro</h1>
+            <div class="flex flex-col items-center mb-6">
+                <div onclick="document.getElementById('logoInput').click()" class="w-24 h-24 bg-slate-100 rounded-3xl border-2 border-dashed border-slate-300 flex items-center justify-center overflow-hidden cursor-pointer relative">
+                    <img id="logoPreview" class="hidden w-full h-full object-cover">
+                    <i id="logoIcon" data-lucide="camera" class="text-slate-400"></i>
+                </div>
+                <input type="file" id="logoInput" accept="image/*" class="hidden" onchange="previewLogo(event)">
             </div>
-            <input type="file" id="logoInput" accept="image/*" class="hidden" onchange="previewLogo(event)">
             <input type="text" id="u_biz" placeholder="Nom de l'entreprise" class="input-f">
             <input type="text" id="u_tel" placeholder="Téléphone WhatsApp" class="input-f">
             <input type="text" id="u_adr" placeholder="Adresse" class="input-f">
             <select id="u_cur" class="input-f"><option value="FCFA">FCFA</option><option value="USD">USD ($)</option></select>
-            <button onclick="saveProfile()" class="btn-p mt-4 w-full uppercase">Activer mon Espace</button>
+            <button onclick="saveProfile()" class="btn-p mt-4 w-full uppercase">Lancer mon Business</button>
         </div>
     </div>
 
@@ -42,15 +45,15 @@
             <img id="headLogo" class="w-8 h-8 rounded-lg object-cover hidden">
             <h1 id="headBiz" class="font-black text-blue-600 text-sm italic">ComptaPro</h1>
         </div>
-        <div id="sync-status" class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_green]"></div>
+        <span id="sub-badge" class="text-[9px] font-bold px-2 py-1 rounded-full bg-red-100 text-red-600 uppercase">Gratuit</span>
     </header>
 
     <main class="p-5 space-y-6">
         <div id="page-home" class="page active space-y-6">
-            <div class="bg-slate-900 p-8 rounded-[2.5rem] text-white shadow-2xl relative overflow-hidden">
-                <p class="text-[10px] uppercase font-bold text-slate-400 mb-1">Profit Net (Local)</p>
+            <div class="bg-slate-900 p-8 rounded-[2.5rem] text-white shadow-2xl relative">
+                <p class="text-[10px] uppercase font-bold text-slate-400 mb-1">Profit Net Actuel</p>
                 <h2 class="text-4xl font-black"><span id="valProfit">0</span> <span class="cur text-sm font-normal"></span></h2>
-                <button onclick="resetProfit()" class="absolute top-4 right-4 text-slate-600"><i data-lucide="rotate-ccw" class="w-4"></i></button>
+                <button onclick="resetLocalData()" class="absolute top-4 right-4 text-slate-700"><i data-lucide="rotate-ccw" class="w-4"></i></button>
             </div>
             
             <div class="grid grid-cols-3 gap-3">
@@ -69,55 +72,62 @@
             </div>
 
             <div class="pt-2">
-                <h3 class="text-sm font-black mb-3 italic text-slate-500">Historique local</h3>
+                <h3 class="text-sm font-black mb-3 italic text-slate-500">Historique Local</h3>
                 <div id="historyList" class="space-y-3"></div>
-            </div>
-        </div>
-
-        <div id="page-invoice" class="page space-y-4">
-            <h2 class="text-2xl font-black">Nouvelle Vente</h2>
-            <div class="bg-white p-6 rounded-3xl border space-y-4 shadow-sm">
-                <input type="text" id="c_name" placeholder="Nom du client" class="input-f">
-                <div class="flex gap-2">
-                    <select id="v_product" class="input-f flex-1"></select>
-                    <input type="number" id="v_qty" placeholder="Qté" class="input-f w-20" value="1">
-                </div>
-                <button onclick="addToCart()" class="w-full py-3 bg-blue-50 text-blue-600 rounded-xl font-bold text-[10px] border border-blue-100 uppercase">+ Ajouter</button>
-
-                <div id="cartList" class="space-y-2 border-t pt-4 min-h-[40px]"></div>
-
-                <div class="flex justify-between items-center py-2 border-t">
-                    <span class="font-bold text-xs text-slate-400">TOTAL :</span>
-                    <span id="cartTotalDisplay" class="font-black text-xl text-blue-600">0</span>
-                </div>
-
-                <button onclick="processFinalSale()" id="btnSubmitSale" class="btn-p w-full uppercase shadow-lg opacity-50 pointer-events-none">Valider la Vente</button>
             </div>
         </div>
 
         <div id="page-stock" class="page space-y-4">
             <div class="flex justify-between items-center">
-                <h2 class="text-2xl font-black">Stock</h2>
+                <h2 class="text-2xl font-black">Mon Stock</h2>
                 <button onclick="toggleAddProduct()" class="bg-blue-600 text-white p-2 rounded-full"><i data-lucide="plus"></i></button>
             </div>
             <div id="addProductForm" class="hidden bg-white p-5 rounded-3xl border shadow-sm">
-                <input type="text" id="p_name" placeholder="Produit" class="input-f">
+                <input type="text" id="p_name" placeholder="Nom du produit" class="input-f">
                 <input type="number" id="p_cost" placeholder="Prix Achat" class="input-f">
                 <input type="number" id="p_price" placeholder="Prix Vente" class="input-f">
                 <input type="number" id="p_qty" placeholder="Quantité" class="input-f">
-                <button onclick="addProduct()" class="btn-p w-full uppercase">Ajouter</button>
+                <button onclick="addProduct()" class="btn-p w-full uppercase">Enregistrer</button>
             </div>
             <div id="stockList" class="space-y-3"></div>
         </div>
 
+        <div id="page-invoice" class="page space-y-4">
+            <h2 class="text-2xl font-black">Nouvelle Vente</h2>
+            <div class="bg-white p-6 rounded-3xl border space-y-4 shadow-sm">
+                <input type="text" id="c_name" placeholder="Nom de l'acheteur" class="input-f">
+                <select id="v_product" class="input-f"></select>
+                <input type="number" id="v_qty" placeholder="Quantité vendue" class="input-f">
+                <button onclick="processSale()" id="btn-valider" class="btn-p w-full uppercase shadow-lg">Générer Facture PDF</button>
+                <p class="text-[9px] text-center text-slate-400 uppercase italic">La transaction sera sécurisée sur le Cloud</p>
+            </div>
+        </div>
+
+        <div id="page-expense" class="page space-y-4">
+            <h2 class="text-2xl font-black">Sortie de Caisse</h2>
+            <div class="bg-white p-6 rounded-3xl border shadow-sm">
+                <select id="e_type" class="input-f">
+                    <option value="Loyer">Loyer</option>
+                    <option value="Salaire">Salaire</option>
+                    <option value="Transport">Transport</option>
+                    <option value="Autre">Autre</option>
+                </select>
+                <input type="number" id="e_amount" placeholder="Montant" class="input-f">
+                <button onclick="addExpense()" class="btn-p w-full bg-red-500 uppercase">Valider le Frais</button>
+            </div>
+        </div>
+
         <div id="page-premium" class="page space-y-4 text-center">
-            <div class="bg-white p-8 rounded-3xl border">
-                <i data-lucide="cloud" class="mx-auto text-blue-600 w-12 h-12 mb-4"></i>
-                <h2 class="text-xl font-black">Serveur Cloud</h2>
-                <p class="text-[10px] text-slate-400 mt-2 uppercase">ID CLIENT : <span id="prem_uid" class="text-blue-600 font-bold"></span></p>
+            <div class="bg-white p-8 rounded-3xl border shadow-sm">
+                <i data-lucide="crown" class="mx-auto text-amber-500 w-12 h-12 mb-4"></i>
+                <h2 class="text-2xl font-black">Abonnement PRO</h2>
+                <div class="mt-6 p-4 bg-slate-50 rounded-2xl border border-dashed">
+                    <p class="text-[10px] font-bold text-slate-400">VOTRE ID CLIENT :</p>
+                    <p id="prem_uid" class="text-2xl font-black text-blue-600"></p>
+                </div>
                 <input type="number" id="key-input" placeholder="Clé d'activation" class="input-f mt-4 text-center font-bold">
                 <button onclick="activatePro()" class="btn-p w-full bg-slate-900 uppercase">Activer</button>
-                <button onclick="payViaWhatsApp()" class="mt-4 text-emerald-600 font-bold text-xs uppercase flex items-center justify-center gap-2"><i data-lucide="message-circle"></i> Commander une clé</button>
+                <button onclick="payViaWhatsApp()" class="mt-4 text-emerald-600 font-bold text-xs uppercase flex items-center justify-center gap-2"><i data-lucide="message-circle"></i> Commander par WhatsApp</button>
             </div>
         </div>
     </main>
@@ -125,21 +135,20 @@
     <nav class="fixed bottom-0 left-0 right-0 h-20 bg-white border-t flex justify-around items-center z-50">
         <button id="nav-home" onclick="showPage('home')" class="active"><i data-lucide="home"></i></button>
         <button id="nav-stock" onclick="checkAccess('stock')"><i data-lucide="package"></i></button>
-        <button id="nav-premium" onclick="showPage('premium')"><i data-lucide="cloud"></i></button>
+        <button id="nav-expense" onclick="checkAccess('expense')"><i data-lucide="trending-down"></i></button>
+        <button id="nav-premium" onclick="showPage('premium')"><i data-lucide="crown"></i></button>
     </nav>
 
     <script>
-        // --- DATA ---
-        let db = JSON.parse(localStorage.getItem('cp_cloud_v3_db')) || { 
+        // --- CONFIGURATION CLOUD (METTRE TES INFOS ICI) ---
+        const CLOUD_API_URL = "https://nano-bee.pikapod.net/api/v1/db/data/v1/Business_Manager/Ventes_Cloud";
+        const CLOUD_TOKEN = "1WLL5zRuBwK3nLuq4YBNZ8f2KHCXgzdgBXURpOKJ";
+
+        let db = JSON.parse(localStorage.getItem('cp_ultra_master_db')) || { 
             profile: null, inventory: [], sales: [], expenses: [], totalProfit: 0, 
             uid: Math.floor(1000 + Math.random() * 8999), expiry: null 
         };
-        let cart = [];
         let logoBase64 = db.profile ? db.profile.logo : "";
-
-        // --- CLOUD CONFIG (TON NOCODB) ---
-        const API_URL = "https://nano-bee.pikapod.net/api/v1/db/data/v1/Business_Manager/Ventes_Cloud";
-        const XC_TOKEN = "1WLL5zRuBwK3nLuq4YBNZ8f2KHCXgzdgBXURpOKJ";
 
         window.onload = () => { if(!db.profile) document.getElementById('setup-screen').classList.remove('hidden'); else init(); };
 
@@ -151,105 +160,131 @@
             renderStock(); renderHome(); renderHistory(); populateProductSelect(); checkSubscription();
         }
 
-        // --- FONCTION CLOUD (SÉCURISÉE) ---
-        async function syncToCloud(itemStr, totalVal) {
-            const payload = {
+        // --- NOUVELLE FONCTION : ENVOI SÉCURISÉ ---
+        async function syncToNocoDB(client, article, total) {
+            const data = {
                 "Boutique": db.profile.biz,
                 "Client_UID": String(db.uid),
-                "Produit_Vendu": itemStr,
-                "Prix_Total": Number(totalVal),
+                "Produit_Vendu": article,
+                "Prix_Total": Number(total),
                 "Date_Vente": new Date().toISOString()
             };
 
             try {
-                const response = await fetch(API_URL, {
+                await fetch(CLOUD_API_URL, {
                     method: "POST",
-                    headers: { 
-                        "accept": "application/json", 
-                        "Content-Type": "application/json", 
-                        "xc-token": XC_TOKEN 
-                    },
-                    body: JSON.stringify(payload)
+                    headers: { "accept": "application/json", "Content-Type": "application/json", "xc-token": CLOUD_TOKEN },
+                    body: JSON.stringify(data)
                 });
-                if(response.ok) {
-                    console.log("✅ Vente enregistrée sur le serveur.");
-                } else {
-                    console.error("❌ Erreur serveur NocoDB");
-                }
+                console.log("Sync Cloud Réussie");
             } catch (e) {
-                console.warn("⚠️ Mode hors-ligne : Transaction non envoyée.");
+                console.error("Erreur Sync : ", e);
             }
         }
 
-        // --- LOGIQUE VENTE ---
-        function addToCart() {
+        // --- LOGIQUE METIER MODIFIÉE ---
+        async function processSale() {
             const pId = document.getElementById('v_product').value;
-            const qty = parseInt(document.getElementById('v_qty').value);
+            const vQty = parseInt(document.getElementById('v_qty').value);
             const prod = db.inventory.find(p => p.id == pId);
-            if(!prod || qty <= 0 || qty > prod.qty) return alert("Stock insuffisant");
+            const client = document.getElementById('c_name').value || "Client";
 
-            const existing = cart.find(i => i.id == pId);
-            if(existing) {
-                existing.qty += qty;
-                existing.subtotal = existing.qty * prod.price;
-            } else {
-                cart.push({ id: prod.id, name: prod.name, price: prod.price, cost: prod.cost, qty: qty, subtotal: prod.price * qty });
-            }
-            renderCart();
-        }
+            if(!prod || isNaN(vQty) || vQty > prod.qty) return alert("Quantité invalide ou stock insuffisant");
 
-        function renderCart() {
-            const container = document.getElementById('cartList');
-            if(cart.length === 0) { 
-                container.innerHTML = ""; 
-                document.getElementById('btnSubmitSale').classList.add('opacity-50', 'pointer-events-none');
-                return; 
-            }
-            document.getElementById('btnSubmitSale').classList.remove('opacity-50', 'pointer-events-none');
-            let total = 0;
-            container.innerHTML = cart.map((item, idx) => {
-                total += item.subtotal;
-                return `<div class="flex justify-between text-[11px] bg-slate-50 p-2 rounded-lg">
-                    <span>${item.name} (x${item.qty})</span>
-                    <span class="font-bold">${item.subtotal} <button onclick="cart.splice(${idx},1);renderCart()" class="ml-2 text-red-500 text-xs">X</button></span>
-                </div>`;
-            }).join('');
-            document.getElementById('cartTotalDisplay').innerText = total.toLocaleString();
-        }
+            const total = prod.price * vQty;
+            const profit = (prod.price - prod.cost) * vQty;
+            const btn = document.getElementById('btn-valider');
 
-        async function processFinalSale() {
-            const client = document.getElementById('c_name').value || "Client Comptant";
-            let totalVente = 0;
-            let totalProfit = 0;
-            let details = [];
+            // Verrouiller le bouton pendant l'envoi
+            btn.innerText = "SÉCURISATION...";
+            btn.style.opacity = "0.5";
+            btn.disabled = true;
 
-            cart.forEach(item => {
-                const prod = db.inventory.find(p => p.id == item.id);
-                prod.qty -= item.qty;
-                totalVente += item.subtotal;
-                totalProfit += (item.price - item.cost) * item.qty;
-                details.push(`${item.name} (x${item.qty})`);
-            });
+            // 1. ENVOI AU CLOUD (Priorité absolue)
+            await syncToNocoDB(client, `${prod.name} (x${vQty})`, total);
 
-            const saleString = details.join(", ");
+            // 2. MISE A JOUR LOCALE
+            prod.qty -= vQty; 
+            db.totalProfit += profit;
+            db.sales.push({ client, item: prod.name, qty: vQty, total, date: new Date().toLocaleDateString() });
             
-            // 1. ENVOI AU CLOUD (Même si le client efface tout plus tard, c'est sur ton serveur)
-            await syncToCloud(saleString, totalVente);
-
-            // 2. ENREGISTREMENT LOCAL
-            db.sales.push({ client, item: saleString, total: totalVente, date: new Date().toLocaleDateString() });
-            db.totalProfit += totalProfit;
             save();
-
-            // 3. PDF
-            generateMultiPDF(client, cart, totalVente);
-
-            cart = [];
-            document.getElementById('c_name').value = "";
-            renderCart(); init(); showPage('home');
+            generatePDF(client, prod.name, vQty, prod.price, total);
+            
+            // Reset interface
+            btn.innerText = "GÉNÉRER FACTURE PDF";
+            btn.style.opacity = "1";
+            btn.disabled = false;
+            init(); 
+            showPage('home');
         }
 
-        function generateMultiPDF(client, items, total) {
-            const { jsPDF } = window.jspdf; const doc = new jsPDF();
-            if(db.profile.logo) doc.addImage(db.profile.logo, 'PNG', 15, 10, 20, 20);
-            doc.setFontSize(18); doc.text(db.profile.biz.toUpperCase(), 40
+        function resetLocalData() {
+            if(confirm("Réinitialiser les données locales ? Les ventes sur le Cloud ne seront PAS supprimées.")) {
+                db.totalProfit = 0;
+                db.sales = [];
+                db.expenses = [];
+                save();
+                init();
+            }
+        }
+
+        // --- FONCTIONS EXISTANTES (CONSERVÉES) ---
+        function generatePDF(client, item, qty, price, total) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            if(db.profile.logo) doc.addImage(db.profile.logo, 'PNG', 15, 10, 25, 25);
+            doc.setFontSize(20); doc.text(db.profile.biz.toUpperCase(), 45, 20);
+            doc.setFontSize(9); doc.text(db.profile.adr || "", 45, 26);
+            doc.autoTable({
+                startY: 60,
+                head: [['Produit', 'P.U', 'Qté', 'Total']],
+                body: [[item, price + " " + db.profile.cur, qty, total + " " + db.profile.cur]],
+                theme: 'striped', headStyles: { fillColor: [37, 99, 235] }
+            });
+            doc.save(`Facture_${client}.pdf`);
+        }
+
+        function addProduct() {
+            const name = document.getElementById('p_name').value;
+            const cost = parseInt(document.getElementById('p_cost').value);
+            const price = parseInt(document.getElementById('p_price').value);
+            const qty = parseInt(document.getElementById('p_qty').value);
+            if(!name || isNaN(cost)) return;
+            db.inventory.push({ id: Date.now(), name, cost, price, qty });
+            save(); init(); toggleAddProduct();
+        }
+
+        function addExpense() {
+            const amt = parseInt(document.getElementById('e_amount').value);
+            if(!amt) return;
+            db.expenses.push({ type: document.getElementById('e_type').value, amount: amt, date: new Date().toLocaleDateString() });
+            db.totalProfit -= amt;
+            save(); init(); showPage('home');
+        }
+
+        function renderStock() {
+            document.getElementById('stockList').innerHTML = db.inventory.map(p => `
+                <div class="bg-white p-4 rounded-2xl border flex justify-between items-center shadow-sm">
+                    <div><p class="font-bold text-sm">${p.name}</p><p class="text-[10px] text-slate-400">${p.price} ${db.profile.cur}</p></div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-black ${p.qty <= 3 ? 'text-red-500' : 'text-blue-600'} text-lg mr-2">${p.qty}</span>
+                        <button onclick="db.inventory = db.inventory.filter(x => x.id !== ${p.id});save();renderStock()" class="p-2 text-red-400"><i data-lucide="trash-2" class="w-4"></i></button>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function renderHome() { 
+            document.getElementById('valProfit').innerText = db.totalProfit.toLocaleString(); 
+            document.querySelectorAll('.cur').forEach(e => e.innerText = db.profile.cur);
+        }
+
+        function renderHistory() {
+            const history = [...db.sales, ...db.expenses.map(e=>({...e, isExp:true}))].reverse().slice(0, 10);
+            document.getElementById('historyList').innerHTML = history.map(h => `
+                <div class="bg-white p-3 rounded-xl border flex justify-between items-center text-[11px]">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="${h.isExp ? 'minus-circle' : 'plus-circle'}" class="w-4 ${h.isExp ? 'text-red-400' : 'text-blue-400'}"></i>
+                        <div>
