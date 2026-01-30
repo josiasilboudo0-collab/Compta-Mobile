@@ -1,252 +1,268 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ComptaPro - Stable</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-    <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #F3F4F6; padding-bottom: 90px; }
-        .page { display: none; } .page.active { display: block; animation: fadeIn 0.2s; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .input-f { width: 100%; padding: 12px; background: white; border-radius: 10px; border: 1px solid #D1D5DB; margin-bottom: 10px; outline: none; }
-        .btn-blue { background: #2563EB; color: white; padding: 14px; border-radius: 12px; font-weight: bold; width: 100%; cursor: pointer; border: none; }
-        .card { background: white; padding: 15px; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 10px; }
-        nav { position: fixed; bottom: 0; left: 0; right: 0; height: 70px; background: white; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #E5E7EB; z-index: 100; }
-        nav button { color: #6B7280; font-size: 10px; font-weight: bold; display: flex; flex-direction: column; align-items: center; border: none; background: none; }
-        nav button.active { color: #2563EB; }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ComptaPro - Stable</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #F3F4F6; padding-bottom: 90px; }
+        .page { display: none; } .page.active { display: block; animation: fadeIn 0.2s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .input-f { width: 100%; padding: 12px; background: white; border-radius: 10px; border: 1px solid #D1D5DB; margin-bottom: 10px; outline: none; }
+        .btn-blue { background: #2563EB; color: white; padding: 14px; border-radius: 12px; font-weight: bold; width: 100%; cursor: pointer; border: none; }
+        .card { background: white; padding: 15px; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 10px; }
+        nav { position: fixed; bottom: 0; left: 0; right: 0; height: 70px; background: white; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #E5E7EB; z-index: 100; }
+        nav button { color: #6B7280; font-size: 10px; font-weight: bold; display: flex; flex-direction: column; align-items: center; border: none; background: none; }
+        nav button.active { color: #2563EB; }
+    </style>
 </head>
 <body>
 
-    <div id="setup-screen" class="fixed inset-0 bg-white z-[200] p-6 hidden overflow-y-auto">
-        <h1 class="text-2xl font-black text-blue-600 text-center mb-8">COMPTAPRO</h1>
-        <div class="flex flex-col items-center mb-6">
-            <div onclick="document.getElementById('logoInp').click()" class="w-24 h-24 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden">
-                <img id="logoPre" class="hidden w-full h-full object-cover">
-                <i id="logoIc" data-lucide="camera" class="text-gray-400"></i>
-            </div>
-            <input type="file" id="logoInp" accept="image/*" class="hidden" onchange="loadImg(event)">
-        </div>
-        <input type="text" id="biz_n" placeholder="Nom de l'entreprise" class="input-f">
-        <input type="tel" id="biz_p" placeholder="Téléphone WhatsApp" class="input-f">
-        <input type="text" id="biz_a" placeholder="Adresse physique" class="input-f">
-        <select id="biz_c" class="input-f">
-            <option value="FCFA">FCFA</option>
-            <option value="€">Euro (€)</option>
-            <option value="$">Dollar ($)</option>
-        </select>
-        <button onclick="saveSetup()" class="btn-blue mt-4 uppercase">Créer mon compte</button>
-    </div>
+    <div id="setup-screen" class="fixed inset-0 bg-white z-[200] p-6 hidden overflow-y-auto">
+        <h1 class="text-2xl font-black text-blue-600 text-center mb-8">COMPTAPRO</h1>
+        <div class="flex flex-col items-center mb-6">
+            <div onclick="document.getElementById('logoInp').click()" class="w-24 h-24 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden">
+                <img id="logoPre" class="hidden w-full h-full object-cover">
+                <i id="logoIc" data-lucide="camera" class="text-gray-400"></i>
+            </div>
+            <input type="file" id="logoInp" accept="image/*" class="hidden" onchange="loadImg(event)">
+        </div>
+        <input type="text" id="biz_n" placeholder="Nom de l'entreprise" class="input-f">
+        <input type="tel" id="biz_p" placeholder="Téléphone WhatsApp" class="input-f">
+        <input type="text" id="biz_a" placeholder="Adresse physique" class="input-f">
+        <select id="biz_c" class="input-f">
+            <option value="FCFA">FCFA</option>
+            <option value="€">Euro (€)</option>
+            <option value="$">Dollar ($)</option>
+        </select>
+        <button onclick="saveSetup()" class="btn-blue mt-4 uppercase">Créer mon compte</button>
+    </div>
 
-    <header class="p-4 bg-white border-b flex justify-between items-center sticky top-0 z-50">
-        <div class="flex items-center gap-3">
-            <img id="headL" class="w-8 h-8 rounded object-cover hidden">
-            <h1 id="headT" class="font-bold text-blue-600">ComptaPro</h1>
-        </div>
-        <div id="status" class="text-[10px] font-bold px-2 py-1 bg-gray-100 rounded">GRATUIT</div>
-    </header>
+    <header class="p-4 bg-white border-b flex justify-between items-center sticky top-0 z-50">
+        <div class="flex items-center gap-3">
+            <img id="headL" class="w-8 h-8 rounded object-cover hidden">
+            <h1 id="headT" class="font-bold text-blue-600">ComptaPro</h1>
+        </div>
+        <div id="status" class="text-[10px] font-bold px-2 py-1 bg-gray-100 rounded">GRATUIT</div>
+    </header>
 
-    <main class="p-4">
-        <div id="page-home" class="page active">
-            <div class="bg-blue-600 p-8 rounded-3xl text-white text-center shadow-lg mb-6">
-                <p class="text-xs opacity-80 uppercase mb-1">Bénéfice Net</p>
-                <h2 class="text-4xl font-black"><span id="valP">0</span> <span class="cur text-sm"></span></h2>
-                <p id="days" class="text-[10px] mt-4 text-yellow-300 font-bold hidden"></p>
-            </div>
-            <h3 class="text-xs font-bold text-gray-400 mb-3 uppercase">Activités récentes</h3>
-            <div id="hist" class="space-y-2"></div>
-        </div>
+    <main class="p-4">
+        <div id="page-home" class="page active">
+            <div class="bg-blue-600 p-8 rounded-3xl text-white text-center shadow-lg mb-6">
+                <p class="text-xs opacity-80 uppercase mb-1">Bénéfice Net</p>
+                <h2 class="text-4xl font-black"><span id="valP">0</span> <span class="cur text-sm"></span></h2>
+                <p id="days" class="text-[10px] mt-4 text-yellow-300 font-bold hidden"></p>
+            </div>
+            <h3 class="text-xs font-bold text-gray-400 mb-3 uppercase">Activités récentes</h3>
+            <div id="hist" class="space-y-2"></div>
+        </div>
 
-        <div id="page-stock" class="page">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold">Stock</h2>
-                <button onclick="toggleF('stk-form')" class="bg-blue-600 text-white p-2 rounded-lg"><i data-lucide="plus"></i></button>
-            </div>
-            <div id="stk-form" class="hidden card border-2 border-blue-50">
-                <input type="hidden" id="edit_id">
-                <input type="text" id="p_name" placeholder="Article" class="input-f">
-                <div class="grid grid-cols-2 gap-2">
-                    <input type="number" id="p_cost" placeholder="Prix Achat" class="input-f">
-                    <input type="number" id="p_sell" placeholder="Prix Vente" class="input-f">
-                </div>
-                <input type="number" id="p_qty" placeholder="Quantité" class="input-f">
-                <button onclick="addStock()" class="btn-blue">Enregistrer</button>
-            </div>
-            <div id="stkList" class="space-y-2"></div>
-        </div>
+        <div id="page-stock" class="page">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">Stock</h2>
+                <button onclick="toggleF('stk-form')" class="bg-blue-600 text-white p-2 rounded-lg"><i data-lucide="plus"></i></button>
+            </div>
+            <div id="stk-form" class="hidden card border-2 border-blue-50">
+                <input type="hidden" id="edit_id">
+                <input type="text" id="p_name" placeholder="Article" class="input-f">
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="number" id="p_cost" placeholder="Prix Achat" class="input-f">
+                    <input type="number" id="p_sell" placeholder="Prix Vente" class="input-f">
+                </div>
+                <input type="number" id="p_qty" placeholder="Quantité" class="input-f">
+                <button onclick="addStock()" class="btn-blue">Enregistrer</button>
+            </div>
+            <div id="stkList" class="space-y-2"></div>
+        </div>
 
-        <div id="page-sale" class="page">
-            <h2 class="text-xl font-bold mb-4">Facturation</h2>
-            <div class="card">
-                <input type="text" id="cl_name" placeholder="Nom du Client" class="input-f">
-                <div class="flex gap-2">
-                    <select id="sel_p" class="input-f m-0 flex-1"></select>
-                    <input type="number" id="sel_q" value="1" class="input-f m-0 w-20 text-center">
-                    <button onclick="addCart()" class="bg-blue-600 text-white px-3 rounded-lg"><i data-lucide="plus"></i></button>
-                </div>
-                <div id="cart" class="mt-4 border-t pt-4 space-y-2 text-xs"></div>
-                <div class="mt-4 flex justify-between items-center font-bold">
-                    <span>Total: <span id="cartT">0</span> <span class="cur"></span></span>
-                    <button onclick="doSale()" class="bg-green-600 text-white px-4 py-2 rounded-lg">VENDRE</button>
-                </div>
-            </div>
-        </div>
+        <div id="page-sale" class="page">
+            <h2 class="text-xl font-bold mb-4">Facturation</h2>
+            <div class="card">
+                <input type="text" id="cl_name" placeholder="Nom du Client" class="input-f">
+                <div class="flex gap-2">
+                    <select id="sel_p" class="input-f m-0 flex-1"></select>
+                    <input type="number" id="sel_q" value="1" class="input-f m-0 w-20 text-center">
+                    <button onclick="addCart()" class="bg-blue-600 text-white px-3 rounded-lg"><i data-lucide="plus"></i></button>
+                </div>
+                <div id="cart" class="mt-4 border-t pt-4 space-y-2 text-xs"></div>
+                <div class="mt-4 flex justify-between items-center font-bold">
+                    <span>Total: <span id="cartT">0</span> <span class="cur"></span></span>
+                    <button onclick="doSale()" class="bg-green-600 text-white px-4 py-2 rounded-lg">VENDRE</button>
+                </div>
+            </div>
+        </div>
 
-        <div id="page-exp" class="page">
-            <h2 class="text-xl font-bold mb-4">Dépenses</h2>
-            <div class="card">
-                <input type="text" id="ex_n" placeholder="Motif (Loyer, Transport...)" class="input-f">
-                <input type="number" id="ex_v" placeholder="Montant" class="input-f">
-                <button onclick="addExp()" class="btn-blue bg-red-500">Ajouter le frais</button>
-            </div>
-            <div id="expList" class="mt-4 space-y-2"></div>
-        </div>
+        <div id="page-exp" class="page">
+            <h2 class="text-xl font-bold mb-4">Dépenses</h2>
+            <div class="card">
+                <input type="text" id="ex_n" placeholder="Motif (Loyer, Transport...)" class="input-f">
+                <input type="number" id="ex_v" placeholder="Montant" class="input-f">
+                <button onclick="addExp()" class="btn-blue bg-red-500">Ajouter le frais</button>
+            </div>
+            <div id="expList" class="mt-4 space-y-2"></div>
+        </div>
 
-        <div id="page-pro" class="page">
-            <div class="card text-center py-8">
-                <i data-lucide="crown" class="mx-auto text-yellow-500 w-12 h-12 mb-4"></i>
-                <h2 class="text-xl font-bold">Mode PRO</h2>
-                <div class="space-y-3 mt-6">
-                    <a href="https://qaasxtqf.mychariow.shop/abonnement-pro-compta-mobile/checkout" target="_blank" class="btn-blue flex items-center justify-center gap-2">Payer via Chariow</a>
-                    <button onclick="waPay()" class="btn-blue bg-green-500">WhatsApp Admin</button>
-                </div>
-                <div class="mt-8 bg-gray-50 p-4 rounded-xl border-2 border-dashed">
-                    <p class="text-[10px] text-gray-400 font-bold uppercase">ID CLIENT</p>
-                    <p id="uid" class="text-3xl font-black text-blue-600"></p>
-                </div>
-                <input type="number" id="key" placeholder="Code d'activation" class="input-f mt-4 text-center font-bold">
-                <button onclick="activate()" class="btn-blue bg-black mt-2 uppercase">Activer</button>
-            </div>
-        </div>
-    </main>
+        <div id="page-pro" class="page">
+            <div class="card text-center py-8">
+                <i data-lucide="crown" class="mx-auto text-yellow-500 w-12 h-12 mb-4"></i>
+                <h2 class="text-xl font-bold">Mode PRO</h2>
+                <div class="space-y-3 mt-6">
+                    <a href="https://qaasxtqf.mychariow.shop/abonnement-pro-compta-mobile/checkout" target="_blank" class="btn-blue flex items-center justify-center gap-2">Payer via Chariow</a>
+                    <button onclick="waPay()" class="btn-blue bg-green-500">WhatsApp Admin</button>
+                </div>
+                <div class="mt-8 bg-gray-50 p-4 rounded-xl border-2 border-dashed">
+                    <p class="text-[10px] text-gray-400 font-bold uppercase">ID CLIENT</p>
+                    <p id="uid" class="text-3xl font-black text-blue-600"></p>
+                </div>
+                <input type="number" id="key" placeholder="Code d'activation" class="input-f mt-4 text-center font-bold">
+                <button onclick="activate()" class="btn-blue bg-black mt-2 uppercase">Activer</button>
+                
+                <hr class="my-6">
+                <h3 class="text-xs font-bold text-gray-400 mb-3">SÉCURITÉ DES DONNÉES</h3>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="exportData()" class="bg-gray-100 p-3 rounded-lg text-[10px] font-bold">EXPORTER SAUVEGARDE</button>
+                    <button onclick="document.getElementById('imp').click()" class="bg-gray-100 p-3 rounded-lg text-[10px] font-bold">RESTAURER</button>
+                    <input type="file" id="imp" class="hidden" onchange="importData(event)">
+                </div>
+            </div>
+        </div>
+    </main>
 
-    <nav>
-        <button onclick="nav('home')" id="n-home" class="active"><i data-lucide="home"></i>Accueil</button>
-        <button onclick="chk('stock')" id="n-stock"><i data-lucide="package"></i>Stock</button>
-        <button onclick="nav('sale')" id="n-sale"><i data-lucide="shopping-cart"></i>Vendre</button>
-        <button onclick="chk('exp')" id="n-exp"><i data-lucide="trending-down"></i>Frais</button>
-        <button onclick="nav('pro')" id="n-pro"><i data-lucide="crown"></i>Pro</button>
-    </nav>
+    <nav>
+        <button onclick="nav('home')" id="n-home" class="active"><i data-lucide="home"></i>Accueil</button>
+        <button onclick="chk('stock')" id="n-stock"><i data-lucide="package"></i>Stock</button>
+        <button onclick="nav('sale')" id="n-sale"><i data-lucide="shopping-cart"></i>Vendre</button>
+        <button onclick="chk('exp')" id="n-exp"><i data-lucide="trending-down"></i>Frais</button>
+        <button onclick="nav('pro')" id="n-pro"><i data-lucide="crown"></i>Pro</button>
+    </nav>
 
-    <script>
-        // --- DATA ---
-        let db = JSON.parse(localStorage.getItem('CP_V44')) || {
-            p:null, stk:[], sales:[], exps:[], prof:0, id:Math.floor(1000+Math.random()*8999), expD:null
-        };
-        let cart = [];
-        let logo = db.p ? db.p.logo : "";
+    <script>
+        let db = JSON.parse(localStorage.getItem('CP_V44')) || {
+            p:null, stk:[], sales:[], exps:[], prof:0, id:Math.floor(1000+Math.random()*8999), expD:null
+        };
+        let cart = [];
+        let logo = db.p ? db.p.logo : "";
 
-        window.onload = () => { if(!db.p) document.getElementById('setup-screen').classList.remove('hidden'); else start(); };
+        window.onload = () => { if(!db.p) document.getElementById('setup-screen').classList.remove('hidden'); else start(); };
 
-        function start() {
-            lucide.createIcons();
-            document.getElementById('headT').innerText = db.p.name;
-            if(db.p.logo) { document.getElementById('headL').src=db.p.logo; document.getElementById('headL').classList.remove('hidden'); }
-            document.getElementById('uid').innerText = db.id;
-            render(); chkExp(); updSel();
-        }
+        function start() {
+            lucide.createIcons();
+            document.getElementById('headT').innerText = db.p.name;
+            if(db.p.logo) { document.getElementById('headL').src=db.p.logo; document.getElementById('headL').classList.remove('hidden'); }
+            document.getElementById('uid').innerText = db.id;
+            render(); chkExp(); updSel();
+        }
 
-        // --- SETUP ---
-        function loadImg(e) {
-            let r = new FileReader();
-            r.onload = () => { logo=r.result; document.getElementById('logoPre').src=r.result; document.getElementById('logoPre').classList.remove('hidden'); document.getElementById('logoIc').classList.add('hidden'); };
-            r.readAsDataURL(e.target.files[0]);
-        }
-        function saveSetup() {
-            let n=document.getElementById('biz_n').value;
-            if(!n) return;
-            db.p = { name:n, tel:document.getElementById('biz_p').value, addr:document.getElementById('biz_a').value, cur:document.getElementById('biz_c').value, logo:logo };
-            save(); location.reload();
-        }
+        function exportData() {
+            const blob = new Blob([JSON.stringify(db)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `comptapro_save_${new Date().toLocaleDateString()}.json`;
+            a.click();
+        }
 
-        // --- STOCK ---
-        function addStock() {
-            let n=document.getElementById('p_name').value, c=+document.getElementById('p_cost').value, s=+document.getElementById('p_sell').value, q=+document.getElementById('p_qty').value, eid=document.getElementById('edit_id').value;
-            if(!n) return;
-            if(eid) { let i=db.stk.find(x=>x.id==eid); Object.assign(i,{n,c,s,q}); }
-            else { db.stk.push({id:Date.now(),n,c,s,q}); }
-            save(); render(); updSel(); toggleF('stk-form');
-        }
-        function editStk(id) {
-            let i=db.stk.find(x=>x.id==id);
-            document.getElementById('p_name').value=i.n; document.getElementById('p_cost').value=i.c; document.getElementById('p_sell').value=i.s; document.getElementById('p_qty').value=i.q; document.getElementById('edit_id').value=i.id;
-            document.getElementById('stk-form').classList.remove('hidden');
-        }
+        function importData(e) {
+            const reader = new FileReader();
+            reader.onload = (x) => { db = JSON.parse(x.target.result); save(); location.reload(); };
+            reader.readAsText(e.target.files[0]);
+        }
 
-        // --- FRAIS ---
-        function addExp() {
-            let n=document.getElementById('ex_n').value, v=+document.getElementById('ex_v').value;
-            if(!n || !v) return;
-            db.exps.push({n,v,d:new Date().toLocaleDateString()});
-            db.prof -= v; save(); render();
-            document.getElementById('ex_n').value=""; document.getElementById('ex_v').value="";
-        }
+        function loadImg(e) {
+            let r = new FileReader();
+            r.onload = () => { logo=r.result; document.getElementById('logoPre').src=r.result; document.getElementById('logoPre').classList.remove('hidden'); document.getElementById('logoIc').classList.add('hidden'); };
+            r.readAsDataURL(e.target.files[0]);
+        }
+        function saveSetup() {
+            let n=document.getElementById('biz_n').value;
+            if(!n) return;
+            db.p = { name:n, tel:document.getElementById('biz_p').value, addr:document.getElementById('biz_a').value, cur:document.getElementById('biz_c').value, logo:logo };
+            save(); location.reload();
+        }
 
-        // --- VENTE ---
-        function addCart() {
-            let id=document.getElementById('sel_p').value, q=+document.getElementById('sel_q').value, it=db.stk.find(x=>x.id==id);
-            if(!it || q>it.q) return alert("Stock insuffisant");
-            cart.push({...it, sq:q, st:it.s*q});
-            let t=0;
-            document.getElementById('cart').innerHTML = cart.map((i,idx)=> { t+=i.st; return `<div class="flex justify-between bg-gray-50 p-2 rounded"><span>${i.n} (x${i.sq})</span><button onclick="cart.splice(${idx},1);addCart()" class="text-red-500 font-bold">X</button></div>`}).join('');
-            document.getElementById('cartT').innerText = t;
-        }
-        function doSale() {
-            if(!cart.length) return;
-            let cli=document.getElementById('cl_name').value||"Client", tV=0, tP=0;
-            cart.forEach(i=>{ let s=db.stk.find(x=>x.id==i.id); s.q-=i.sq; tV+=i.st; tP+=(i.s-i.c)*i.sq; });
-            db.prof += tP;
-            let sData = {id:Date.now(), cli, items:[...cart], tot:tV, d:new Date().toLocaleString()};
-            db.sales.push(sData); save(); pdf(sData); location.reload();
-        }
+        function addStock() {
+            let n=document.getElementById('p_name').value, c=+document.getElementById('p_cost').value, s=+document.getElementById('p_sell').value, q=+document.getElementById('p_qty').value, eid=document.getElementById('edit_id').value;
+            if(!n) return;
+            if(eid) { let i=db.stk.find(x=>x.id==eid); Object.assign(i,{n,c,s,q}); }
+            else { db.stk.push({id:Date.now(),n,c,s,q}); }
+            save(); render(); updSel(); toggleF('stk-form');
+        }
+        function editStk(id) {
+            let i=db.stk.find(x=>x.id==id);
+            document.getElementById('p_name').value=i.n; document.getElementById('p_cost').value=i.c; document.getElementById('p_sell').value=i.s; document.getElementById('p_qty').value=i.q; document.getElementById('edit_id').value=i.id;
+            document.getElementById('stk-form').classList.remove('hidden');
+        }
 
-        // --- PDF ---
-        async function pdf(s) {
-            const { jsPDF } = window.jspdf;
-            let doc = new jsPDF();
-            if(db.p.logo) doc.addImage(db.p.logo,'PNG',15,10,20,20);
-            doc.setFontSize(14).text(db.p.name, 40, 20);
-            doc.setFontSize(8).text(db.p.addr + " | " + db.p.tel, 40, 25);
-            doc.autoTable({ startY:40, head:[['Art','Qté','Prix','Total']], body:s.items.map(i=>[i.n, i.sq, i.s, i.st]) });
-            doc.text("TOTAL : " + s.tot + " " + db.p.cur, 15, doc.lastAutoTable.finalY+10);
-            doc.save(`Facture_${s.cli}.pdf`);
-        }
+        function addExp() {
+            let n=document.getElementById('ex_n').value, v=+document.getElementById('ex_v').value;
+            if(!n || !v) return;
+            db.exps.push({id:Date.now(), n,v,d:new Date().toLocaleDateString()});
+            db.prof -= v; save(); render();
+            document.getElementById('ex_n').value=""; document.getElementById('ex_v').value="";
+        }
 
-        // --- UTILS ---
-        function render() {
-            document.getElementById('valP').innerText = db.prof.toLocaleString();
-            document.querySelectorAll('.cur').forEach(e=>e.innerText = db.p.cur);
-            document.getElementById('hist').innerHTML = [...db.sales,...db.exps].sort((a,b)=>b.id-a.id).slice(0,10).map(x=>`
-                <div class="card flex justify-between items-center text-xs">
-                    <div><b>${x.cli||x.n}</b><br><small class="text-gray-400">${x.d}</small></div>
-                    <span class="${x.cli?'text-blue-600':'text-red-500'} font-bold">${x.cli?'+':'-'} ${x.tot||x.v}</span>
-                </div>
-            `).join('');
-            document.getElementById('stkList').innerHTML = db.stk.map(i=>`
-                <div class="card flex justify-between items-center">
-                    <div><b>${i.n}</b><br><small>Prix: ${i.s} | Qté: ${i.q}</small></div>
-                    <div class="flex gap-2">
-                        <button onclick="editStk(${i.id})" class="text-blue-500"><i data-lucide="edit-3" class="w-4"></i></button>
-                        <button onclick="if(confirm('Supprimer?')){db.stk=db.stk.filter(x=>x.id!=${i.id});save();render()}" class="text-red-300"><i data-lucide="trash-2" class="w-4"></i></button>
-                    </div>
-                </div>
-            `).join('');
-            document.getElementById('expList').innerHTML = db.exps.slice(-5).reverse().map(e=>`<div class="card flex justify-between text-xs"><span>${e.n}</span><b class="text-red-500">-${e.v}</b></div>`).join('');
-            lucide.createIcons();
-        }
+        function addCart() {
+            let id=document.getElementById('sel_p').value, q=+document.getElementById('sel_q').value, it=db.stk.find(x=>x.id==id);
+            if(!it || q>it.q) return alert("Stock insuffisant");
+            cart.push({...it, sq:q, st:it.s*q});
+            let t=0;
+            document.getElementById('cart').innerHTML = cart.map((i,idx)=> { t+=i.st; return `<div class="flex justify-between bg-gray-50 p-2 rounded"><span>${i.n} (x${i.sq})</span><button onclick="cart.splice(${idx},1);addCart()" class="text-red-500 font-bold">X</button></div>`}).join('');
+            document.getElementById('cartT').innerText = t;
+        }
+        function doSale() {
+            if(!cart.length) return;
+            let cli=document.getElementById('cl_name').value||"Client", tV=0, tP=0;
+            cart.forEach(i=>{ let s=db.stk.find(x=>x.id==i.id); s.q-=i.sq; tV+=i.st; tP+=(i.s-i.c)*i.sq; });
+            db.prof += tP;
+            let sData = {id:Date.now(), cli, items:[...cart], tot:tV, d:new Date().toLocaleString()};
+            db.sales.push(sData); save(); pdf(sData); location.reload();
+        }
 
-        function nav(id) { document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active')); document.getElementById('page-'+id).classList.add('active'); document.getElementById('n-'+id).classList.add('active'); lucide.createIcons(); }
-        function chk(p) { if(db.expD) nav(p); else { alert("Option PRO requise"); nav('pro'); } }
-        function save() { localStorage.setItem('CP_V44', JSON.stringify(db)); }
-        function toggleF(id) { document.getElementById(id).classList.toggle('hidden'); }
-        function updSel() { document.getElementById('sel_p').innerHTML = db.stk.map(i=>`<option value="${i.id}">${i.n} (${i.q})</option>`).join(''); }
-        function activate() { let k=document.getElementById('key').value, m=new Date().getMonth()+1, v=(db.id+m+42)*7; if(k==v){ db.expD=Date.now()+(30*86400000); save(); alert("PRO activé!"); location.reload(); }else alert("Clé erronée"); }
-        function waPay() { let m=encodeURIComponent(`Activation PRO svp\nID: ${db.id}\nEntreprise: ${db.p.name}`); window.open(`https://wa.me/22600000000?text=${m}`); }
-        function chkExp() { if(db.expD && Date.now()<db.expD){ let d=Math.ceil((db.expD-Date.now())/86400000); document.getElementById('status').innerText="MODE PRO"; document.getElementById('status').className="text-[10px] font-bold px-2 py-1 bg-blue-600 text-white rounded"; document.getElementById('days').innerText=d+" JOURS RESTANTS"; document.getElementById('days').classList.remove('hidden'); }else{ db.expD=null; save(); } }
-    </script>
+        async function pdf(s) {
+            const { jsPDF } = window.jspdf;
+            let doc = new jsPDF();
+            if(db.p.logo) doc.addImage(db.p.logo,'PNG',15,10,20,20);
+            doc.setFontSize(14).text(db.p.name, 40, 20);
+            doc.setFontSize(8).text(db.p.addr + " | " + db.p.tel, 40, 25);
+            doc.autoTable({ startY:40, head:[['Art','Qté','Prix','Total']], body:s.items.map(i=>[i.n, i.sq, i.s, i.st]) });
+            doc.text("TOTAL : " + s.tot + " " + db.p.cur, 15, doc.lastAutoTable.finalY+10);
+            doc.save(`Facture_${s.cli}.pdf`);
+        }
+
+        function render() {
+            document.getElementById('valP').innerText = db.prof.toLocaleString();
+            document.querySelectorAll('.cur').forEach(e=>e.innerText = db.p.cur);
+            document.getElementById('hist').innerHTML = [...db.sales,...db.exps].sort((a,b)=>b.id-a.id).slice(0,10).map(x=>`
+                <div class="card flex justify-between items-center text-xs">
+                    <div><b>${x.cli||x.n}</b><br><small class="text-gray-400">${x.d}</small></div>
+                    <span class="${x.cli?'text-blue-600':'text-red-500'} font-bold">${x.cli?'+':'-'} ${x.tot||x.v}</span>
+                </div>
+            `).join('');
+            document.getElementById('stkList').innerHTML = db.stk.map(i=>`
+                <div class="card flex justify-between items-center">
+                    <div><b>${i.n}</b><br><small>Prix: ${i.s} | Qté: ${i.q}</small></div>
+                    <div class="flex gap-2">
+                        <button onclick="editStk(${i.id})" class="text-blue-500"><i data-lucide="edit-3" class="w-4"></i></button>
+                        <button onclick="if(confirm('Supprimer?')){db.stk=db.stk.filter(x=>x.id!=${i.id});save();render()}" class="text-red-300"><i data-lucide="trash-2" class="w-4"></i></button>
+                    </div>
+                </div>
+            `).join('');
+            document.getElementById('expList').innerHTML = db.exps.slice(-5).reverse().map(e=>`<div class="card flex justify-between text-xs"><span>${e.n}</span><b class="text-red-500">-${e.v}</b></div>`).join('');
+            lucide.createIcons();
+        }
+
+        function nav(id) { document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active')); document.getElementById('page-'+id).classList.add('active'); document.getElementById('n-'+id).classList.add('active'); lucide.createIcons(); }
+        function chk(p) { if(db.expD) nav(p); else { alert("Option PRO requise"); nav('pro'); } }
+        function save() { localStorage.setItem('CP_V44', JSON.stringify(db)); }
+        function toggleF(id) { document.getElementById(id).classList.toggle('hidden'); }
+        function updSel() { document.getElementById('sel_p').innerHTML = db.stk.map(i=>`<option value="${i.id}">${i.n} (${i.q})</option>`).join(''); }
+        function activate() { let k=document.getElementById('key').value, m=new Date().getMonth()+1, v=(db.id+m+42)*7; if(k==v){ db.expD=Date.now()+(30*86400000); save(); alert("PRO activé!"); location.reload(); }else alert("Clé erronée"); }
+        function waPay() { let m=encodeURIComponent(`Activation PRO svp\nID: ${db.id}\nEntreprise: ${db.p.name}`); window.open(`https://wa.me/22600000000?text=${m}`); }
+        function chkExp() { if(db.expD && Date.now()<db.expD){ let d=Math.ceil((db.expD-Date.now())/86400000); document.getElementById('status').innerText="MODE PRO"; document.getElementById('status').className="text-[10px] font-bold px-2 py-1 bg-blue-600 text-white rounded"; document.getElementById('days').innerText=d+" JOURS RESTANTS"; document.getElementById('days').classList.remove('hidden'); }else{ db.expD=null; save(); } }
+    </script>
 </body>
 </html>
