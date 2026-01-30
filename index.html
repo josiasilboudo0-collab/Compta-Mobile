@@ -3,13 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ComptaPro Ultra V4.2</title>
-    
+    <title>ComptaPro Ultra V4.3</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-    
     <style>
         body { font-family: sans-serif; background: #f4f7fe; padding-bottom: 100px; }
         .page { display: none; }
@@ -18,105 +16,110 @@
         .input-field { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; margin-bottom: 10px; outline: none; }
         .btn-blue { background: #2563eb; color: white; padding: 15px; border-radius: 12px; font-weight: bold; width: 100%; text-align: center; border: none; cursor: pointer; }
         .card { background: white; padding: 15px; border-radius: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 10px; }
-        nav { position: fixed; bottom: 0; left: 0; right: 0; height: 70px; background: white; border-top: 1px solid #eee; display: flex; justify-content: space-around; items-center: center; z-index: 100; }
-        nav button { color: #94a3b8; display: flex; flex-direction: column; align-items: center; font-size: 10px; font-weight: bold; }
+        nav { position: fixed; bottom: 0; left: 0; right: 0; height: 75px; background: white; border-top: 1px solid #eee; display: flex; justify-content: space-around; align-items: center; z-index: 100; }
+        nav button { color: #94a3b8; display: flex; flex-direction: column; align-items: center; font-size: 10px; font-weight: bold; border: none; background: none; }
         nav button.active { color: #2563eb; }
     </style>
 </head>
 <body>
 
     <div id="setup-screen" class="fixed inset-0 bg-white z-[200] p-6 hidden overflow-y-auto">
-        <h1 class="text-2xl font-bold text-blue-600 text-center mb-6">CONFIGURER MON COMPTE</h1>
-        
+        <h1 class="text-2xl font-bold text-blue-600 text-center mb-6 uppercase">Mon Entreprise</h1>
         <div class="flex flex-col items-center mb-6">
-            <div onclick="document.getElementById('logoInp').click()" class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center border-2 border-dashed border-gray-300 overflow-hidden">
+            <div onclick="document.getElementById('logoInp').click()" class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center border-2 border-dashed border-gray-300 overflow-hidden cursor-pointer">
                 <img id="logoPre" class="hidden w-full h-full object-cover">
                 <i id="logoIc" data-lucide="camera" class="text-gray-400"></i>
             </div>
             <input type="file" id="logoInp" accept="image/*" class="hidden" onchange="loadImg(event)">
-            <p class="text-xs mt-2 text-gray-500">Ajouter un logo</p>
         </div>
-
-        <input type="text" id="biz_name" placeholder="Nom de votre Business" class="input-field">
-        <input type="tel" id="biz_phone" placeholder="Numéro WhatsApp (ex: 226XXXXXXXX)" class="input-field">
-        <input type="text" id="biz_addr" placeholder="Adresse / Ville" class="input-field">
+        <input type="text" id="biz_name" placeholder="Nom du Business" class="input-field">
+        <input type="tel" id="biz_phone" placeholder="Téléphone" class="input-field">
+        <input type="text" id="biz_addr" placeholder="Adresse" class="input-field">
         <select id="biz_cur" class="input-field">
-            <option value="FCFA">Devise : FCFA</option>
-            <option value="€">Devise : Euro (€)</option>
-            <option value="$">Devise : Dollar ($)</option>
+            <option value="FCFA">FCFA</option>
+            <option value="€">Euro (€)</option>
+            <option value="$">Dollar ($)</option>
         </select>
-        <button onclick="setupDone()" class="btn-blue mt-4">CRÉER MON COMPTE</button>
+        <button onclick="setupDone()" class="btn-blue mt-4">SAUVEGARDER</button>
     </div>
 
     <header class="p-4 bg-white border-b flex justify-between items-center sticky top-0 z-50">
         <div class="flex items-center gap-2">
-            <img id="headLog" class="w-8 h-8 rounded hidden object-cover">
+            <img id="headLog" class="w-8 h-8 rounded hidden object-cover border">
             <h1 id="headTi" class="font-bold text-blue-600 text-sm">ComptaPro</h1>
         </div>
-        <div id="badge" class="text-[10px] bg-gray-100 px-2 py-1 rounded font-bold text-gray-500">GRATUIT</div>
+        <div id="badge" class="text-[10px] bg-blue-50 px-2 py-1 rounded font-bold text-blue-600">STANDART</div>
     </header>
 
     <main class="p-4">
         <div id="page-home" class="page active">
-            <div class="bg-blue-600 p-6 rounded-2xl text-white mb-6 text-center shadow-lg">
-                <p class="text-xs opacity-80 uppercase tracking-widest mb-1">Bénéfice Net</p>
-                <h2 class="text-4xl font-bold"><span id="totProf">0</span> <span class="cur"></span></h2>
-                <p id="sub-msg" class="text-[10px] mt-4 font-bold text-yellow-300 hidden uppercase"></p>
+            <div class="bg-slate-900 p-6 rounded-3xl text-white mb-6 text-center shadow-xl">
+                <p class="text-[10px] opacity-60 uppercase tracking-widest mb-1">Bénéfice Net Global</p>
+                <h2 class="text-4xl font-bold"><span id="totProf">0</span> <span class="cur text-sm"></span></h2>
+                <div id="sub-msg" class="text-[9px] mt-4 text-amber-400 font-bold hidden"></div>
             </div>
-            
-            <h3 class="font-bold text-gray-400 text-xs mb-3 uppercase">Ventes récentes</h3>
+            <h3 class="font-bold text-gray-400 text-[10px] mb-3 uppercase tracking-tighter">Flux récents</h3>
             <div id="salesList" class="space-y-2"></div>
         </div>
 
         <div id="page-stock" class="page">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold">Mon Stock</h2>
-                <button onclick="document.getElementById('stk-f').classList.toggle('hidden')" class="bg-blue-600 text-white p-2 rounded-lg"><i data-lucide="plus"></i></button>
+                <h2 class="text-xl font-bold">Stock</h2>
+                <button onclick="openStockForm()" class="bg-blue-600 text-white p-2 rounded-xl"><i data-lucide="plus"></i></button>
             </div>
-            <div id="stk-f" class="hidden card border-2 border-blue-50">
+            <div id="stk-f" class="hidden card border-2 border-blue-100">
+                <input type="hidden" id="edit_id">
                 <input type="text" id="p_n" placeholder="Nom produit" class="input-field">
                 <div class="grid grid-cols-2 gap-2">
                     <input type="number" id="p_c" placeholder="Prix Achat" class="input-field">
                     <input type="number" id="p_p" placeholder="Prix Vente" class="input-field">
                 </div>
                 <input type="number" id="p_q" placeholder="Quantité" class="input-field">
-                <button onclick="addStk()" class="btn-blue">AJOUTER</button>
+                <button onclick="addStk()" class="btn-blue">ENREGISTRER</button>
             </div>
             <div id="stkList" class="space-y-2"></div>
         </div>
 
         <div id="page-sale" class="page">
-            <h2 class="text-xl font-bold mb-4">Nouvelle Vente</h2>
+            <h2 class="text-xl font-bold mb-4">Facturation</h2>
             <div class="card">
                 <input type="text" id="cl_n" placeholder="Nom du Client" class="input-field">
                 <div class="flex gap-2">
-                    <select id="sel_p" class="input-field m-0"></select>
-                    <input type="number" id="sel_q" value="1" class="input-field m-0 w-20">
+                    <select id="sel_p" class="input-field m-0 flex-1"></select>
+                    <input type="number" id="sel_q" value="1" class="input-field m-0 w-16 text-center">
                     <button onclick="addCart()" class="bg-blue-600 text-white px-3 rounded-lg"><i data-lucide="plus"></i></button>
                 </div>
-                <div id="cartBox" class="mt-4 space-y-2 border-t pt-4"></div>
-                <div class="mt-4 flex justify-between items-center font-bold">
-                    <span>Total: <span id="cartTot">0</span> <span class="cur"></span></span>
-                    <button onclick="doSale()" class="bg-green-600 text-white px-4 py-2 rounded-lg text-xs">FACTURER (PDF)</button>
+                <div id="cartBox" class="mt-4 space-y-1"></div>
+                <div class="mt-4 border-t pt-4 flex justify-between items-center font-bold">
+                    <span class="text-sm">TOTAL: <span id="cartTot">0</span> <span class="cur"></span></span>
+                    <button onclick="doSale()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-[10px]">VALIDER</button>
                 </div>
             </div>
         </div>
 
+        <div id="page-expense" class="page">
+            <h2 class="text-xl font-bold mb-4">Dépenses / Frais</h2>
+            <div class="card">
+                <input type="text" id="exp_n" placeholder="Motif du frais (Loyer, Transport...)" class="input-field">
+                <input type="number" id="exp_v" placeholder="Montant" class="input-field">
+                <button onclick="addExp()" class="btn-blue">DÉDUIRE DU BÉNÉFICE</button>
+            </div>
+            <div id="expList" class="mt-4 space-y-2"></div>
+        </div>
+
         <div id="page-pro" class="page">
-            <div class="card text-center py-6">
-                <i data-lucide="crown" class="w-12 h-12 text-yellow-500 mx-auto mb-2"></i>
-                <h2 class="text-xl font-bold">Passer en Version PRO</h2>
-                <p class="text-xs text-gray-400 mb-6">Débloquez le Stock & les PDF illimités</p>
-                
-                <a href="https://qaasxtqf.mychariow.shop/abonnement-pro-compta-mobile/checkout" target="_blank" class="btn-blue mb-3 flex items-center justify-center gap-2">Payer via Chariow</a>
-                <button onclick="waPay()" class="btn-blue bg-green-500 mb-6">Payer via WhatsApp</button>
-                
-                <div class="bg-gray-50 p-4 rounded-xl border-2 border-dashed mb-4">
-                    <p class="text-[10px] font-bold text-gray-400 uppercase">Votre ID Client</p>
+            <div class="card text-center py-8">
+                <i data-lucide="crown" class="w-12 h-12 text-amber-500 mx-auto mb-2"></i>
+                <h2 class="text-xl font-bold mb-6">Mode PRO</h2>
+                <button onclick="waPay()" class="btn-blue bg-green-500 mb-6 flex items-center justify-center gap-2">
+                    <i data-lucide="message-circle" class="w-4"></i> WhatsApp Admin
+                </button>
+                <div class="bg-gray-50 p-4 rounded-2xl border-2 border-dashed mb-4">
+                    <p class="text-[10px] font-bold text-gray-400 uppercase">ID CLIENT</p>
                     <p id="cl_id" class="text-3xl font-bold text-blue-600"></p>
                 </div>
-                <input type="number" id="act_key" placeholder="Clé d'activation" class="input-field text-center font-bold">
-                <button onclick="unlock()" class="btn-blue bg-black">ACTIVER</button>
+                <input type="number" id="act_key" placeholder="Code d'activation" class="input-field text-center font-bold">
+                <button onclick="unlock()" class="btn-blue bg-black">ACTIVER 30 JOURS</button>
             </div>
         </div>
     </main>
@@ -125,15 +128,14 @@
         <button onclick="nav('home')" id="n-home" class="active"><i data-lucide="home"></i>Accueil</button>
         <button onclick="chkAcc('stock')" id="n-stock"><i data-lucide="package"></i>Stock</button>
         <button onclick="nav('sale')" id="n-sale"><i data-lucide="shopping-cart"></i>Vendre</button>
-        <button onclick="nav('pro')" id="n-pro"><i data-lucide="crown"></i>Premium</button>
+        <button onclick="chkAcc('expense')" id="n-expense"><i data-lucide="trending-down"></i>Frais</button>
+        <button onclick="nav('pro')" id="n-pro"><i data-lucide="crown"></i>PRO</button>
     </nav>
 
     <script>
-        // CONFIG : METS TON NUMÉRO ICI
-        const WHATSAPP_ADMIN = "22600000000"; 
-
-        let store = JSON.parse(localStorage.getItem('CP_V5')) || {
-            p: null, items: [], sales: [], prof: 0, uid: Math.floor(1000 + Math.random()*8999), exp: null
+        const ADMIN_WA = "22600000000"; 
+        let store = JSON.parse(localStorage.getItem('CP_V6')) || {
+            p: null, items: [], sales: [], exps: [], prof: 0, uid: Math.floor(1000 + Math.random()*8999), exp: null
         };
         let cart = [];
         let logoB64 = store.p ? store.p.logo : "";
@@ -150,12 +152,7 @@
 
         function loadImg(e) {
             let r = new FileReader();
-            r.onload = () => { 
-                logoB64 = r.result; 
-                document.getElementById('logoPre').src = r.result; 
-                document.getElementById('logoPre').classList.remove('hidden');
-                document.getElementById('logoIc').classList.add('hidden');
-            };
+            r.onload = () => { logoB64 = r.result; document.getElementById('logoPre').src = r.result; document.getElementById('logoPre').classList.remove('hidden'); document.getElementById('logoIc').classList.add('hidden'); };
             r.readAsDataURL(e.target.files[0]);
         }
 
@@ -166,101 +163,38 @@
             save(); location.reload();
         }
 
+        function openStockForm() { document.getElementById('stk-f').classList.toggle('hidden'); document.getElementById('edit_id').value = ""; }
+
         function addStk() {
-            let n = document.getElementById('p_n').value, c = +document.getElementById('p_c').value, p = +document.getElementById('p_p').value, q = +document.getElementById('p_q').value;
-            if(!n || !p) return;
-            store.items.push({ id: Date.now(), n, c, p, q });
+            let n = document.getElementById('p_n').value, c = +document.getElementById('p_c').value, p = +document.getElementById('p_p').value, q = +document.getElementById('p_q').value, eid = document.getElementById('edit_id').value;
+            if(!n || isNaN(p)) return;
+            if(eid) {
+                let i = store.items.find(x => x.id == eid);
+                Object.assign(i, { n, c, p, q });
+            } else {
+                store.items.push({ id: Date.now(), n, c, p, q });
+            }
             save(); ui(); updSel(); document.getElementById('stk-f').classList.add('hidden');
+        }
+
+        function editStk(id) {
+            let i = store.items.find(x => x.id == id);
+            document.getElementById('p_n').value = i.n;
+            document.getElementById('p_c').value = i.c;
+            document.getElementById('p_p').value = i.p;
+            document.getElementById('p_q').value = i.q;
+            document.getElementById('edit_id').value = i.id;
+            document.getElementById('stk-f').classList.remove('hidden');
+        }
+
+        function addExp() {
+            let n = document.getElementById('exp_n').value, v = +document.getElementById('exp_v').value;
+            if(!n || !v) return;
+            store.exps.push({ n, v, d: new Date().toLocaleDateString() });
+            store.prof -= v;
+            save(); ui(); document.getElementById('exp_n').value = ""; document.getElementById('exp_v').value = "";
         }
 
         function addCart() {
             let id = document.getElementById('sel_p').value, q = +document.getElementById('sel_q').value, it = store.items.find(x => x.id == id);
             if(!it || q > it.q) return alert("Stock insuffisant");
-            cart.push({ ...it, sq: q, st: it.p * q });
-            let t = 0;
-            document.getElementById('cartBox').innerHTML = cart.map(i => { t += i.st; return `<div class="flex justify-between text-xs bg-gray-50 p-2 rounded"><span>${i.n} (x${i.sq})</span><b>${i.st}</b></div>` }).join('');
-            document.getElementById('cartTot').innerText = t;
-        }
-
-        function doSale() {
-            if(!cart.length) return;
-            let cli = document.getElementById('cl_n').value || "Client Cash", tV = 0, tP = 0;
-            cart.forEach(i => {
-                let s = store.items.find(x => x.id == i.id);
-                s.q -= i.sq; tV += i.st; tP += (i.p - i.c) * i.sq;
-            });
-            store.prof += tP;
-            let sData = { id: Date.now(), cli, items: [...cart], tot: tV, d: new Date().toLocaleString() };
-            store.sales.push(sData);
-            save();
-            pdf(sData);
-            alert("Vente enregistrée !");
-            location.reload();
-        }
-
-        async function pdf(s) {
-            const { jsPDF } = window.jspdf;
-            let doc = new jsPDF();
-            if(store.p.logo) doc.addImage(store.p.logo, 'PNG', 15, 10, 20, 20);
-            doc.setFontSize(16); doc.text(store.p.name, 40, 20);
-            doc.setFontSize(8); doc.text(store.p.addr + " | Tél: " + store.p.tel, 40, 25);
-            doc.text("Facture N° " + s.id + " | Date: " + s.d, 15, 45);
-            doc.autoTable({ startY: 50, head: [['Art', 'Qté', 'Prix', 'Total']], body: s.items.map(i => [i.n, i.sq, i.p, i.st]) });
-            doc.text("TOTAL : " + s.tot + " " + store.p.cur, 15, doc.lastAutoTable.finalY + 10);
-            doc.save(`Facture_${s.cli}.pdf`);
-        }
-
-        function unlock() {
-            let k = document.getElementById('act_key').value, m = new Date().getMonth()+1, v = (store.uid + m + 42) * 7;
-            if(k == v) { store.exp = new Date().getTime() + (30*24*60*60*1000); save(); alert("PRO activé !"); location.reload(); }
-            else alert("Clé invalide");
-        }
-
-        function waPay() {
-            let m = encodeURIComponent(`Bonjour, je veux le code PRO.\nID : ${store.uid}\nEntreprise : ${store.p.name}`);
-            window.open(`https://wa.me/${WHATSAPP_ADMIN}?text=${m}`);
-        }
-
-        function chkExp() {
-            let n = new Date().getTime();
-            if(store.exp && n < store.exp) {
-                let d = Math.ceil((store.exp - n) / 86400000);
-                document.getElementById('badge').innerText = "MODE PRO";
-                document.getElementById('badge').className = "text-[10px] bg-blue-600 px-2 py-1 rounded font-bold text-white";
-                document.getElementById('sub-msg').innerText = d + " jours restants";
-                document.getElementById('sub-msg').classList.remove('hidden');
-            } else { store.exp = null; save(); }
-        }
-
-        function ui() {
-            document.getElementById('totProf').innerText = store.prof.toLocaleString();
-            document.querySelectorAll('.cur').forEach(e => e.innerText = store.p.cur);
-            document.getElementById('salesList').innerHTML = store.sales.slice(-5).reverse().map(s => `
-                <div class="card flex justify-between items-center text-xs">
-                    <div><b>${s.cli}</b><br><small>${s.d}</small></div>
-                    <span class="text-blue-600 font-bold">${s.tot} ${store.p.cur}</span>
-                </div>
-            `).join('');
-            document.getElementById('stkList').innerHTML = store.items.map(i => `
-                <div class="card flex justify-between items-center">
-                    <div><b>${i.n}</b><br><small>Prix: ${i.p}</small></div>
-                    <b class="${i.q < 5 ? 'text-red-500':'text-blue-600'}">${i.q}</b>
-                </div>
-            `).join('');
-            lucide.createIcons();
-        }
-
-        function nav(id) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-            document.getElementById('page-'+id).classList.add('active');
-            document.getElementById('n-'+id).classList.add('active');
-            lucide.createIcons();
-        }
-
-        function chkAcc(p) { if(store.exp) nav(p); else { alert("Option PRO requise"); nav('pro'); } }
-        function save() { localStorage.setItem('CP_V5', JSON.stringify(store)); }
-        function updSel() { document.getElementById('sel_p').innerHTML = store.items.map(i => `<option value="${i.id}">${i.n} (${i.q})</option>`).join(''); }
-    </script>
-</body>
-</html>
