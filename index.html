@@ -2,150 +2,190 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ComptaPro Cloud Direct</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ComptaPro Cloud Ultra</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     <style>
-        body { font-family: sans-serif; background: #f1f5f9; padding-bottom: 80px; }
-        .card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 12px; }
-        .input { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; margin-bottom: 10px; outline: none; }
-        nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; padding: 15px; border-top: 1px solid #e2e8f0; z-index: 100; }
-        .page { display: none; padding: 15px; }
-        .active { display: block; animation: fadeIn 0.3s; }
+        body { font-family: sans-serif; background: #f4f7fe; padding-bottom: 90px; }
+        .page { display: none; } .page.active { display: block; animation: fadeIn 0.3s; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .btn { width: 100%; padding: 12px; border-radius: 8px; color: white; font-weight: bold; }
+        .input-f { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 12px; margin-bottom: 10px; outline: none; }
+        .btn-blue { background: #2563eb; color: white; padding: 15px; border-radius: 14px; font-weight: bold; width: 100%; cursor: pointer; }
+        .card { background: white; padding: 15px; border-radius: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 12px; }
+        nav { position: fixed; bottom: 0; left: 0; right: 0; height: 75px; background: white; border-top: 1px solid #eee; display: flex; justify-content: space-around; align-items: center; z-index: 100; }
+        nav button { color: #94a3b8; display: flex; flex-direction: column; align-items: center; font-size: 10px; font-weight: bold; border: none; background: none; }
+        nav button.active { color: #2563eb; }
+        #sync-tag { position: fixed; top: 12px; right: 12px; font-size: 9px; background: #22c55e; color: white; padding: 2px 8px; border-radius: 10px; display: none; z-index: 1000; }
     </style>
 </head>
 <body>
 
-    <div id="page-config" class="page active">
-        <div class="card mt-10">
-            <h2 class="text-xl font-bold text-blue-600 mb-4">Initialisation Cloud</h2>
-            <input id="url" type="text" placeholder="Coller l'URL API ici" class="input" value="https://app.nocodb.com/api/v1/db/data/noco/psqprrfkrdcyu56">
-            <button onclick="saveConfig()" class="btn bg-blue-600">SE CONNECTER</button>
+    <div id="sync-tag">Cloud Sync...</div>
+
+    <div id="setup-screen" class="fixed inset-0 bg-white z-[200] p-6 hidden overflow-y-auto">
+        <h1 class="text-2xl font-black text-blue-600 text-center mb-6">COMPTAPRO CLOUD</h1>
+        <div class="flex flex-col items-center mb-4">
+            <div onclick="document.getElementById('logoInp').click()" class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center border-2 border-dashed border-gray-300 overflow-hidden">
+                <img id="logoPre" class="hidden w-full h-full object-cover">
+                <i id="logoIc" data-lucide="camera" class="text-gray-400"></i>
+            </div>
+            <input type="file" id="logoInp" accept="image/*" class="hidden" onchange="loadImg(event)">
         </div>
+        <input type="text" id="biz_n" placeholder="Nom du Business" class="input-f">
+        <input type="text" id="biz_url" placeholder="URL NocoDB" class="input-f" value="https://app.nocodb.com/api/v1/db/data/noco/psqprrfkrdcyu56">
+        <input type="tel" id="biz_p" placeholder="Téléphone" class="input-f">
+        <select id="biz_c" class="input-f"><option value="FCFA">FCFA</option><option value="€">€</option><option value="$">$</option></select>
+        <button onclick="saveSetup()" class="btn-blue mt-4">ACTIVER MON BUSINESS</button>
     </div>
 
-    <div id="page-vente" class="page">
-        <h2 class="text-lg font-bold mb-4">Nouvelle Vente</h2>
-        <div class="card">
-            <input id="cli" type="text" placeholder="Nom du Client" class="input">
-            <select id="prod-select" class="input"></select>
-            <input id="qte" type="number" value="1" class="input">
-            <button onclick="vendre()" class="btn bg-green-600">VALIDER & FACTURE PDF</button>
+    <header class="p-4 bg-white border-b flex justify-between items-center sticky top-0 z-50">
+        <div class="flex items-center gap-2">
+            <img id="headLog" class="w-8 h-8 rounded hidden object-cover border">
+            <h1 id="headTi" class="font-bold text-blue-600">ComptaPro</h1>
         </div>
-    </div>
+        <div id="badge" class="text-[10px] bg-gray-100 px-2 py-1 rounded font-bold">MODE CLOUD</div>
+    </header>
 
-    <div id="page-stock" class="page">
-        <h2 class="text-lg font-bold mb-4">Stock en temps réel</h2>
-        <div class="card">
-            <input id="p_nom" type="text" placeholder="Produit" class="input">
-            <input id="p_prix" type="number" placeholder="Prix Vente" class="input">
-            <input id="p_stock" type="number" placeholder="Quantité" class="input">
-            <button onclick="ajouterStock()" class="btn bg-blue-600">AJOUTER AU CLOUD</button>
+    <main class="p-4">
+        <div id="page-home" class="page active">
+            <div class="bg-slate-900 p-8 rounded-[2.5rem] text-white text-center shadow-xl mb-6">
+                <p class="text-[10px] opacity-50 uppercase tracking-widest mb-1">Bénéfice Net Global</p>
+                <h2 class="text-4xl font-bold"><span id="totProf">0</span> <span class="cur text-sm"></span></h2>
+                <div id="sub-msg" class="text-[10px] mt-4 text-amber-400 font-bold hidden"></div>
+            </div>
+            <h3 class="text-xs font-bold text-gray-400 mb-3 uppercase italic">Dernières Activités</h3>
+            <div id="histList" class="space-y-2"></div>
         </div>
-        <div id="liste-stock"></div>
-    </div>
 
-    <div id="page-frais" class="page">
-        <h2 class="text-lg font-bold mb-4">Dépenses</h2>
-        <div class="card">
-            <input id="f_motif" type="text" placeholder="Motif (Loyer...)" class="input">
-            <input id="f_montant" type="number" placeholder="Montant" class="input">
-            <button onclick="ajouterFrais()" class="btn bg-red-500">ENREGISTRER</button>
+        <div id="page-stock" class="page">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">Stock</h2>
+                <button onclick="document.getElementById('stk-f').classList.toggle('hidden')" class="bg-blue-600 text-white p-2 rounded-xl"><i data-lucide="plus"></i></button>
+            </div>
+            <div id="stk-f" class="hidden card border-2 border-blue-50">
+                <input type="hidden" id="edit_id">
+                <input type="text" id="p_n" placeholder="Nom Produit" class="input-f">
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="number" id="p_c" placeholder="Prix Achat" class="input-f">
+                    <input type="number" id="p_s" placeholder="Prix Vente" class="input-f">
+                </div>
+                <input type="number" id="p_q" placeholder="Quantité" class="input-f">
+                <button onclick="syncStk()" class="btn-blue">ENREGISTRER AU CLOUD</button>
+            </div>
+            <div id="stkList" class="space-y-2"></div>
         </div>
-    </div>
 
-    <nav id="menu" style="display: none;">
-        <button onclick="show('page-vente')" class="font-bold text-blue-600">Ventes</button>
-        <button onclick="show('page-stock')" class="font-bold text-gray-500">Stock</button>
-        <button onclick="show('page-frais')" class="font-bold text-gray-500">Frais</button>
+        <div id="page-sale" class="page">
+            <h2 class="text-xl font-bold mb-4">Facturation</h2>
+            <div class="card">
+                <input type="text" id="cl_n" placeholder="Nom du Client" class="input-f">
+                <div class="flex gap-2">
+                    <select id="sel_p" class="input-f m-0 flex-1"></select>
+                    <input type="number" id="sel_q" value="1" class="input-f m-0 w-16 text-center">
+                    <button onclick="addCart()" class="bg-blue-600 text-white px-3 rounded-lg"><i data-lucide="plus"></i></button>
+                </div>
+                <div id="cartBox" class="mt-4 space-y-2 text-xs border-t pt-4"></div>
+                <div class="mt-4 flex justify-between items-center font-bold">
+                    <span>TOTAL: <span id="cartT">0</span> <span class="cur"></span></span>
+                    <button onclick="doSale()" class="bg-green-600 text-white px-4 py-2 rounded-lg text-xs">VENDRE</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-exp" class="page">
+            <h2 class="text-xl font-bold mb-4">Dépenses</h2>
+            <div class="card">
+                <input type="text" id="ex_n" placeholder="Motif (Loyer, Transport...)" class="input-f">
+                <input type="number" id="ex_v" placeholder="Montant" class="input-f">
+                <button onclick="syncExp()" class="btn-blue bg-red-500">DÉDUIRE DU CLOUD</button>
+            </div>
+            <div id="expList" class="mt-4 space-y-2"></div>
+        </div>
+
+        <div id="page-pro" class="page">
+            <div class="card text-center py-8">
+                <i data-lucide="crown" class="w-12 h-12 text-amber-500 mx-auto mb-2"></i>
+                <h2 class="text-xl font-bold mb-6">Mode PRO Cloud</h2>
+                <div class="bg-gray-50 p-4 rounded-2xl border-2 border-dashed mb-4">
+                    <p class="text-[10px] font-bold text-gray-400 uppercase">ID CLIENT</p>
+                    <p id="cl_id" class="text-3xl font-bold text-blue-600"></p>
+                </div>
+                <input type="number" id="act_key" placeholder="Code d'activation" class="input-f text-center font-bold">
+                <button onclick="unlock()" class="btn-blue bg-black">ACTIVER</button>
+            </div>
+        </div>
+    </main>
+
+    <nav>
+        <button onclick="nav('home')" id="n-home" class="active"><i data-lucide="home"></i>Accueil</button>
+        <button onclick="chkAcc('stock')" id="n-stock"><i data-lucide="package"></i>Stock</button>
+        <button onclick="nav('sale')" id="n-sale"><i data-lucide="shopping-cart"></i>Vendre</button>
+        <button onclick="chkAcc('exp')" id="n-exp"><i data-lucide="trending-down"></i>Frais</button>
+        <button onclick="nav('pro')" id="n-pro"><i data-lucide="crown"></i>PRO</button>
     </nav>
 
     <script>
         const TOKEN = "1WLL5zRuBwK3nLuq4YBNZ8f2KHCXgzdgBXURpOKJ";
-        let conf = JSON.parse(localStorage.getItem('conf_simple'));
+        let store = JSON.parse(localStorage.getItem('CP_V55')) || {
+            p:null, stk:[], sales:[], exps:[], prof:0, uid:Math.floor(1000+Math.random()*8999), exp:null
+        };
+        let cart = [];
+        let logoB64 = store.p ? store.p.logo : "";
 
-        if(conf) show('page-vente');
+        window.onload = () => { if(!store.p) document.getElementById('setup-screen').classList.remove('hidden'); else { start(); refreshCloud(); } };
 
-        function saveConfig() {
-            let u = document.getElementById('url').value.trim();
-            if(!u) return alert("URL vide !");
-            localStorage.setItem('conf_simple', JSON.stringify({url: u}));
-            location.reload();
+        function start() {
+            lucide.createIcons();
+            document.getElementById('headTi').innerText = store.p.name;
+            if(store.p.logo) { document.getElementById('headLog').src=store.p.logo; document.getElementById('headLog').classList.remove('hidden'); }
+            document.getElementById('cl_id').innerText = store.uid;
+            ui(); chkExp();
         }
 
-        async function api(table, method="GET", body=null) {
+        async function noco(table, method="GET", body=null) {
+            document.getElementById('sync-tag').style.display = 'block';
             try {
-                let res = await fetch(`${conf.url}/${table}`, {
-                    method, 
-                    headers: {'xc-token': TOKEN, 'Content-Type': 'application/json'},
+                let res = await fetch(`${store.p.url}/${table}`, {
+                    method, headers: {'xc-token': TOKEN, 'Content-Type': 'application/json'},
                     body: body ? JSON.stringify(body) : null
                 });
+                document.getElementById('sync-tag').style.display = 'none';
                 return await res.json();
-            } catch(e) { console.error(e); }
+            } catch(e) { document.getElementById('sync-tag').style.background = 'red'; return null; }
         }
 
-        async function show(id) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            document.getElementById('menu').style.display = 'flex';
-            if(id === 'page-vente') loadProds();
-            if(id === 'page-stock') listStock();
+        async function refreshCloud() {
+            let s = await noco('Produits'); if(s) store.stk = s.list || s;
+            let v = await noco('Ventes'); if(v) store.sales = v.list || v;
+            let f = await noco('Frais'); if(f) store.exps = f.list || f;
+            calcProf(); ui(); updSel();
         }
 
-        async function loadProds() {
-            let data = await api('Produits');
-            let list = data.list || data;
-            document.getElementById('prod-select').innerHTML = list.map(p => `<option value="${p.Prix}">${p.Nom} (${p.Stock})</option>`).join('');
+        function calcProf() {
+            let gain = 0;
+            // On recalcule le profit réel basé sur (Prix_Vente - Prix_Achat) de chaque vente si possible
+            // Pour simplifier ici : Somme des Ventes - Somme des Frais
+            store.sales.forEach(s => gain += (s.Total || 0));
+            let dep = 0;
+            store.exps.forEach(e => dep += (e.Montant || 0));
+            store.prof = gain - dep;
         }
 
-        async function ajouterStock() {
-            await api('Produits', 'POST', {
-                Nom: document.getElementById('p_nom').value,
-                Prix: parseInt(document.getElementById('p_prix').value),
-                Stock: parseInt(document.getElementById('p_stock').value)
-            });
-            alert("Stock synchronisé !"); listStock();
+        function loadImg(e) {
+            let r = new FileReader();
+            r.onload = () => { logoB64=r.result; document.getElementById('logoPre').src=r.result; document.getElementById('logoPre').classList.remove('hidden'); document.getElementById('logoIc').classList.add('hidden'); };
+            r.readAsDataURL(e.target.files[0]);
         }
 
-        async function listStock() {
-            let data = await api('Produits');
-            let list = data.list || data;
-            document.getElementById('liste-stock').innerHTML = list.map(p => `
-                <div class='card flex justify-between items-center'>
-                    <span><b>${p.Nom}</b><br><small>${p.Prix} FCFA</small></span>
-                    <span class="font-bold text-blue-600">${p.Stock}</span>
-                </div>
-            `).join('');
+        function saveSetup() {
+            let n=document.getElementById('biz_n').value, u=document.getElementById('biz_url').value;
+            if(!n || !u) return alert("Nom et URL requis");
+            store.p = { name:n, url:u, tel:document.getElementById('biz_p').value, cur:document.getElementById('biz_c').value, logo:logoB64 };
+            save(); location.reload();
         }
 
-        async function ajouterFrais() {
-            await api('Frais', 'POST', {
-                Motif: document.getElementById('f_motif').value,
-                Montant: parseInt(document.getElementById('f_montant').value)
-            });
-            alert("Frais enregistré dans le Cloud !");
-        }
-
-        async function vendre() {
-            let sel = document.getElementById('prod-select');
-            let total = parseInt(sel.value) * parseInt(document.getElementById('qte').value);
-            
-            await api('Ventes', 'POST', { 
-                Client: document.getElementById('cli').value || "Client Cash", 
-                Total: total 
-            });
-            
-            const { jsPDF } = window.jspdf;
-            let doc = new jsPDF();
-            doc.text("FACTURE COMPTAPRO", 10, 20);
-            doc.text(`Client: ${document.getElementById('cli').value}`, 10, 40);
-            doc.text(`Total: ${total} FCFA`, 10, 50);
-            doc.save("Facture.pdf");
-            alert("Vente enregistrée !");
-        }
-    </script>
-</body>
-</html>
+        async function syncStk() {
+            let data = { Nom:document.getElementById('p_n').value, Prix_Achat:+document.getElementById('p_c').
