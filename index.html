@@ -35,21 +35,20 @@
         .nav-pro button.active { color: white; transform: translateY(-5px); }
         .nav-pro button.active i { color: var(--primary); }
 
+        .section-title { font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin: 25px 0 12px 10px; }
+        
+        #setup-screen { position: fixed; inset: 0; background: white; z-index: 5000; padding: 40px 25px; display: none; overflow-y: auto; }
+        .locked { filter: blur(10px); pointer-events: none; opacity: 0.6; }
         .ctrl-btn { width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
         .btn-del { color: #ef4444; background: #fee2e2; }
         .btn-qty { background: #f1f5f9; color: #1e293b; }
-
-        .section-title { font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin: 25px 0 12px 10px; }
-
-        #setup-screen { position: fixed; inset: 0; background: white; z-index: 5000; padding: 40px 25px; display: none; overflow-y: auto; }
-        .locked { filter: blur(10px); pointer-events: none; opacity: 0.6; }
     </style>
 </head>
 <body>
 
     <div id="setup-screen">
         <div class="mb-8">
-            <h2 id="setup-title" class="text-4xl font-extrabold tracking-tight text-slate-900">Configuration.</h2>
+            <h2 class="text-4xl font-extrabold tracking-tight text-slate-900">Configuration.</h2>
         </div>
         <div class="space-y-4">
             <input type="text" id="setup-user" placeholder="Votre Nom" class="input-pro">
@@ -67,7 +66,7 @@
     <header class="glass-header p-5 sticky top-0 z-[1100] flex justify-between items-center">
         <div>
             <h1 id="header-biz" class="font-extrabold text-xl text-slate-900 tracking-tight uppercase">ComptaPro</h1>
-            <p id="licence-status" class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">V14 ELITE</p>
+            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">V14 ELITE</p>
         </div>
         <div id="days-badge" class="px-4 py-1.5 rounded-full text-[10px] font-extrabold tracking-wider"></div>
     </header>
@@ -140,11 +139,16 @@
 
             <div class="section-title">Abonnement</div>
             <div class="card-premium space-y-4">
-                <button onclick="window.open('https://chariow.com')" class="btn-secondary w-full !bg-orange-50 !text-orange-600 !border-orange-100 flex items-center justify-center gap-2">
+                <button onclick="window.open('https://qaasxtqf.mychariow.shop/abonnement-pro-compta-mobile/checkout')" class="btn-secondary w-full !bg-orange-50 !text-orange-600 !border-orange-100 flex items-center justify-center gap-2">
                     <i data-lucide="credit-card" class="w-4"></i> Payer sur Chariow
                 </button>
-                <div class="relative">
-                    <input type="text" id="lic-code" placeholder="Code PRO-XXXX" class="input-pro !mb-0 text-center font-bold tracking-widest">
+                
+                <button onclick="payWhatsApp()" class="btn-secondary w-full !bg-green-50 !text-green-600 !border-green-100 flex items-center justify-center gap-2">
+                    <i data-lucide="message-circle" class="w-4"></i> Paiement manuel WhatsApp
+                </button>
+
+                <div class="relative mt-2">
+                    <input type="text" id="lic-code" placeholder="Code PRO-XXXX" class="input-pro !mb-0 text-center font-bold tracking-widest uppercase">
                     <button onclick="activateLic()" class="absolute right-2 top-2 bottom-2 bg-blue-600 text-white px-4 rounded-xl text-xs font-bold">Activer</button>
                 </div>
             </div>
@@ -179,7 +183,7 @@
 
     <script>
         let db = JSON.parse(localStorage.getItem('CP_V14_ELITE')) || { 
-            biz:{}, stk:[], sales:[], expenses:[], prof:0,
+            biz:{}, stk:[], sales:[], prof:0,
             licenseID: "CP-" + Math.floor(1000 + Math.random() * 9000), expiryDate: null 
         };
         let cart = [];
@@ -187,7 +191,6 @@
         window.onload = () => { if (!db.biz.name) openSetup(false); else render(); };
         function save() { localStorage.setItem('CP_V14_ELITE', JSON.stringify(db)); }
 
-        // --- FONCTIONS ---
         function render() {
             document.getElementById('header-biz').innerText = db.biz.name || "ComptaPro";
             document.getElementById('valP').innerText = Math.round(db.prof).toLocaleString();
@@ -217,7 +220,19 @@
             `).join('');
 
             document.getElementById('sel_p').innerHTML = db.stk.map(i => `<option value="${i.id}">${i.n} (${i.q})</option>`).join('');
+            
+            const now = Date.now();
+            const calc = (t) => db.sales.filter(s => (now-s.t) < t).reduce((a,b) => a+b.tot, 0);
+            document.getElementById('repJ').innerText = calc(86400000).toLocaleString();
+            document.getElementById('repS').innerText = calc(604800000).toLocaleString();
+            document.getElementById('repM').innerText = calc(2592000000).toLocaleString();
+            
             checkLicense(); lucide.createIcons();
+        }
+
+        function payWhatsApp() {
+            const msg = encodeURIComponent(`Bonjour, je souhaite activer ma licence ComptaPro.\n\nMon ID de licence est : ${db.licenseID}`);
+            window.open(`https://wa.me/22666566140?text=${msg}`);
         }
 
         function genMonthlyReport() {
@@ -233,7 +248,7 @@
             doc.autoTable({
                 startY: 40,
                 head: [['INDICATEUR', 'VALEUR']],
-                body: [['TOTAL VENTES', `${totalV.toLocaleString()} ${db.biz.cur}`]],
+                body: [['TOTAL VENTES DU MOIS', `${totalV.toLocaleString()} ${db.biz.cur}`]],
                 theme: 'grid'
             });
             doc.save(`Rapport_${now.getMonth()+1}.pdf`);
@@ -243,7 +258,7 @@
             const blob = new Blob([JSON.stringify(db)], {type: 'application/json'});
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
-            a.href = url; a.download = `comptapro_backup_${Date.now()}.json`;
+            a.href = url; a.download = `comptapro_backup.json`;
             a.click();
         }
 
@@ -259,11 +274,11 @@
         }
 
         function activateLic() {
-            const code = document.getElementById('lic-code').value;
-            if(code.length > 5) {
+            const code = document.getElementById('lic-code').value.toUpperCase();
+            if(code.startsWith("PRO-") && code.length > 6) {
                 db.expiryDate = Date.now() + (365 * 24 * 60 * 60 * 1000);
-                save(); alert("Licence activée pour 1 an !"); location.reload();
-            }
+                save(); alert("Licence activée !"); location.reload();
+            } else { alert("Code invalide."); }
         }
 
         function openSetup(e){ document.getElementById('setup-screen').style.display='block'; if(e){ document.getElementById('setup-biz').value=db.biz.name; document.getElementById('cancel-setup').classList.remove('hidden'); } }
@@ -271,7 +286,7 @@
         function saveSetup(){ let n=document.getElementById('setup-biz').value; if(!n)return; db.biz={name:n, user:document.getElementById('setup-user').value, addr:document.getElementById('setup-addr').value, phone:document.getElementById('setup-phone').value, cur:document.getElementById('setup-cur').value}; save(); location.reload(); }
         function checkLicense(){ const now=Date.now(), isOk=db.expiryDate && now<db.expiryDate; document.getElementById('lock-zone').classList.toggle('locked', !isOk); const b=document.getElementById('days-badge'); b.innerText = isOk ? "PRO" : "DEMO"; b.className = isOk ? "px-4 py-1.5 rounded-full text-[10px] font-extrabold bg-green-100 text-green-600" : "px-4 py-1.5 rounded-full text-[10px] font-extrabold bg-red-100 text-red-500"; return isOk; }
         function nav(id) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.querySelectorAll('.nav-pro button').forEach(b => b.classList.remove('active')); document.getElementById('page-' + id).classList.add('active'); document.getElementById('n-' + id).classList.add('active'); lucide.createIcons(); }
-        function logout(){ if(confirm("Effacer tout ?")){ localStorage.clear(); location.reload(); } }
+        function logout(){ if(confirm("Effacer toutes les données ?")){ localStorage.clear(); location.reload(); } }
         function copyID(){ navigator.clipboard.writeText(db.licenseID); alert("ID Copié"); }
         function toggleF(id){ document.getElementById(id).classList.toggle('hidden'); }
         function addCart() { let id = document.getElementById('sel_p').value, q = +document.getElementById('sel_q').value, it = db.stk.find(x => x.id == id); if(!it || q > it.q) return; let exists = cart.find(x => x.id == id); if(exists) exists.sq += q; else cart.push({...it, sq:q, st:it.s*q}); renderCart(); }
