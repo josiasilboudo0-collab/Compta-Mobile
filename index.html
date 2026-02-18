@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ComptaPro Elite V13</title>
+    <title>ComptaPro Ultimate V13</title>
+    <link rel="manifest" href="manifest.json">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -12,96 +13,99 @@
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
         
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAFC; color: #1E293B; padding-bottom: 100px; }
-        .page { display: none; } .page.active { display: block; animation: slideUp 0.4s ease-out; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        .card { background: white; border: 1px solid rgba(226, 232, 240, 0.8); border-radius: 24px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.03); margin-bottom: 16px; transition: all 0.3s ease; }
-        .card:active { transform: scale(0.98); }
+        /* Animations */
+        .page { display: none; } 
+        .page.active { display: block; animation: slideUp 0.4s ease-out; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
         
-        .input-f { width: 100%; padding: 16px; border-radius: 16px; border: 1px solid #E2E8F0; margin-bottom: 12px; outline: none; transition: all 0.2s; background: #FDFDFD; font-size: 15px; }
+        /* Cards & UI Elements */
+        .card { background: white; padding: 24px; border-radius: 28px; border: 1px solid rgba(226, 232, 240, 0.8); box-shadow: 0 10px 30px -10px rgba(0,0,0,0.04); margin-bottom: 16px; transition: transform 0.2s; }
+        .card:active { transform: scale(0.99); }
+        
+        .input-f { width: 100%; padding: 16px; border-radius: 16px; border: 1px solid #E2E8F0; margin-bottom: 12px; outline: none; transition: all 0.2s; background: #FDFDFD; }
         .input-f:focus { border-color: #2563EB; box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); background: white; }
         
-        .btn-blue { background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%); color: white; padding: 18px; border-radius: 18px; font-weight: 700; width: 100%; border: none; shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
-        .locked { filter: blur(15px); pointer-events: none; opacity: 0.6; transition: 0.5s; }
+        .btn-blue { background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%); color: white; padding: 18px; border-radius: 20px; font-weight: 700; width: 100%; border: none; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2); transition: all 0.2s; }
+        .btn-blue:active { transform: scale(0.96); opacity: 0.9; }
         
-        nav { position: fixed; bottom: 15px; left: 15px; right: 15px; height: 75px; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(15px); display: flex; justify-content: space-around; align-items: center; border-radius: 25px; border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 20px 40px rgba(0,0,0,0.1); z-index: 1000; }
-        nav button { color: #94A3B8; font-size: 11px; font-weight: 600; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: 0.3s; }
+        .locked { filter: blur(15px); pointer-events: none; opacity: 0.6; }
+        
+        /* Navigation Moderne */
+        nav { position: fixed; bottom: 20px; left: 20px; right: 20px; height: 75px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px); display: flex; justify-content: space-around; align-items: center; border-radius: 25px; border: 1px solid rgba(255, 255, 255, 0.3); box-shadow: 0 20px 40px rgba(0,0,0,0.1); z-index: 1000; }
+        nav button { color: #94A3B8; font-size: 11px; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: 0.3s; }
         nav button.active { color: #2563EB; transform: translateY(-5px); }
-        nav button.active i { background: rgba(37, 99, 235, 0.1); padding: 8px; border-radius: 12px; }
+        nav button.active i { background: rgba(37, 99, 235, 0.1); padding: 8px; border-radius: 14px; }
 
-        #overlay-screen { position: fixed; inset: 0; background: #F8FAFC; z-index: 2000; display: none; overflow-y: auto; padding: 30px; }
-        .badge-pro { background: linear-gradient(90deg, #F59E0B, #D97706); color: white; padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: 900; }
+        #overlay-screen { position: fixed; inset: 0; background: #F8FAFC; z-index: 2000; display: none; overflow-y: auto; padding: 40px 30px; }
+        
+        .badge-status { font-size: 10px; font-weight: 800; padding: 6px 12px; border-radius: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
     </style>
 </head>
 <body>
 
     <div id="overlay-screen">
-        <div class="max-w-md mx-auto">
-            <h2 id="setup-title" class="text-4xl font-extrabold text-slate-900 mb-2">ComptaPro <span class="text-blue-600 italic text-2xl">Elite</span></h2>
-            <p class="text-slate-500 mb-8 font-medium">Configurez votre identité commerciale.</p>
-            <div class="space-y-4">
-                <div class="bg-blue-50 p-6 rounded-3xl border border-blue-100 text-center border-dashed">
-                    <label class="text-xs font-bold uppercase text-blue-600 mb-2 block">Logo de l'entreprise</label>
-                    <input type="file" id="setup-logo" accept="image/*" class="hidden">
-                    <button onclick="document.getElementById('setup-logo').click()" class="bg-white px-4 py-2 rounded-xl shadow-sm border text-sm font-semibold text-slate-600">Choisir une image</button>
-                </div>
-                <input type="text" id="setup-user" placeholder="Votre Nom (Propriétaire)" class="input-f">
-                <input type="text" id="setup-biz" placeholder="Nom de la Boutique" class="input-f">
-                <input type="text" id="setup-addr" placeholder="Adresse Physique" class="input-f">
-                <input type="text" id="setup-phone" placeholder="Contact Téléphone" class="input-f">
-                <select id="setup-cur" class="input-f">
-                    <option value="FCFA">Devise : FCFA</option>
-                    <option value="GNF">Devise : GNF</option>
-                    <option value="$">Devise : Dollar ($)</option>
-                    <option value="€">Devise : Euro (€)</option>
-                </select>
-                <button onclick="saveSetup()" class="btn-blue text-lg shadow-xl mt-4">COMMENCER</button>
-                <button id="cancel-setup" onclick="closeSetup()" class="w-full text-slate-400 font-bold text-sm mt-4 hidden">ANNULER</button>
+        <h2 id="setup-title" class="text-4xl font-extrabold text-slate-900 mb-2 tracking-tight">Bienvenue !</h2>
+        <p class="text-slate-500 mb-10 font-medium">Configurez votre identité professionnelle en un instant.</p>
+        <div class="space-y-4">
+            <div class="bg-blue-50/50 p-6 rounded-3xl border border-dashed border-blue-200 text-center">
+                <label class="text-xs font-bold uppercase text-blue-600 mb-3 block">Logo de l'entreprise</label>
+                <input type="file" id="setup-logo" accept="image/*" class="text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700">
             </div>
+            <input type="text" id="setup-user" placeholder="Votre Nom" class="input-f">
+            <input type="text" id="setup-biz" placeholder="Nom de l'Entreprise" class="input-f">
+            <input type="text" id="setup-addr" placeholder="Adresse Physique" class="input-f">
+            <input type="text" id="setup-phone" placeholder="Contact Téléphone" class="input-f">
+            <select id="setup-cur" class="input-f">
+                <option value="FCFA">Devise : FCFA</option>
+                <option value="GNF">Devise : GNF</option>
+                <option value="$">Devise : Dollar ($)</option>
+                <option value="€">Devise : Euro (€)</option>
+            </select>
+            <button onclick="saveSetup()" class="btn-blue text-lg mt-4">CRÉER MON COMPTE</button>
+            <button id="cancel-setup" onclick="closeSetup()" class="w-full text-slate-400 font-bold text-sm mt-4 hidden">ANNULER</button>
         </div>
     </div>
 
-    <header class="p-6 bg-white/80 backdrop-blur-md sticky top-0 z-[1100] border-b border-slate-100 flex justify-between items-center">
+    <header class="p-6 bg-white/80 backdrop-blur-md border-b border-slate-100 flex justify-between items-center sticky top-0 z-[1100]">
         <div>
-            <h1 id="header-biz" class="font-extrabold text-xl tracking-tight text-slate-800 uppercase">ComptaPro</h1>
-            <div class="flex items-center gap-2">
-                <span class="badge-pro">ULTIMATE V13</span>
-                <p id="licence-status" class="text-[9px] font-bold text-slate-400 uppercase tracking-widest"></p>
-            </div>
+            <h1 id="header-biz" class="font-extrabold text-xl text-slate-900 tracking-tighter uppercase">ComptaPro</h1>
+            <p id="licence-status" class="text-[9px] font-extrabold text-blue-500 uppercase tracking-[0.2em]"></p>
         </div>
-        <div id="days-badge" class="px-4 py-1.5 rounded-full text-[10px] font-extrabold shadow-sm border"></div>
+        <div id="days-badge" class="badge-status"></div>
     </header>
 
-    <main class="p-5 max-w-lg mx-auto">
+    <main class="p-5 max-w-xl mx-auto">
         <div id="page-home" class="page active">
             <div class="bg-slate-900 p-8 rounded-[40px] text-white shadow-2xl mb-8 relative overflow-hidden">
-                <div class="absolute -top-10 -right-10 w-40 h-40 bg-blue-600 rounded-full blur-[80px] opacity-30"></div>
-                <p class="text-xs font-bold opacity-60 uppercase tracking-widest mb-1">Caisse Actuelle</p>
-                <h2 class="text-4xl font-extrabold tracking-tighter mb-8"><span id="valP">0</span> <small class="text-blue-400 text-lg cur"></small></h2>
+                <div class="absolute -top-10 -right-10 w-32 h-32 bg-blue-600 rounded-full blur-[60px] opacity-40"></div>
+                <p class="text-xs opacity-60 uppercase font-extrabold tracking-widest mb-1">Bénéfice Net Global</p>
+                <h2 class="text-4xl font-extrabold tracking-tighter mb-8"><span id="valP">0</span> <small class="cur text-blue-400 text-lg"></small></h2>
+                
                 <div class="grid grid-cols-3 gap-3">
-                    <div class="bg-white/5 backdrop-blur-lg p-3 rounded-2xl border border-white/10">
-                        <p class="text-[9px] font-bold opacity-50 uppercase mb-1">Jour</p>
-                        <span id="repJ" class="text-sm font-extrabold">0</span>
+                    <div class="bg-white/10 backdrop-blur-md p-3 rounded-2xl border border-white/10 text-center">
+                        <span class="text-[9px] font-bold opacity-50 block mb-1">JOUR</span>
+                        <span id="repJ" class="font-extrabold text-sm">0</span>
                     </div>
-                    <div class="bg-white/5 backdrop-blur-lg p-3 rounded-2xl border border-white/10">
-                        <p class="text-[9px] font-bold opacity-50 uppercase mb-1">Sem.</p>
-                        <span id="repS" class="text-sm font-extrabold">0</span>
+                    <div class="bg-white/10 backdrop-blur-md p-3 rounded-2xl border border-white/10 text-center">
+                        <span class="text-[9px] font-bold opacity-50 block mb-1">SEM.</span>
+                        <span id="repS" class="font-extrabold text-sm">0</span>
                     </div>
-                    <div class="bg-white/5 backdrop-blur-lg p-3 rounded-2xl border border-white/10">
-                        <p class="text-[9px] font-bold opacity-50 uppercase mb-1">Mois</p>
-                        <span id="repM" class="text-sm font-extrabold">0</span>
+                    <div class="bg-white/10 backdrop-blur-md p-3 rounded-2xl border border-white/10 text-center">
+                        <span class="text-[9px] font-bold opacity-50 block mb-1">MOIS</span>
+                        <span id="repM" class="font-extrabold text-sm">0</span>
                     </div>
                 </div>
             </div>
 
             <div class="grid grid-cols-2 gap-4 mb-8">
-                <button onclick="nav('sale')" class="bg-white border border-slate-100 p-5 rounded-[30px] flex flex-col items-center gap-3 shadow-sm active:bg-blue-50 transition-all">
-                    <div class="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600"><i data-lucide="shopping-bag"></i></div>
-                    <span class="text-xs font-extrabold uppercase text-slate-600">Vendre</span>
+                <button onclick="nav('sale')" class="card m-0 flex flex-col items-center gap-3 p-6 text-blue-600">
+                    <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center"><i data-lucide="shopping-cart"></i></div>
+                    <span class="text-xs font-extrabold uppercase tracking-tight text-slate-700">Vendre</span>
                 </button>
-                <button onclick="nav('expense')" class="bg-white border border-slate-100 p-5 rounded-[30px] flex flex-col items-center gap-3 shadow-sm active:bg-red-50 transition-all">
-                    <div class="w-12 h-12 bg-red-100 rounded-2xl flex items-center justify-center text-red-600"><i data-lucide="arrow-down-right"></i></div>
-                    <span class="text-xs font-extrabold uppercase text-slate-600">Dépense</span>
+                <button onclick="nav('expense')" class="card m-0 flex flex-col items-center gap-3 p-6 text-red-500">
+                    <div class="w-12 h-12 bg-red-50 rounded-2xl flex items-center justify-center"><i data-lucide="arrow-down-circle"></i></div>
+                    <span class="text-xs font-extrabold uppercase tracking-tight text-slate-700">Dépense</span>
                 </button>
             </div>
 
@@ -111,126 +115,116 @@
 
         <div id="lock-zone">
             <div id="page-sale" class="page">
-                <div class="flex items-center gap-3 mb-6">
-                    <button onclick="nav('home')" class="p-2 bg-white rounded-xl border"><i data-lucide="chevron-left"></i></button>
-                    <h2 class="text-2xl font-extrabold">Caisse</h2>
-                </div>
-                <div class="card p-6 border-t-8 border-blue-600">
-                    <input type="text" id="vendeur" placeholder="Vendeur par défaut" class="input-f">
-                    <input type="text" id="cl_name" placeholder="Client (Optionnel)" class="input-f">
+                <h2 class="text-2xl font-extrabold mb-6 tracking-tight">Nouvelle Vente</h2>
+                <div class="card border-t-8 border-blue-600">
+                    <input type="text" id="vendeur" placeholder="Vendeur" class="input-f bg-slate-50 border-transparent">
+                    <input type="text" id="cl_name" placeholder="Nom du Client" class="input-f">
                     
-                    <div class="flex gap-2 items-end mb-4 bg-slate-50 p-4 rounded-2xl border border-dashed border-slate-300">
-                        <div class="flex-1">
-                            <label class="text-[10px] font-black uppercase text-slate-400 ml-1">Article</label>
-                            <select id="sel_p" class="w-full bg-transparent font-bold text-slate-700 outline-none"></select>
-                        </div>
-                        <div class="w-20">
-                            <label class="text-[10px] font-black uppercase text-slate-400 ml-1">Qté</label>
-                            <input type="number" id="sel_q" value="1" class="w-full bg-transparent font-bold text-center outline-none">
-                        </div>
-                        <button onclick="addCart()" class="bg-slate-900 text-white p-3 rounded-xl shadow-lg active:scale-90"><i data-lucide="plus" class="w-5 h-5"></i></button>
+                    <div class="flex gap-2 mb-4">
+                        <select id="sel_p" class="input-f flex-1 m-0 font-bold text-slate-700"></select>
+                        <input type="number" id="sel_q" value="1" class="input-f w-20 text-center m-0 font-bold">
+                        <button onclick="addCart()" class="bg-slate-900 text-white px-5 rounded-2xl active:scale-90 transition-transform"><i data-lucide="plus"></i></button>
                     </div>
 
-                    <div id="cart" class="space-y-2 mb-6"></div>
-
-                    <div class="pt-6 border-t border-slate-100 flex justify-between items-center">
+                    <div id="cart" class="mt-4 space-y-2 border-t border-dashed border-slate-200 pt-5"></div>
+                    
+                    <div class="mt-8 flex justify-between items-end">
                         <div>
-                            <p class="text-[10px] font-bold text-slate-400 uppercase">Total à payer</p>
-                            <span class="text-2xl font-extrabold text-slate-900"><span id="cartT">0</span> <small class="cur text-sm"></small></span>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Total Net</p>
+                            <span class="font-extrabold text-3xl tracking-tighter"><span id="cartT">0</span> <small class="cur text-lg text-slate-400"></small></span>
                         </div>
-                        <button onclick="doSale()" class="bg-blue-600 text-white px-8 py-4 rounded-2xl font-extrabold shadow-lg shadow-blue-200 active:scale-95 transition-all">VALIDER</button>
+                        <button onclick="doSale()" class="bg-green-600 text-white px-10 py-4 rounded-2xl shadow-lg shadow-green-100 font-extrabold uppercase text-sm active:scale-95 transition-all">Valider</button>
                     </div>
+                </div>
+            </div>
+
+            <div id="page-expense" class="page">
+                <h2 class="text-2xl font-extrabold mb-6 tracking-tight">Enregistrer une Charge</h2>
+                <div class="card border-t-8 border-red-500">
+                    <input type="text" id="exp_name" placeholder="Motif de la dépense" class="input-f">
+                    <input type="number" id="exp_amt" placeholder="Montant" class="input-f">
+                    <button onclick="addExpense()" class="w-full bg-red-500 text-white p-5 rounded-2xl font-extrabold shadow-lg shadow-red-100 mt-2">ENREGISTRER</button>
                 </div>
             </div>
 
             <div id="page-stock" class="page">
                 <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-extrabold text-slate-800">Inventaire</h2>
-                    <button onclick="toggleF('stk-form')" class="bg-slate-900 text-white px-5 py-2.5 rounded-2xl font-bold text-sm flex items-center gap-2 shadow-lg"><i data-lucide="plus" class="w-4 h-4"></i> Ajouter</button>
+                    <h2 class="text-2xl font-extrabold tracking-tight">Inventaire</h2>
+                    <button onclick="toggleF('stk-form')" class="bg-blue-600 text-white px-5 py-2.5 rounded-2xl font-bold text-sm flex items-center gap-2 shadow-lg"><i data-lucide="plus" class="w-4 h-4"></i> Produit</button>
                 </div>
-
-                <div id="stk-form" class="hidden card p-6 bg-blue-50 border-blue-100">
-                    <input type="text" id="p_name" placeholder="Désignation du produit" class="input-f">
-                    <div class="grid grid-cols-2 gap-3 mb-3">
-                        <div>
-                            <label class="text-[10px] font-bold uppercase text-slate-400 ml-1">Prix Achat</label>
-                            <input type="number" id="p_cost" class="input-f">
-                        </div>
-                        <div>
-                            <label class="text-[10px] font-bold uppercase text-slate-400 ml-1">Prix Vente</label>
-                            <input type="number" id="p_sell" class="input-f">
-                        </div>
+                
+                <div id="stk-form" class="hidden card bg-blue-50/50 border-blue-100">
+                    <input type="text" id="p_name" placeholder="Nom de l'article" class="input-f">
+                    <div class="grid grid-cols-2 gap-3">
+                        <input type="number" id="p_cost" placeholder="Prix Achat" class="input-f">
+                        <input type="number" id="p_sell" placeholder="Prix Vente" class="input-f">
                     </div>
-                    <label class="text-[10px] font-bold uppercase text-slate-400 ml-1">Quantité Initiale</label>
-                    <input type="number" id="p_qty" class="input-f">
-                    <button onclick="addStock()" class="btn-blue shadow-lg">ENREGISTRER LE PRODUIT</button>
+                    <input type="number" id="p_qty" placeholder="Quantité Initiale" class="input-f">
+                    <button onclick="addStock()" class="btn-blue mt-2">AJOUTER AU STOCK</button>
                 </div>
-
-                <div id="stkList" class="space-y-3 mt-4"></div>
-            </div>
-
-            <div id="page-expense" class="page">
-                <h2 class="text-2xl font-extrabold mb-6">Sortie de Caisse</h2>
-                <div class="card p-6 border-t-8 border-red-500">
-                    <input type="text" id="exp_name" placeholder="Motif (Loyer, Salaire, Divers...)" class="input-f">
-                    <input type="number" id="exp_amt" placeholder="Montant retiré" class="input-f">
-                    <button onclick="addExpense()" class="w-full bg-red-600 text-white p-4 rounded-2xl font-extrabold shadow-lg shadow-red-100">ENREGISTRER LA DÉPENSE</button>
-                </div>
+                <div id="stkList" class="space-y-3"></div>
             </div>
         </div>
 
         <div id="page-pro" class="page">
-            <h2 class="text-2xl font-extrabold mb-6">Paramètres</h2>
+            <h2 class="text-2xl font-extrabold mb-6 tracking-tight">Administration</h2>
             
-            <div class="bg-slate-900 rounded-[30px] p-6 text-white mb-6">
-                <p class="text-[10px] font-bold opacity-50 uppercase mb-2">ID Appareil (Licence)</p>
-                <div class="flex justify-between items-center">
-                    <h3 id="displayID" class="text-2xl font-mono font-bold text-blue-400"></h3>
-                    <button onclick="copyID()" class="bg-white/10 p-2 rounded-xl"><i data-lucide="copy" class="w-5 h-5"></i></button>
+            <div class="bg-slate-900 rounded-[30px] p-6 text-white mb-6 flex justify-between items-center shadow-xl">
+                <div>
+                    <p class="text-[10px] font-bold opacity-50 uppercase tracking-widest mb-1">ID Licence</p>
+                    <h3 id="displayID" class="text-xl font-mono font-bold text-blue-400 tracking-tighter"></h3>
                 </div>
+                <button onclick="copyID()" class="bg-white/10 p-3 rounded-2xl text-white/50"><i data-lucide="copy" class="w-5 h-5"></i></button>
             </div>
 
-            <div class="card p-6 border-2 border-orange-100 bg-orange-50/30 text-center">
-                <h3 class="font-extrabold text-sm mb-4 text-orange-700 uppercase tracking-tighter">Abonnement Professionnel</h3>
-                <div class="flex flex-col gap-2">
-                    <button onclick="contactWA()" class="bg-[#25D366] text-white p-4 rounded-2xl font-bold flex items-center justify-center gap-2"><i data-lucide="phone"></i> WhatsApp Pay</button>
-                    <button onclick="openChariow()" class="bg-orange-500 text-white p-4 rounded-2xl font-bold flex items-center justify-center gap-2"><i data-lucide="credit-card"></i> Paiement en Ligne</button>
+            <div class="card border-2 border-orange-100 bg-orange-50/20 text-center">
+                <h3 class="font-extrabold text-xs mb-4 uppercase text-orange-700 tracking-widest">Abonnement Professionnel</h3>
+                <div class="grid grid-cols-1 gap-2 mb-6">
+                    <button onclick="contactWA()" class="flex items-center justify-center gap-3 bg-green-600 text-white p-4 rounded-2xl font-bold text-sm shadow-md">
+                        <i data-lucide="message-circle"></i> Orange / Moov Money
+                    </button>
+                    <button onclick="openChariow()" class="flex items-center justify-center gap-3 bg-orange-500 text-white p-4 rounded-2xl font-bold text-sm shadow-md">
+                        <i data-lucide="credit-card"></i> Paiement par Carte
+                    </button>
                 </div>
-                <div class="mt-4 pt-4 border-t border-orange-100">
-                    <input type="text" id="activation-key" placeholder="Code Activation" class="input-f text-center font-mono uppercase bg-white">
-                    <button onclick="checkKey()" class="w-full bg-slate-800 text-white p-3 rounded-xl font-bold text-xs uppercase">Activer la Licence</button>
-                </div>
+                <input type="text" id="activation-key" placeholder="Code d'activation" class="input-f text-center font-mono uppercase bg-white border-orange-200">
+                <button onclick="checkKey()" class="w-full bg-slate-800 text-white p-4 rounded-2xl font-bold text-xs uppercase tracking-widest">Activer la Licence</button>
             </div>
 
-            <button onclick="openSetup(true)" class="card w-full flex items-center justify-between p-5 font-bold text-slate-700">
-                <div class="flex items-center gap-4"><i data-lucide="building" class="text-blue-600"></i> Profil Entreprise</div>
-                <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300"></i>
+            <button onclick="openSetup(true)" class="card w-full flex items-center justify-between p-5 font-bold text-slate-700 mb-4">
+                <div class="flex items-center gap-4"><i data-lucide="settings-2" class="text-blue-600"></i> Modifier Profil Boutique</div>
+                <i data-lucide="chevron-right" class="w-4 h-4 opacity-30"></i>
             </button>
 
-            <div class="card p-6 space-y-4">
-                <h3 class="font-extrabold text-xs text-slate-400 uppercase">Base de données</h3>
-                <button onclick="exportAudit()" class="w-full flex items-center gap-3 p-3 bg-slate-50 rounded-2xl font-bold text-sm text-slate-600"><i data-lucide="download" class="w-4 h-4"></i> Exporter Backup</button>
-                <button onclick="resetProfitAudit()" class="w-full p-3 text-red-500 font-extrabold text-[10px] uppercase border border-red-50 rounded-2xl">Clôturer la Caisse</button>
+            <div class="card space-y-3">
+                <h3 class="font-extrabold text-[10px] text-slate-400 uppercase tracking-widest px-1">Maintenance</h3>
+                <button onclick="exportAudit()" class="w-full flex items-center justify-between p-4 bg-slate-50 rounded-2xl font-bold text-sm text-slate-600">Exporter les données <i data-lucide="download" class="w-4 h-4"></i></button>
+                <label for="restore-file" class="w-full flex items-center justify-between p-4 bg-slate-50 rounded-2xl font-bold text-sm text-slate-600 cursor-pointer">Restaurer Backup <i data-lucide="upload" class="w-4 h-4"></i></label>
+                <input type="file" id="restore-file" class="hidden" accept=".json" onchange="restoreData(this)">
+                <button onclick="resetProfitAudit()" class="w-full p-4 text-red-500 font-extrabold text-[10px] uppercase tracking-tighter border border-red-50 rounded-2xl">Clôture & Remise à zéro caisse</button>
             </div>
+
+            <button onclick="logout()" class="w-full py-8 text-slate-300 font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2">
+                <i data-lucide="log-out" class="w-4"></i> Effacer toutes les données
+            </button>
         </div>
     </main>
 
     <nav>
-        <button onclick="nav('home')" id="n-home" class="active"><i data-lucide="layout-grid"></i>Accueil</button>
-        <button onclick="nav('sale')" id="n-sale"><i data-lucide="shopping-bag"></i>Vendre</button>
+        <button onclick="nav('home')" id="n-home" class="active"><i data-lucide="home"></i>Accueil</button>
+        <button onclick="nav('sale')" id="n-sale"><i data-lucide="shopping-cart"></i>Vendre</button>
         <button onclick="nav('stock')" id="n-stock"><i data-lucide="package"></i>Stock</button>
-        <button onclick="nav('pro')" id="n-pro"><i data-lucide="settings-2"></i>Admin</button>
+        <button onclick="nav('pro')" id="n-pro"><i data-lucide="user"></i>Admin</button>
     </nav>
 
     <script>
-        // Logique de données conservée et améliorée
-        let db = JSON.parse(localStorage.getItem('CP_V13_ELITE')) || { 
+        let db = JSON.parse(localStorage.getItem('CP_V13_ULTIMATE')) || { 
             biz:{}, stk:[], sales:[], expenses:[], resets:[], prof:0,
             licenseID: "CP-" + Math.floor(1000 + Math.random() * 9000), expiryDate: null 
         };
         let cart = [];
 
-        function save() { localStorage.setItem('CP_V13_ELITE', JSON.stringify(db)); }
+        function save() { localStorage.setItem('CP_V13_ULTIMATE', JSON.stringify(db)); }
 
         window.onload = () => { if (!db.biz.name) openSetup(false); else render(); };
 
@@ -251,104 +245,66 @@
 
         async function saveSetup() {
             const bizName = document.getElementById('setup-biz').value;
-            if(!bizName) return;
+            if(!bizName) return alert("Nom entreprise requis");
             const logoFile = document.getElementById('setup-logo').files[0];
+            const reader = new FileReader();
+            
             const finalize = (logoData) => {
-                db.biz = { user: document.getElementById('setup-user').value, name: bizName, addr: document.getElementById('setup-addr').value, phone: document.getElementById('setup-phone').value, cur: document.getElementById('setup-cur').value, logo: logoData || db.biz.logo || "" };
+                db.biz = {
+                    user: document.getElementById('setup-user').value,
+                    name: bizName, addr: document.getElementById('setup-addr').value,
+                    phone: document.getElementById('setup-phone').value,
+                    cur: document.getElementById('setup-cur').value,
+                    logo: logoData || db.biz.logo || ""
+                };
                 save(); location.reload();
             };
-            if (logoFile) { let r = new FileReader(); r.onloadend = () => finalize(r.result); r.readAsDataURL(logoFile); } else finalize();
+
+            if (logoFile) {
+                reader.onloadend = () => finalize(reader.result);
+                reader.readAsDataURL(logoFile);
+            } else finalize();
         }
 
         function checkLicense() {
-            const badge = document.getElementById('days-badge');
             const now = Date.now();
+            const badge = document.getElementById('days-badge');
             const isOk = db.expiryDate && now < db.expiryDate;
             document.getElementById('lock-zone').classList.toggle('locked', !isOk);
-            if(!isOk) { badge.innerText = "LICENCE EXPIRÉE"; badge.className = "px-4 py-1.5 rounded-full text-[10px] font-black bg-red-50 text-red-600 border-red-100"; }
-            else { const d = Math.ceil((db.expiryDate-now)/86400000); badge.innerText = d + " JOURS RESTANTS"; badge.className = "px-4 py-1.5 rounded-full text-[10px] font-black bg-blue-50 text-blue-600 border-blue-100"; }
+            if(!isOk) {
+                badge.innerText = "LICENCE EXPIRÉE"; badge.className = "badge-status bg-red-100 text-red-600 border border-red-200";
+            } else {
+                const days = Math.ceil((db.expiryDate-now)/86400000);
+                badge.innerText = days + " JOURS VALIDES"; badge.className = "badge-status bg-green-100 text-green-600 border border-green-200";
+            }
             return isOk;
         }
 
-        function render() {
-            document.getElementById('header-biz').innerText = db.biz.name || "ComptaPro";
-            document.getElementById('valP').innerText = db.prof.toLocaleString();
-            document.querySelectorAll('.cur').forEach(e => e.innerText = db.biz.cur);
-            document.getElementById('displayID').innerText = db.licenseID;
-            
-            // Historique Design
-            const hist = [...db.sales, ...db.expenses, ...db.resets].sort((a,b) => b.id - a.id).slice(0, 10);
-            document.getElementById('hist').innerHTML = hist.map(i => `
-                <div class="card p-4 flex justify-between items-center bg-white border-slate-100">
-                    <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 rounded-full flex items-center justify-center ${i.isExp?'bg-red-50 text-red-500':'bg-green-50 text-green-500'}">
-                            <i data-lucide="${i.isExp?'arrow-down-right':'arrow-up-right'}" class="w-5 h-5"></i>
-                        </div>
-                        <div>
-                            <p class="font-extrabold text-slate-800 text-sm">${i.cli || i.n}</p>
-                            <p class="text-[10px] text-slate-400 font-bold">${i.d}</p>
-                        </div>
-                    </div>
-                    <b class="text-sm ${i.isExp?'text-red-500':'text-blue-600'}">${(i.tot || -i.a || -i.montant).toLocaleString()}</b>
-                </div>
-            `).join('');
-            
-            // Inventaire Design
-            document.getElementById('stkList').innerHTML = db.stk.map((i, index) => `
-                <div class="card p-5 flex justify-between items-center bg-white">
-                    <div class="flex-1">
-                        <b class="text-sm font-extrabold block text-slate-800 mb-1">${i.n}</b>
-                        <div class="flex items-center gap-2">
-                            <span class="text-[10px] font-black bg-blue-50 text-blue-600 px-2 py-0.5 rounded-md">${i.s} ${db.biz.cur}</span>
-                            ${i.q < 5 ? '<span class="text-[10px] font-black bg-red-50 text-red-500 px-2 py-0.5 rounded-md">STOCK BAS</span>' : ''}
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-3 bg-slate-50 p-2 rounded-2xl border">
-                        <button onclick="updateQty(${index}, -1)" class="w-8 h-8 bg-white shadow-sm border rounded-xl flex items-center justify-center text-slate-400 font-black hover:text-red-500">-</button>
-                        <span class="font-extrabold text-sm w-6 text-center text-slate-700">${i.q}</span>
-                        <button onclick="updateQty(${index}, 1)" class="w-8 h-8 bg-white shadow-sm border rounded-xl flex items-center justify-center text-slate-400 font-black hover:text-blue-500">+</button>
-                    </div>
-                    <button onclick="removeStock(${index})" class="ml-4 text-slate-200 hover:text-red-400 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                </div>`).join('');
-            
-            document.getElementById('sel_p').innerHTML = db.stk.map(i => `<option value="${i.id}">${i.n} (${i.q} dispo)</option>`).join('');
-            
-            const now = Date.now();
-            const calc = (t) => db.sales.filter(s => (now-s.t) < t).reduce((a,b) => a+b.tot, 0);
-            document.getElementById('repJ').innerText = calc(86400000).toLocaleString();
-            document.getElementById('repS').innerText = calc(604800000).toLocaleString();
-            document.getElementById('repM').innerText = calc(2592000000).toLocaleString();
-            
-            checkLicense(); lucide.createIcons();
+        function checkKey() {
+            const input = document.getElementById('activation-key').value.trim().toUpperCase();
+            const date = new Date();
+            const formula = (parseInt(db.licenseID.replace(/\D/g, '')) * 7) + date.getDate() + (date.getMonth() + 1);
+            if (input === "PRO-" + formula) {
+                db.expiryDate = (db.expiryDate > Date.now() ? db.expiryDate : Date.now()) + (30*86400000);
+                save(); alert("Félicitations ! Version PRO activée."); location.reload();
+            } else { alert("Code invalide pour cette date !"); }
         }
 
-        // --- Fonctions d'Action ---
-        function updateQty(idx, v) { if(db.stk[idx].q + v >= 0) { db.stk[idx].q += v; save(); render(); } }
-        function removeStock(idx) { if(confirm("Supprimer l'article ?")) { db.stk.splice(idx, 1); save(); render(); } }
-        function addStock() {
-            let n=document.getElementById('p_name').value, c=+document.getElementById('p_cost').value, s=+document.getElementById('p_sell').value, q=+document.getElementById('p_qty').value;
-            if(!n) return; db.stk.push({id:Date.now(), n, c, s, q}); save(); render(); toggleF('stk-form');
-        }
-
-        function addCart() {
-            let id = document.getElementById('sel_p').value, q = +document.getElementById('sel_q').value;
-            let it = db.stk.find(x => x.id == id);
-            if(!it || q > it.q) return alert("Stock insuffisant !");
-            cart.push({...it, sq:q, st:it.s*q}); renderCart();
-        }
-
-        function renderCart() {
-            let t = 0;
-            document.getElementById('cart').innerHTML = cart.map((i, idx) => { t += i.st; return `
-                <div class="flex justify-between items-center bg-slate-50 p-3 rounded-2xl border-l-4 border-blue-500">
-                    <div><b class="text-xs text-slate-700">${i.n}</b><p class="text-[10px] text-slate-400 font-bold">Qté: ${i.sq} × ${i.s}</p></div>
-                    <div class="flex items-center gap-3">
-                        <b class="text-xs">${i.st.toLocaleString()}</b>
-                        <button onclick="cart.splice(${idx},1);renderCart()" class="text-slate-300"><i data-lucide="x-circle" class="w-4 h-4"></i></button>
-                    </div>
-                </div>`; }).join('');
-            document.getElementById('cartT').innerText = t.toLocaleString();
-            lucide.createIcons();
+        function genPDF(sale) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            if (db.biz.logo) doc.addImage(db.biz.logo, 'PNG', 15, 10, 25, 25);
+            doc.setFont(undefined, 'bold').setFontSize(20).setTextColor(37, 99, 235).text(db.biz.name.toUpperCase(), 45, 20);
+            doc.setFont(undefined, 'normal').setFontSize(9).setTextColor(100).text(`${db.biz.addr} | Tel: ${db.biz.phone}`, 45, 27);
+            doc.setDrawColor(230).line(15, 40, 195, 40);
+            doc.setFontSize(10).setTextColor(0).text(`FACTURE : # ${sale.id.toString().slice(-5)}`, 15, 50);
+            doc.text(`DATE : ${sale.d}`, 15, 55);
+            doc.text(`VENDEUR : ${sale.ven}`, 140, 55);
+            doc.text(`CLIENT : ${sale.cli.toUpperCase()}`, 15, 65);
+            doc.autoTable({ startY: 70, head: [['ARTICLE', 'QTÉ', 'PRIX', 'TOTAL']], body: sale.items.map(i => [i.n, i.sq, i.s.toLocaleString(), i.st.toLocaleString()]), headStyles:{fillColor:[37, 99, 235]} });
+            doc.setFontSize(14).text(`NET À PAYER : ${sale.tot.toLocaleString()} ${db.biz.cur}`, 120, doc.lastAutoTable.finalY + 15);
+            doc.setFontSize(9).setFont(undefined, 'italic').text("Merci de votre confiance !", 105, doc.lastAutoTable.finalY + 30, {align:'center'});
+            doc.save(`Facture_${sale.cli}.pdf`);
         }
 
         function doSale() {
@@ -356,16 +312,123 @@
             let tP=0, tV=0;
             cart.forEach(c => { let s = db.stk.find(x => x.id == c.id); s.q -= c.sq; tV += c.st; tP += (c.s-c.c)*c.sq; });
             db.prof += tP;
-            db.sales.push({id:Date.now(), ven:document.getElementById('vendeur').value || "Gérant", cli:document.getElementById('cl_name').value || "Passager", tot:tV, items:[...cart], d:new Date().toLocaleString(), t:Date.now()});
-            save(); cart=[]; render(); nav('home');
+            const sale = {id:Date.now(), ven:document.getElementById('vendeur').value || "Gérant", cli:document.getElementById('cl_name').value || "Passager", tot:tV, items:[...cart], d:new Date().toLocaleString(), t:Date.now()};
+            db.sales.push(sale); save(); genPDF(sale);
+            cart=[]; render(); nav('home');
         }
 
         function addExpense() {
-            let n=document.getElementById('exp_name').value, a=+document.getElementById('exp_amt').value;
-            if(!n || !a) return; db.prof -= a; db.expenses.push({id:Date.now(), n, a, d:new Date().toLocaleString(), t:Date.now(), isExp:true});
+            let n = document.getElementById('exp_name').value, a = +document.getElementById('exp_amt').value;
+            if(!n || !a) return;
+            db.prof -= a; db.expenses.push({id:Date.now(), n, a, d:new Date().toLocaleString(), t:Date.now(), isExp:true});
             save(); render(); nav('home');
         }
 
+        function render() {
+            document.getElementById('header-biz').innerText = db.biz.name || "ComptaPro";
+            document.getElementById('valP').innerText = db.prof.toLocaleString();
+            document.querySelectorAll('.cur').forEach(e => e.innerText = db.biz.cur);
+            document.getElementById('displayID').innerText = db.licenseID;
+            const hist = [...db.sales, ...db.expenses, ...db.resets].sort((a,b) => b.id - a.id).slice(0, 12);
+            document.getElementById('hist').innerHTML = hist.map(i => `
+                <div class="card flex justify-between items-center p-4 border-l-4 ${i.montant?'border-red-800 bg-red-50':i.isExp?'border-red-500':'border-blue-500'}">
+                    <div><b class="text-slate-800">${i.cli || i.n}</b><br><small class="text-[9px] text-slate-400 font-bold uppercase">${i.d}</small></div>
+                    <b class="text-sm ${i.isExp || i.montant?'text-red-500':'text-blue-600'}">${(i.tot || -i.a || -i.montant).toLocaleString()}</b>
+                </div>
+            `).join('');
+            
+            document.getElementById('stkList').innerHTML = db.stk.map((i, index) => `
+                <div class="card flex justify-between items-center p-4">
+                    <div class="flex-1">
+                        <b class="text-sm block text-slate-800">${i.n}</b>
+                        <span class="text-blue-600 font-extrabold text-[10px] bg-blue-50 px-2 py-1 rounded-lg mt-1 inline-block">${i.s} ${db.biz.cur}</span>
+                    </div>
+                    <div class="flex items-center gap-3 bg-slate-100 p-2 rounded-2xl border border-slate-200">
+                        <button onclick="updateQty(${index}, -1)" class="bg-white shadow-sm w-8 h-8 rounded-xl flex items-center justify-center text-red-500 font-black">-</button>
+                        <span class="font-black text-sm w-6 text-center text-slate-700">${i.q}</span>
+                        <button onclick="updateQty(${index}, 1)" class="bg-white shadow-sm w-8 h-8 rounded-xl flex items-center justify-center text-green-600 font-black">+</button>
+                    </div>
+                    <button onclick="removeStock(${index})" class="ml-4 text-slate-200 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                </div>`).join('');
+            
+            document.getElementById('sel_p').innerHTML = db.stk.map(i => `<option value="${i.id}">${i.n} (${i.q})</option>`).join('');
+            const now = Date.now();
+            const calc = (t) => db.sales.filter(s => (now-s.t) < t).reduce((a,b) => a+b.tot, 0);
+            document.getElementById('repJ').innerText = calc(86400000).toLocaleString();
+            document.getElementById('repS').innerText = calc(604800000).toLocaleString();
+            document.getElementById('repM').innerText = calc(2592000000).toLocaleString();
+            checkLicense(); lucide.createIcons();
+        }
+
+        function updateQty(index, val) {
+            let newQty = db.stk[index].q + val;
+            if(newQty >= 0) {
+                db.stk[index].q = newQty;
+                save(); render();
+            }
+        }
+
+        function removeStock(index) {
+            if(confirm("Supprimer définitivement ?")) {
+                db.stk.splice(index, 1);
+                save(); render();
+            }
+        }
+
+        function addStock() {
+            let n=document.getElementById('p_name').value, c=+document.getElementById('p_cost').value, s=+document.getElementById('p_sell').value, q=+document.getElementById('p_qty').value;
+            if(!n || q < 0) return;
+            db.stk.push({id:Date.now(), n, c, s, q}); save(); render(); toggleF('stk-form');
+        }
+
+        function addCart() {
+            let id = document.getElementById('sel_p').value, q = +document.getElementById('sel_q').value;
+            let it = db.stk.find(x => x.id == id);
+            if(!it || q > it.q) return alert("Stock insuffisant");
+            cart.push({...it, sq:q, st:it.s*q, cartId: Date.now()}); 
+            renderCart();
+        }
+
+        function renderCart() {
+            let t = 0;
+            document.getElementById('cart').innerHTML = cart.map((i, index) => { 
+                t+=i.st; 
+                return `
+                <div class="flex justify-between items-center bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                    <div><b class="text-sm text-slate-700">${i.n}</b><br><small class="text-slate-400 font-bold">Qté: ${i.sq} × ${i.s}</small></div>
+                    <div class="flex items-center gap-4">
+                        <b class="text-blue-600 text-sm">${i.st.toLocaleString()}</b>
+                        <button onclick="removeFromCart(${index})" class="text-red-300 hover:text-red-500"><i data-lucide="x-circle" class="w-5 h-5"></i></button>
+                    </div>
+                </div>`}).join('');
+            document.getElementById('cartT').innerText = t.toLocaleString();
+            lucide.createIcons();
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            renderCart();
+        }
+
+        function copyID() { navigator.clipboard.writeText(db.licenseID); alert("ID Copié !"); }
+        function openChariow() { window.open("https://qaasxtqf.mychariow.shop/abonnement-pro-compta-mobile/checkout", "_blank"); }
+        function contactWA() { window.open(`https://wa.me/22666566140?text=Paiement%20Licence%20ID:${db.licenseID}`, '_blank'); }
+        function logout() { if(confirm("EFFACER TOUT ?")) { localStorage.clear(); location.reload(); } }
+        function exportAudit() {
+            const blob = new Blob([JSON.stringify(db, null, 2)], {type: "application/json"});
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Backup_${db.biz.name}.json`; a.click();
+        }
+        function restoreData(input) {
+            const reader = new FileReader();
+            reader.onload = (e) => { db = JSON.parse(e.target.result); save(); location.reload(); };
+            reader.readAsText(input.files[0]);
+        }
+        function resetProfitAudit() {
+            if(confirm("Clôturer la caisse ?")) {
+                db.resets.push({id:Date.now(), n:"CLÔTURE DE CAISSE", montant:db.prof, d:new Date().toLocaleString()});
+                db.prof = 0; save(); render();
+            }
+        }
         function nav(id) {
             document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
             document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
@@ -374,23 +437,6 @@
             lucide.createIcons();
         }
         function toggleF(id) { document.getElementById(id).classList.toggle('hidden'); }
-        function copyID() { navigator.clipboard.writeText(db.licenseID); alert("ID Copié !"); }
-        function contactWA() { window.open(`https://wa.me/22666566140?text=Paiement%20Elite%20ID:${db.licenseID}`, '_blank'); }
-        function exportAudit() {
-            const blob = new Blob([JSON.stringify(db, null, 2)], {type: "application/json"});
-            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Compta_Elite_Backup.json`; a.click();
-        }
-        function resetProfitAudit() { if(confirm("Voulez-vous clôturer la caisse et remettre le solde à zéro ?")) { db.resets.push({id:Date.now(), n:"CLÔTURE DE CAISSE", montant:db.prof, d:new Date().toLocaleString()}); db.prof = 0; save(); render(); } }
-
-        function checkKey() {
-            const input = document.getElementById('activation-key').value.trim().toUpperCase();
-            const date = new Date();
-            const formula = (parseInt(db.licenseID.replace(/\D/g, '')) * 7) + date.getDate() + (date.getMonth() + 1);
-            if (input === "PRO-" + formula) {
-                db.expiryDate = (db.expiryDate > Date.now() ? db.expiryDate : Date.now()) + (30*86400000);
-                save(); alert("Version ELITE activée pour 30 jours !"); location.reload();
-            } else { alert("Code incorrect."); }
-        }
     </script>
 </body>
 </html>
