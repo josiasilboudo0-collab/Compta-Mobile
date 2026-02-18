@@ -178,7 +178,6 @@
 
         function save() { localStorage.setItem('CP_V13_ULTIMATE', JSON.stringify(db)); }
 
-        // --- GESTION SETUP / PROFIL ---
         window.onload = () => { if (!db.biz.name) openSetup(false); else render(); };
 
         function openSetup(isEdit) {
@@ -219,7 +218,6 @@
             } else finalize();
         }
 
-        // --- LICENCE (FORMULE : ID*7 + JOUR + MOIS) ---
         function checkLicense() {
             const now = Date.now();
             const badge = document.getElementById('days-badge');
@@ -244,7 +242,6 @@
             } else { alert("Code invalide pour cette date !"); }
         }
 
-        // --- FACTURE DELUXE ---
         function genPDF(sale) {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
@@ -262,7 +259,6 @@
             doc.save(`Facture_${sale.cli}.pdf`);
         }
 
-        // --- LOGIQUE METIER ---
         function doSale() {
             if(!checkLicense() || !cart.length) return;
             let tP=0, tV=0;
@@ -292,7 +288,14 @@
                     <b class="${i.isExp || i.montant?'text-red-500':'text-blue-600'}">${(i.tot || -i.a || -i.montant).toLocaleString()}</b>
                 </div>
             `).join('');
-            document.getElementById('stkList').innerHTML = db.stk.map(i => `<div class="card flex justify-between text-xs"><span><b>${i.n}</b> (Qté: ${i.q})</span><b>${i.s}</b></div>`).join('');
+            
+            // Modification ici : Ajout du bouton supprimer dans l'inventaire
+            document.getElementById('stkList').innerHTML = db.stk.map((i, index) => `
+                <div class="card flex justify-between items-center text-xs">
+                    <span><b>${i.n}</b> (Qté: ${i.q}) - <small>${i.s}</small></span>
+                    <button onclick="removeStock(${index})" class="text-red-500 p-2"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                </div>`).join('');
+            
             document.getElementById('sel_p').innerHTML = db.stk.map(i => `<option value="${i.id}">${i.n} (${i.q})</option>`).join('');
             const now = Date.now();
             const calc = (t) => db.sales.filter(s => (now-s.t) < t).reduce((a,b) => a+b.tot, 0);
@@ -302,7 +305,6 @@
             checkLicense(); lucide.createIcons();
         }
 
-        // --- FONCTIONS ADMIN ---
         function copyID() { navigator.clipboard.writeText(db.licenseID); alert("ID Copié !"); }
         function openChariow() { window.open("https://qaasxtqf.mychariow.shop/abonnement-pro-compta-mobile/checkout", "_blank"); }
         function contactWA() { window.open(`https://wa.me/22666566140?text=Paiement%20Licence%20ID:${db.licenseID}`, '_blank'); }
@@ -330,20 +332,50 @@
             lucide.createIcons();
         }
         function toggleF(id) { document.getElementById(id).classList.toggle('hidden'); }
+        
         function addStock() {
             let n=document.getElementById('p_name').value, c=+document.getElementById('p_cost').value, s=+document.getElementById('p_sell').value, q=+document.getElementById('p_qty').value;
+            if(!n || q <= 0) return;
             db.stk.push({id:Date.now(), n, c, s, q}); save(); render(); toggleF('stk-form');
         }
+
+        // Nouvelle fonction pour supprimer un article du stock
+        function removeStock(index) {
+            if(confirm("Supprimer cet article définitivement ?")) {
+                db.stk.splice(index, 1);
+                save(); render();
+            }
+        }
+
         function addCart() {
             let id = document.getElementById('sel_p').value, q = +document.getElementById('sel_q').value;
             let it = db.stk.find(x => x.id == id);
             if(!it || q > it.q) return alert("Stock insuffisant");
-            cart.push({...it, sq:q, st:it.s*q}); renderCart();
+            cart.push({...it, sq:q, st:it.s*q, cartId: Date.now()}); 
+            renderCart();
         }
+
+        // Modification ici : Ajout du bouton supprimer dans le panier
         function renderCart() {
             let t = 0;
-            document.getElementById('cart').innerHTML = cart.map(i => { t+=i.st; return `<div class="flex justify-between text-xs font-bold bg-gray-50 p-2 rounded-lg"><span>${i.n} x${i.sq}</span><span>${i.st}</span></div>`}).join('');
+            document.getElementById('cart').innerHTML = cart.map((i, index) => { 
+                t+=i.st; 
+                return `
+                <div class="flex justify-between items-center text-xs font-bold bg-gray-50 p-2 rounded-lg">
+                    <span>${i.n} x${i.sq}</span>
+                    <div class="flex items-center gap-2">
+                        <span>${i.st.toLocaleString()}</span>
+                        <button onclick="removeFromCart(${index})" class="text-red-500"><i data-lucide="x-circle" class="w-4 h-4"></i></button>
+                    </div>
+                </div>`}).join('');
             document.getElementById('cartT').innerText = t.toLocaleString();
+            lucide.createIcons();
+        }
+
+        // Nouvelle fonction pour supprimer un article du panier
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            renderCart();
         }
     </script>
 </body>
