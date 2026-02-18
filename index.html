@@ -21,7 +21,7 @@
         @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
         .glass-header { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(0,0,0,0.05); }
-        .card-premium { background: white; border-radius: 30px; border: 1px solid rgba(0,0,0,0.03); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.04); padding: 20px; transition: transform 0.2s; position: relative; }
+        .card-premium { background: white; border-radius: 25px; border: 1px solid rgba(0,0,0,0.03); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.04); padding: 20px; transition: transform 0.2s; position: relative; }
         .card-premium:active { transform: scale(0.99); }
         
         .btn-main { background: var(--primary); color: white; border-radius: 20px; padding: 18px; font-weight: 700; width: 100%; box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.4); border: none; }
@@ -35,11 +35,11 @@
         .nav-pro button.active { color: white; transform: translateY(-5px); }
         .nav-pro button.active i { color: var(--primary); }
 
-        /* Styles nouveaux contrôles */
         .ctrl-btn { width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
         .btn-del { color: #ef4444; background: #fee2e2; }
         .btn-qty { background: #f1f5f9; color: #1e293b; }
-        .btn-qty:active { background: #e2e8f0; }
+
+        .section-title { font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin: 25px 0 12px 10px; }
 
         #setup-screen { position: fixed; inset: 0; background: white; z-index: 5000; padding: 40px 25px; display: none; overflow-y: auto; }
         .locked { filter: blur(10px); pointer-events: none; opacity: 0.6; }
@@ -49,23 +49,17 @@
 
     <div id="setup-screen">
         <div class="mb-8">
-            <div class="w-16 h-1 w-full bg-blue-100 rounded-full mb-8"></div>
-            <h2 id="setup-title" class="text-4xl font-extrabold tracking-tight text-slate-900">Bienvenue.</h2>
-            <p class="text-slate-500 mt-2">Créez votre profil professionnel en quelques secondes.</p>
+            <h2 id="setup-title" class="text-4xl font-extrabold tracking-tight text-slate-900">Configuration.</h2>
         </div>
         <div class="space-y-4">
-            <div class="bg-slate-50 p-6 rounded-3xl border-2 border-dashed border-slate-200 text-center">
-                <label class="text-xs font-bold text-slate-400 uppercase mb-2 block">Logo de l'entreprise</label>
-                <input type="file" id="setup-logo" accept="image/*" class="text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-            </div>
-            <input type="text" id="setup-user" placeholder="Votre Nom complet" class="input-pro">
-            <input type="text" id="setup-biz" placeholder="Nom de l'Entreprise" class="input-pro">
+            <input type="text" id="setup-user" placeholder="Votre Nom" class="input-pro">
+            <input type="text" id="setup-biz" placeholder="Entreprise" class="input-pro">
             <input type="text" id="setup-addr" placeholder="Adresse" class="input-pro">
-            <input type="text" id="setup-phone" placeholder="Téléphone / WhatsApp" class="input-pro">
+            <input type="text" id="setup-phone" placeholder="Téléphone" class="input-pro">
             <select id="setup-cur" class="input-pro">
-                <option value="FCFA">FCFA</option><option value="GNF">GNF</option><option value="$">USD $</option><option value="€">EUR €</option>
+                <option value="FCFA">FCFA</option><option value="GNF">GNF</option><option value="$">USD</option><option value="€">EUR</option>
             </select>
-            <button onclick="saveSetup()" class="btn-main text-lg mt-6">COMMENCER</button>
+            <button onclick="saveSetup()" class="btn-main text-lg mt-6">SAUVEGARDER</button>
             <button id="cancel-setup" onclick="closeSetup()" class="w-full text-slate-400 font-bold mt-4 hidden">Annuler</button>
         </div>
     </div>
@@ -73,7 +67,7 @@
     <header class="glass-header p-5 sticky top-0 z-[1100] flex justify-between items-center">
         <div>
             <h1 id="header-biz" class="font-extrabold text-xl text-slate-900 tracking-tight uppercase">ComptaPro</h1>
-            <p id="licence-status" class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Chargement...</p>
+            <p id="licence-status" class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">V14 ELITE</p>
         </div>
         <div id="days-badge" class="px-4 py-1.5 rounded-full text-[10px] font-extrabold tracking-wider"></div>
     </header>
@@ -85,39 +79,27 @@
                     <p class="text-xs font-bold opacity-80 uppercase tracking-widest">Bénéfice Net Global</p>
                     <h2 class="text-4xl font-extrabold mt-2 tracking-tighter"><span id="valP">0</span> <small class="text-lg cur font-normal opacity-80"></small></h2>
                     <div class="grid grid-cols-3 gap-3 mt-8">
-                        <div class="bg-white/10 backdrop-blur-md p-3 rounded-2xl border border-white/10 text-center"><span class="text-[9px] font-black opacity-60 block mb-1">JOUR</span><span id="repJ" class="text-xs font-extrabold">0</span></div>
-                        <div class="bg-white/10 backdrop-blur-md p-3 rounded-2xl border border-white/10 text-center"><span class="text-[9px] font-black opacity-60 block mb-1">SEMAINE</span><span id="repS" class="text-xs font-extrabold">0</span></div>
-                        <div class="bg-white/10 backdrop-blur-md p-3 rounded-2xl border border-white/10 text-center"><span class="text-[9px] font-black opacity-60 block mb-1">MOIS</span><span id="repM" class="text-xs font-extrabold">0</span></div>
+                        <div class="bg-white/10 backdrop-blur-md p-3 rounded-2xl text-center"><span class="text-[9px] font-black opacity-60 block">JOUR</span><span id="repJ" class="text-xs font-extrabold">0</span></div>
+                        <div class="bg-white/10 backdrop-blur-md p-3 rounded-2xl text-center"><span class="text-[9px] font-black opacity-60 block">SEMAINE</span><span id="repS" class="text-xs font-extrabold">0</span></div>
+                        <div class="bg-white/10 backdrop-blur-md p-3 rounded-2xl text-center"><span class="text-[9px] font-black opacity-60 block">MOIS</span><span id="repM" class="text-xs font-extrabold">0</span></div>
                     </div>
                 </div>
-                <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
-            </div>
-
-            <div class="flex items-center justify-between mb-4 px-2">
-                <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest">Activités récentes</h3>
-                <i data-lucide="history" class="w-4 h-4 text-slate-300"></i>
             </div>
             <div id="hist" class="space-y-4"></div>
         </div>
 
         <div id="lock-zone">
             <div id="page-sale" class="page">
-                <div class="flex items-center gap-3 mb-6">
-                    <button onclick="nav('home')" class="p-2 bg-slate-100 rounded-full text-slate-400"><i data-lucide="chevron-left"></i></button>
-                    <h2 class="text-2xl font-black">Caisse</h2>
-                </div>
+                <h2 class="text-2xl font-black mb-6">Caisse</h2>
                 <div class="card-premium mb-6">
-                    <input type="text" id="vendeur" placeholder="Vendeur" class="input-pro">
-                    <input type="text" id="cl_name" placeholder="Client" class="input-pro">
+                    <input type="text" id="cl_name" placeholder="Nom du Client" class="input-pro">
                     <div class="flex gap-2 mb-4">
                         <select id="sel_p" class="input-pro flex-1 m-0"></select>
                         <input type="number" id="sel_q" value="1" class="input-pro w-20 text-center m-0">
                     </div>
-                    <button onclick="addCart()" class="btn-secondary flex items-center justify-center gap-2 mb-4"><i data-lucide="plus-circle" class="w-5"></i> Ajouter</button>
-                    
-                    <div id="cart" class="space-y-3 mb-6 border-t border-slate-100 pt-4"></div>
-                    
-                    <div class="flex justify-between items-end">
+                    <button onclick="addCart()" class="btn-secondary mb-4">+ Ajouter</button>
+                    <div id="cart" class="space-y-3 mb-6"></div>
+                    <div class="flex justify-between items-end border-t pt-4">
                         <div><p class="text-[10px] font-bold text-slate-400 uppercase">Total</p><h3 class="text-2xl font-black"><span id="cartT">0</span> <small class="cur text-sm"></small></h3></div>
                         <button onclick="doSale()" class="btn-main !w-auto px-10">VALIDER</button>
                     </div>
@@ -127,52 +109,77 @@
             <div id="page-stock" class="page">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-black">Inventaire</h2>
-                    <button onclick="toggleF('stk-form')" class="w-12 h-12 bg-slate-900 text-white rounded-2xl flex items-center justify-center shadow-lg"><i data-lucide="plus"></i></button>
+                    <button onclick="toggleF('stk-form')" class="w-12 h-12 bg-slate-900 text-white rounded-2xl flex items-center justify-center"><i data-lucide="plus"></i></button>
                 </div>
-                <div id="stk-form" class="hidden card-premium border-2 border-blue-100 mb-6">
+                <div id="stk-form" class="hidden card-premium mb-6">
                     <input type="text" id="p_name" placeholder="Article" class="input-pro">
                     <div class="grid grid-cols-2 gap-3"><input type="number" id="p_cost" placeholder="Prix Achat" class="input-pro"><input type="number" id="p_sell" placeholder="Prix Vente" class="input-pro"></div>
-                    <input type="number" id="p_qty" placeholder="Quantité" class="input-pro">
+                    <input type="number" id="p_qty" placeholder="Quantité Initiale" class="input-pro">
                     <button onclick="addStock()" class="btn-main">ENREGISTRER</button>
                 </div>
                 <div id="stkList" class="space-y-3"></div>
             </div>
-
-            <div id="page-expense" class="page">
-                <div class="flex items-center gap-3 mb-6"><button onclick="nav('home')" class="p-2 bg-slate-100 rounded-full text-slate-400"><i data-lucide="chevron-left"></i></button><h2 class="text-2xl font-black text-red-600">Dépenses</h2></div>
-                <div class="card-premium">
-                    <input type="text" id="exp_name" placeholder="Motif" class="input-pro">
-                    <input type="number" id="exp_amt" placeholder="Montant" class="input-pro">
-                    <button onclick="addExpense()" class="btn-main !bg-red-600 mt-4">ENREGISTRER</button>
-                </div>
-            </div>
         </div>
 
         <div id="page-pro" class="page">
-            <h2 class="text-2xl font-black mb-6">Paramètres</h2>
-            <div class="card-premium bg-slate-900 text-white mb-6">
-                <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">ID Licence</p>
-                <div class="flex justify-between items-center"><h3 id="displayID" class="text-2xl font-extrabold text-blue-400"></h3><button onclick="copyID()" class="p-2 bg-white/10 rounded-lg"><i data-lucide="copy" class="w-4"></i></button></div>
+            <h2 class="text-2xl font-black mb-6">Admin</h2>
+            
+            <div class="card-premium bg-slate-900 text-white mb-8">
+                <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">ID Licence Unique</p>
+                <div class="flex justify-between items-center">
+                    <h3 id="displayID" class="text-2xl font-extrabold text-blue-400">CP-0000</h3>
+                    <button onclick="copyID()" class="p-2 bg-white/10 rounded-lg"><i data-lucide="copy" class="w-4"></i></button>
+                </div>
             </div>
+
+            <div class="section-title">Gestion de l'Entreprise</div>
             <button onclick="openSetup(true)" class="card-premium w-full flex items-center justify-between mb-4">
-                <div class="flex items-center gap-4"><div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center"><i data-lucide="settings" class="w-5"></i></div><span class="font-bold">Infos Entreprise</span></div>
+                <div class="flex items-center gap-4"><div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center"><i data-lucide="edit-3" class="w-5"></i></div><span class="font-bold">Modifier les infos entreprise</span></div>
                 <i data-lucide="chevron-right" class="text-slate-300"></i>
             </button>
-            <button onclick="resetProfitAudit()" class="w-full text-red-400 text-[10px] font-black uppercase mt-10">Clôture de Caisse</button>
-            <button onclick="logout()" class="w-full text-slate-300 text-xs font-bold underline mt-4">Se déconnecter</button>
+
+            <div class="section-title">Abonnement</div>
+            <div class="card-premium space-y-4">
+                <button onclick="window.open('https://chariow.com')" class="btn-secondary w-full !bg-orange-50 !text-orange-600 !border-orange-100 flex items-center justify-center gap-2">
+                    <i data-lucide="credit-card" class="w-4"></i> Payer sur Chariow
+                </button>
+                <div class="relative">
+                    <input type="text" id="lic-code" placeholder="Code PRO-XXXX" class="input-pro !mb-0 text-center font-bold tracking-widest">
+                    <button onclick="activateLic()" class="absolute right-2 top-2 bottom-2 bg-blue-600 text-white px-4 rounded-xl text-xs font-bold">Activer</button>
+                </div>
+            </div>
+
+            <div class="section-title">Sauvegarde & Sécurité</div>
+            <div class="grid grid-cols-2 gap-3 mb-4">
+                <button onclick="exportData()" class="card-premium flex flex-col items-center gap-2 py-4">
+                    <i data-lucide="download-cloud" class="text-blue-500"></i><span class="text-xs font-bold">Exporter</span>
+                </button>
+                <button onclick="importData()" class="card-premium flex flex-col items-center gap-2 py-4">
+                    <i data-lucide="upload-cloud" class="text-emerald-500"></i><span class="text-xs font-bold">Restaurer</span>
+                </button>
+            </div>
+
+            <button onclick="genMonthlyReport()" class="card-premium w-full flex items-center justify-between mb-4 border-2 border-indigo-100">
+                <div class="flex items-center gap-4"><div class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center"><i data-lucide="file-text" class="w-5"></i></div><span class="font-bold">Rapport Mensuel (PDF)</span></div>
+                <i data-lucide="download" class="text-indigo-300"></i>
+            </button>
+
+            <button onclick="logout()" class="w-full p-5 bg-red-50 text-red-500 rounded-3xl font-black uppercase text-xs tracking-widest flex items-center justify-center gap-2">
+                <i data-lucide="power" class="w-4"></i> Déconnexion (Effacer les données)
+            </button>
         </div>
     </main>
 
     <nav class="nav-pro">
-        <button onclick="nav('home')" id="n-home" class="active"><i data-lucide="layout-grid"></i>Dashboard</button>
+        <button onclick="nav('home')" id="n-home" class="active"><i data-lucide="layout-grid"></i>Accueil</button>
         <button onclick="nav('sale')" id="n-sale"><i data-lucide="shopping-bag"></i>Ventes</button>
         <button onclick="nav('stock')" id="n-stock"><i data-lucide="package"></i>Stock</button>
-        <button onclick="nav('pro')" id="n-pro"><i data-lucide="user-cog"></i>Compte</button>
+        <button onclick="nav('pro')" id="n-pro"><i data-lucide="shield-check"></i>Admin</button>
     </nav>
 
     <script>
         let db = JSON.parse(localStorage.getItem('CP_V14_ELITE')) || { 
-            biz:{}, stk:[], sales:[], expenses:[], resets:[], prof:0,
+            biz:{}, stk:[], sales:[], expenses:[], prof:0,
             licenseID: "CP-" + Math.floor(1000 + Math.random() * 9000), expiryDate: null 
         };
         let cart = [];
@@ -180,58 +187,16 @@
         window.onload = () => { if (!db.biz.name) openSetup(false); else render(); };
         function save() { localStorage.setItem('CP_V14_ELITE', JSON.stringify(db)); }
 
-        // --- GESTION DES QUANTITES ET SUPPRESSIONS ---
-        
-        // Stock : Ajuster +/-
-        function adjStk(id, d) {
-            let i = db.stk.find(x => x.id == id);
-            if(i) { i.q = Math.max(0, i.q + d); save(); render(); }
-        }
-
-        function delStk(id) {
-            if(confirm("Supprimer cet article ?")) { db.stk = db.stk.filter(x => x.id != id); save(); render(); }
-        }
-
-        // Panier : Ajuster +/-
-        function adjCart(idx, d) {
-            if(cart[idx].sq + d <= 0) return delCart(idx);
-            let it = db.stk.find(x => x.id == cart[idx].id);
-            if(d > 0 && cart[idx].sq + d > it.q) return alert("Stock insuffisant");
-            cart[idx].sq += d;
-            cart[idx].st = cart[idx].sq * cart[idx].s;
-            renderCart();
-        }
-
-        function delCart(idx) { cart.splice(idx, 1); renderCart(); }
-
-        // Historique : Annulation propre
-        function delAct(id, type) {
-            if(!confirm("Annuler cette opération ?")) return;
-            if(type === 'sale') {
-                let s = db.sales.find(x => x.id == id);
-                if(s) {
-                    s.items.forEach(c => { let it = db.stk.find(x => x.id == c.id); if(it) it.q += c.sq; });
-                    db.prof -= s.tp;
-                    db.sales = db.sales.filter(x => x.id != id);
-                }
-            } else if(type === 'exp') {
-                let e = db.expenses.find(x => x.id == id);
-                if(e) { db.prof += e.a; db.expenses = db.expenses.filter(x => x.id != id); }
-            } else { db.resets = db.resets.filter(x => x.id != id); }
-            save(); render();
-        }
-
-        // --- RENDER LOGIC ---
+        // --- FONCTIONS ---
         function render() {
             document.getElementById('header-biz').innerText = db.biz.name || "ComptaPro";
             document.getElementById('valP').innerText = Math.round(db.prof).toLocaleString();
             document.querySelectorAll('.cur').forEach(e => e.innerText = db.biz.cur);
             document.getElementById('displayID').innerText = db.licenseID;
 
-            // Liste Stock Interactif
             document.getElementById('stkList').innerHTML = db.stk.map(i => `
                 <div class="card-premium flex justify-between items-center">
-                    <div><b class="text-slate-800">${i.n}</b><br><small class="text-slate-400 font-bold text-[10px] uppercase">En Stock: ${i.q}</small></div>
+                    <div><b class="text-slate-800">${i.n}</b><br><small class="text-slate-400 font-bold text-[10px]">Stock: ${i.q}</small></div>
                     <div class="flex items-center gap-2">
                         <button onclick="adjStk(${i.id}, -1)" class="ctrl-btn btn-qty"><i data-lucide="minus" class="w-4"></i></button>
                         <button onclick="adjStk(${i.id}, 1)" class="ctrl-btn btn-qty"><i data-lucide="plus" class="w-4"></i></button>
@@ -240,102 +205,81 @@
                 </div>
             `).join('');
 
-            // Liste Historique Interactif
-            const hist = [...db.sales, ...db.expenses, ...db.resets].sort((a,b) => b.id - a.id).slice(0, 15);
+            const hist = [...db.sales].sort((a,b) => b.id - a.id).slice(0, 10);
             document.getElementById('hist').innerHTML = hist.map(i => `
-                <div class="card-premium flex justify-between items-center ${i.montant || i.isExp ? 'bg-red-50/50' : ''}">
+                <div class="card-premium flex justify-between items-center">
                     <div class="flex items-center gap-3">
-                        <button onclick="delAct(${i.id}, '${i.tot ? 'sale' : i.isExp ? 'exp' : 'reset'}')" class="ctrl-btn btn-del"><i data-lucide="trash-2" class="w-3"></i></button>
-                        <div><b class="text-xs text-slate-800">${i.cli || i.n}</b><br><small class="text-[9px] text-slate-400 uppercase">${i.d}</small></div>
+                        <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center text-xs font-bold">${i.cli[0]}</div>
+                        <div><b class="text-xs text-slate-800">${i.cli}</b><br><small class="text-[9px] text-slate-400 uppercase">${i.d}</small></div>
                     </div>
-                    <b class="text-sm ${i.isExp || i.montant ? 'text-red-500' : 'text-blue-600'}">${i.isExp || i.montant ? '-' : '+'}${(i.tot || i.a || i.montant).toLocaleString()}</b>
+                    <b class="text-sm text-blue-600">+${i.tot.toLocaleString()}</b>
                 </div>
             `).join('');
 
             document.getElementById('sel_p').innerHTML = db.stk.map(i => `<option value="${i.id}">${i.n} (${i.q})</option>`).join('');
-            
-            const now = Date.now();
-            const calc = (t) => db.sales.filter(s => (now-s.t) < t).reduce((a,b) => a+b.tot, 0);
-            document.getElementById('repJ').innerText = calc(86400000).toLocaleString();
-            document.getElementById('repS').innerText = calc(604800000).toLocaleString();
-            document.getElementById('repM').innerText = calc(2592000000).toLocaleString();
-            
             checkLicense(); lucide.createIcons();
         }
 
-        function renderCart() {
-            let t = 0;
-            document.getElementById('cart').innerHTML = cart.map((i, idx) => { 
-                t += i.st; 
-                return `
-                <div class="flex justify-between items-center bg-slate-50 p-3 rounded-2xl border border-slate-100">
-                    <div class="flex flex-col">
-                        <span class="text-xs font-bold">${i.n}</span>
-                        <span class="text-[10px] text-slate-400">${i.s.toLocaleString()} / uté</span>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <div class="flex items-center bg-white rounded-xl border border-slate-200 p-1">
-                            <button onclick="adjCart(${idx}, -1)" class="w-7 h-7 flex items-center justify-center text-slate-400"><i data-lucide="minus" class="w-3"></i></button>
-                            <span class="px-2 text-xs font-black">${i.sq}</span>
-                            <button onclick="adjCart(${idx}, 1)" class="w-7 h-7 flex items-center justify-center text-blue-600"><i data-lucide="plus" class="w-3"></i></button>
-                        </div>
-                        <button onclick="delCart(${idx})" class="text-red-400 p-1"><i data-lucide="x-circle" class="w-5"></i></button>
-                    </div>
-                </div>`;
-            }).join('');
-            document.getElementById('cartT').innerText = t.toLocaleString();
-            lucide.createIcons();
-        }
+        function genMonthlyReport() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const now = new Date();
+            const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+            const monthSales = db.sales.filter(s => s.t >= monthStart);
+            const totalV = monthSales.reduce((a,b) => a + b.tot, 0);
 
-        // --- CORE FUNCTIONS (Inchangées/Adaptées) ---
-        function addCart() {
-            let id = document.getElementById('sel_p').value, q = +document.getElementById('sel_q').value;
-            let it = db.stk.find(x => x.id == id);
-            if(!it || q > it.q) return alert("Stock insuffisant");
-            let exists = cart.find(x => x.id == id);
-            if(exists) exists.sq += q; else cart.push({...it, sq:q, st:it.s*q});
-            renderCart();
-        }
-
-        function doSale() {
-            if(!checkLicense() || !cart.length) return;
-            let tP=0, tV=0;
-            cart.forEach(c => { 
-                let s = db.stk.find(x => x.id == c.id); 
-                s.q -= c.sq; tV += c.st; tP += (c.s-c.c)*c.sq; 
+            doc.setFontSize(20).text("BILAN MENSUEL", 105, 20, {align:'center'});
+            doc.setFontSize(10).text(db.biz.name.toUpperCase(), 105, 28, {align:'center'});
+            doc.autoTable({
+                startY: 40,
+                head: [['INDICATEUR', 'VALEUR']],
+                body: [['TOTAL VENTES', `${totalV.toLocaleString()} ${db.biz.cur}`]],
+                theme: 'grid'
             });
-            db.prof += tP;
-            const sale = {id:Date.now(), ven:document.getElementById('vendeur').value || "Gérant", cli:document.getElementById('cl_name').value || "Passager", tot:tV, items:[...cart], d:new Date().toLocaleString(), t:Date.now(), tp:tP};
-            db.sales.push(sale); save(); cart=[]; render(); nav('home');
+            doc.save(`Rapport_${now.getMonth()+1}.pdf`);
         }
 
-        function addStock() {
-            let n=document.getElementById('p_name').value, c=+document.getElementById('p_cost').value, s=+document.getElementById('p_sell').value, q=+document.getElementById('p_qty').value;
-            if(!n || !s) return; db.stk.push({id:Date.now(), n, c, s, q}); save(); render(); toggleF('stk-form');
+        function exportData() {
+            const blob = new Blob([JSON.stringify(db)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = `comptapro_backup_${Date.now()}.json`;
+            a.click();
         }
 
-        function addExpense() {
-            let n = document.getElementById('exp_name').value, a = +document.getElementById('exp_amt').value;
-            if(!n || !a) return; db.prof -= a; db.expenses.push({id:Date.now(), n, a, d:new Date().toLocaleString(), t:Date.now(), isExp:true});
-            save(); render(); nav('home');
+        function importData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.onchange = e => {
+                const reader = new FileReader();
+                reader.onload = f => { db = JSON.parse(f.target.result); save(); location.reload(); };
+                reader.readAsText(e.target.files[0]);
+            };
+            input.click();
         }
 
-        // --- UTILS ---
-        function nav(id) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.nav-pro button').forEach(b => b.classList.remove('active'));
-            document.getElementById('page-' + id).classList.add('active');
-            document.getElementById('n-' + id).classList.add('active');
-            lucide.createIcons();
+        function activateLic() {
+            const code = document.getElementById('lic-code').value;
+            if(code.length > 5) {
+                db.expiryDate = Date.now() + (365 * 24 * 60 * 60 * 1000);
+                save(); alert("Licence activée pour 1 an !"); location.reload();
+            }
         }
+
         function openSetup(e){ document.getElementById('setup-screen').style.display='block'; if(e){ document.getElementById('setup-biz').value=db.biz.name; document.getElementById('cancel-setup').classList.remove('hidden'); } }
         function closeSetup(){ document.getElementById('setup-screen').style.display='none'; }
         function saveSetup(){ let n=document.getElementById('setup-biz').value; if(!n)return; db.biz={name:n, user:document.getElementById('setup-user').value, addr:document.getElementById('setup-addr').value, phone:document.getElementById('setup-phone').value, cur:document.getElementById('setup-cur').value}; save(); location.reload(); }
-        function checkLicense(){ const now=Date.now(), isOk=db.expiryDate && now<db.expiryDate; document.getElementById('lock-zone').classList.toggle('locked', !isOk); const b=document.getElementById('days-badge'); if(!isOk){ b.innerText="DEMO"; b.className="px-4 py-1.5 rounded-full text-[10px] font-extrabold bg-red-100 text-red-500"; } else { b.innerText="PRO"; b.className="px-4 py-1.5 rounded-full text-[10px] font-extrabold bg-green-100 text-green-600"; } return isOk; }
-        function toggleF(id){ document.getElementById(id).classList.toggle('hidden'); }
-        function copyID(){ navigator.clipboard.writeText(db.licenseID); alert("ID Copié"); }
-        function resetProfitAudit(){ if(confirm("Clôturer la caisse ?")){ db.resets.push({id:Date.now(), n:"Clôture", montant:db.prof, d:new Date().toLocaleString()}); db.prof=0; save(); render(); } }
+        function checkLicense(){ const now=Date.now(), isOk=db.expiryDate && now<db.expiryDate; document.getElementById('lock-zone').classList.toggle('locked', !isOk); const b=document.getElementById('days-badge'); b.innerText = isOk ? "PRO" : "DEMO"; b.className = isOk ? "px-4 py-1.5 rounded-full text-[10px] font-extrabold bg-green-100 text-green-600" : "px-4 py-1.5 rounded-full text-[10px] font-extrabold bg-red-100 text-red-500"; return isOk; }
+        function nav(id) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.querySelectorAll('.nav-pro button').forEach(b => b.classList.remove('active')); document.getElementById('page-' + id).classList.add('active'); document.getElementById('n-' + id).classList.add('active'); lucide.createIcons(); }
         function logout(){ if(confirm("Effacer tout ?")){ localStorage.clear(); location.reload(); } }
+        function copyID(){ navigator.clipboard.writeText(db.licenseID); alert("ID Copié"); }
+        function toggleF(id){ document.getElementById(id).classList.toggle('hidden'); }
+        function addCart() { let id = document.getElementById('sel_p').value, q = +document.getElementById('sel_q').value, it = db.stk.find(x => x.id == id); if(!it || q > it.q) return; let exists = cart.find(x => x.id == id); if(exists) exists.sq += q; else cart.push({...it, sq:q, st:it.s*q}); renderCart(); }
+        function renderCart() { let t = 0; document.getElementById('cart').innerHTML = cart.map((i, idx) => { t += i.st; return `<div class="flex justify-between text-xs font-bold bg-slate-50 p-3 rounded-xl"><span>${i.n} x${i.sq}</span><span>${i.st.toLocaleString()}</span></div>`; }).join(''); document.getElementById('cartT').innerText = t.toLocaleString(); }
+        function doSale() { if(!checkLicense() || !cart.length) return; let tP=0, tV=0; cart.forEach(c => { let s = db.stk.find(x => x.id == c.id); s.q -= c.sq; tV += c.st; tP += (c.s-c.c)*c.sq; }); db.prof += tP; db.sales.push({id:Date.now(), cli:document.getElementById('cl_name').value || "Passager", tot:tV, d:new Date().toLocaleDateString(), t:Date.now(), tp:tP}); save(); cart=[]; render(); nav('home'); }
+        function addStock() { let n=document.getElementById('p_name').value, c=+document.getElementById('p_cost').value, s=+document.getElementById('p_sell').value, q=+document.getElementById('p_qty').value; if(!n) return; db.stk.push({id:Date.now(), n, c, s, q}); save(); render(); toggleF('stk-form'); }
+        function adjStk(id, d) { let i = db.stk.find(x => x.id == id); if(i){ i.q = Math.max(0, i.q + d); save(); render(); } }
+        function delStk(id) { if(confirm("Supprimer ?")){ db.stk = db.stk.filter(x => x.id != id); save(); render(); } }
     </script>
 </body>
 </html>
