@@ -3,68 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ComptaPro Ultimate - V10</title>
-    
+    <title>ComptaPro Ultimate V13</title>
     <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="logo.png">
-    <meta name="theme-color" content="#2563EB">
-
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #F3F4F6; padding-bottom: 100px; user-select: none; }
-        .page { display: none; } .page.active { display: block; animation: slideUp 0.3s ease-out; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .card { background: white; padding: 20px; border-radius: 28px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 15px; }
-        .input-f { width: 100%; padding: 15px; border-radius: 15px; border: 1px solid #E5E7EB; margin-bottom: 10px; font-size: 16px; outline: none; }
-        .btn-blue { background: #2563EB; color: white; padding: 18px; border-radius: 18px; font-weight: 800; width: 100%; active:scale-95; transition: 0.2s; border: none; }
+        body { font-family: 'Segoe UI', sans-serif; background: #F3F4F6; padding-bottom: 90px; }
+        .page { display: none; } .page.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .card { background: white; padding: 20px; border-radius: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 15px; }
+        .input-f { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #E5E7EB; margin-bottom: 10px; outline: none; }
+        .btn-blue { background: #2563EB; color: white; padding: 16px; border-radius: 15px; font-weight: 800; width: 100%; border: none; active:scale-95; }
         .locked { filter: blur(12px); pointer-events: none; opacity: 0.5; }
-        nav { position: fixed; bottom: 0; left: 0; right: 0; height: 85px; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #E5E7EB; z-index: 1000; }
-        nav button { color: #9CA3AF; font-size: 10px; font-weight: 800; display: flex; flex-direction: column; align-items: center; gap: 5px; background: none; border: none; }
+        nav { position: fixed; bottom: 0; left: 0; right: 0; height: 80px; background: white; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #EEE; z-index: 1000; }
+        nav button { color: #9CA3AF; font-size: 10px; font-weight: 800; display: flex; flex-direction: column; align-items: center; background: none; border: none; }
         nav button.active { color: #2563EB; }
-        .badge-exp { px-3; py-1; rounded-full; text-[10px]; font-black; }
+        #overlay-screen { position: fixed; inset: 0; background: white; z-index: 2000; display: none; overflow-y: auto; padding: 30px; }
     </style>
 </head>
 <body>
 
+    <div id="overlay-screen">
+        <h2 id="setup-title" class="text-3xl font-black text-blue-600 mb-2">Bienvenue !</h2>
+        <p class="text-gray-500 mb-8">Configurez votre entreprise pour des factures pro.</p>
+        <div class="space-y-4">
+            <div>
+                <label class="text-[10px] font-black uppercase text-gray-400">Logo de l'entreprise</label>
+                <input type="file" id="setup-logo" accept="image/*" class="input-f">
+            </div>
+            <input type="text" id="setup-user" placeholder="Votre Nom (Propriétaire)" class="input-f">
+            <input type="text" id="setup-biz" placeholder="Nom de la Boutique / Entreprise" class="input-f">
+            <input type="text" id="setup-addr" placeholder="Adresse Physique (Ville, Quartier)" class="input-f">
+            <input type="text" id="setup-phone" placeholder="Contact Téléphone" class="input-f">
+            <select id="setup-cur" class="input-f">
+                <option value="FCFA">Devise : FCFA</option>
+                <option value="GNF">Devise : GNF</option>
+                <option value="$">Devise : Dollar ($)</option>
+                <option value="€">Devise : Euro (€)</option>
+            </select>
+            <button onclick="saveSetup()" class="btn-blue text-lg">ENREGISTRER</button>
+            <button id="cancel-setup" onclick="closeSetup()" class="w-full text-gray-400 text-sm font-bold mt-2 hidden">Annuler</button>
+        </div>
+    </div>
+
     <header class="p-5 bg-white border-b flex justify-between items-center sticky top-0 z-[1100]">
         <div>
-            <h1 class="font-black text-xl text-blue-600 tracking-tighter">ComptaPro <span class="text-orange-500">ULTIMATE</span></h1>
-            <p id="licence-text" class="text-[9px] font-bold text-gray-400 uppercase tracking-widest"></p>
+            <h1 id="header-biz" class="font-black text-xl text-blue-600 italic uppercase">ComptaPro</h1>
+            <p id="licence-status" class="text-[9px] font-bold text-gray-400 uppercase tracking-widest"></p>
         </div>
-        <div id="days-badge" class="px-3 py-1 rounded-full text-[10px] font-black"></div>
+        <div id="days-badge" class="px-3 py-1 rounded-full text-[10px] font-black shadow-sm"></div>
     </header>
 
     <main class="p-4">
-        
         <div id="page-home" class="page active">
-            <div class="bg-blue-600 p-8 rounded-[35px] text-white shadow-2xl mb-6 relative overflow-hidden">
-                <p class="text-xs opacity-70 uppercase font-black">Bénéfice Net (Charges déduites)</p>
+            <div class="bg-gradient-to-br from-blue-600 to-blue-800 p-8 rounded-[35px] text-white shadow-xl mb-6">
+                <p class="text-xs opacity-70 uppercase font-black">Bénéfice Net Global</p>
                 <h2 class="text-4xl font-black mt-1"><span id="valP">0</span> <small class="cur"></small></h2>
-                <div class="mt-4 grid grid-cols-3 gap-2 text-[10px] font-bold text-blue-100">
-                    <div class="bg-blue-500/30 p-2 rounded-xl text-center">JOUR<br><span id="repJ">0</span></div>
-                    <div class="bg-blue-500/30 p-2 rounded-xl text-center">SEM.<br><span id="repS">0</span></div>
-                    <div class="bg-blue-500/30 p-2 rounded-xl text-center">MOIS<br><span id="repM">0</span></div>
+                <div class="mt-6 grid grid-cols-3 gap-2 text-[10px] font-bold text-blue-100">
+                    <div class="bg-white/10 p-2 rounded-xl text-center">JOUR<br><span id="repJ">0</span></div>
+                    <div class="bg-white/10 p-2 rounded-xl text-center">SEM.<br><span id="repS">0</span></div>
+                    <div class="bg-white/10 p-2 rounded-xl text-center">MOIS<br><span id="repM">0</span></div>
                 </div>
             </div>
-
             <div class="grid grid-cols-2 gap-3 mb-6">
-                <button onclick="nav('sale')" class="card m-0 flex flex-col items-center p-4 text-blue-600"><i data-lucide="shopping-cart"></i><span class="text-[10px] font-black mt-2">VENTE</span></button>
-                <button onclick="nav('expense')" class="card m-0 flex flex-col items-center p-4 text-red-500"><i data-lucide="trending-down"></i><span class="text-[10px] font-black mt-2">CHARGE</span></button>
+                <button onclick="nav('sale')" class="card m-0 flex flex-col items-center p-4 text-blue-600"><i data-lucide="shopping-cart"></i><span class="text-[10px] font-black mt-2 uppercase">Vendre</span></button>
+                <button onclick="nav('expense')" class="card m-0 flex flex-col items-center p-4 text-red-500"><i data-lucide="trending-down"></i><span class="text-[10px] font-black mt-2 uppercase">Charge</span></button>
             </div>
-
-            <h3 class="text-xs font-black text-gray-400 mb-3 uppercase flex items-center gap-2"><i data-lucide="activity"></i> Flux de trésorerie</h3>
+            <h3 class="text-xs font-black text-gray-400 mb-3 uppercase px-2">Flux d'activité récent</h3>
             <div id="hist" class="space-y-3"></div>
         </div>
 
         <div id="lock-zone">
             <div id="page-sale" class="page">
-                <h2 class="text-2xl font-black mb-6">Encaisser</h2>
+                <h2 class="text-2xl font-black mb-6">Nouvelle Vente</h2>
                 <div class="card border-t-4 border-blue-600">
-                    <input type="text" id="vendeur" placeholder="Nom du Vendeur" class="input-f bg-gray-50">
+                    <input type="text" id="vendeur" placeholder="Vendeur" class="input-f bg-gray-50">
                     <input type="text" id="cl_name" placeholder="Nom du Client" class="input-f">
                     <div class="flex gap-2">
                         <select id="sel_p" class="input-f flex-1 m-0"></select>
@@ -72,35 +87,35 @@
                         <button onclick="addCart()" class="bg-blue-600 text-white px-4 rounded-xl"><i data-lucide="plus"></i></button>
                     </div>
                     <div id="cart" class="mt-4 space-y-2 border-t border-dashed pt-4"></div>
-                    <div class="mt-6 flex justify-between items-center font-black">
-                        <span class="text-xl">Total: <span id="cartT">0</span> <small class="cur"></small></span>
-                        <button onclick="doSale()" class="bg-green-600 text-white px-8 py-4 rounded-2xl shadow-lg">VENDRE</button>
+                    <div class="mt-6 flex justify-between items-center">
+                        <span class="font-black text-xl">Total: <span id="cartT">0</span> <small class="cur"></small></span>
+                        <button onclick="doSale()" class="bg-green-600 text-white px-8 py-4 rounded-2xl shadow-lg font-black">VALIDER</button>
                     </div>
                 </div>
             </div>
 
             <div id="page-expense" class="page">
-                <h2 class="text-2xl font-black mb-6">Nouvelle Charge</h2>
+                <h2 class="text-2xl font-black mb-6">Dépense / Charge</h2>
                 <div class="card border-t-4 border-red-500">
                     <input type="text" id="exp_name" placeholder="Motif (Loyer, Transport...)" class="input-f">
                     <input type="number" id="exp_amt" placeholder="Montant" class="input-f">
-                    <button onclick="addExpense()" class="btn-blue bg-red-500">DÉDUIRE DU BÉNÉFICE</button>
+                    <button onclick="addExpense()" class="btn-blue bg-red-500 shadow-lg">ENREGISTRER LA DÉPENSE</button>
                 </div>
             </div>
 
             <div id="page-stock" class="page">
                 <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-black">Inventaire</h2>
-                    <button onclick="toggleF('stk-form')" class="bg-blue-600 text-white p-3 rounded-full"><i data-lucide="plus"></i></button>
+                    <h2 class="text-2xl font-black">Inventaire Stock</h2>
+                    <button onclick="toggleF('stk-form')" class="bg-blue-600 text-white p-3 rounded-full shadow-lg"><i data-lucide="plus"></i></button>
                 </div>
                 <div id="stk-form" class="hidden card bg-blue-50 border-2 border-blue-100">
-                    <input type="text" id="p_name" placeholder="Désignation" class="input-f">
+                    <input type="text" id="p_name" placeholder="Nom de l'article" class="input-f">
                     <div class="grid grid-cols-2 gap-2">
-                        <input type="number" id="p_cost" placeholder="Prix Achat" class="input-f">
-                        <input type="number" id="p_sell" placeholder="Prix Vente" class="input-f">
+                        <input type="number" id="p_cost" placeholder="Prix d'Achat" class="input-f">
+                        <input type="number" id="p_sell" placeholder="Prix de Vente" class="input-f">
                     </div>
-                    <input type="number" id="p_qty" placeholder="Quantité" class="input-f">
-                    <button onclick="addStock()" class="btn-blue">AJOUTER</button>
+                    <input type="number" id="p_qty" placeholder="Quantité en stock" class="input-f">
+                    <button onclick="addStock()" class="btn-blue shadow-lg">AJOUTER AU STOCK</button>
                 </div>
                 <div id="stkList" class="space-y-3"></div>
             </div>
@@ -108,170 +123,228 @@
 
         <div id="page-pro" class="page">
             <h2 class="text-2xl font-black mb-6">Administration</h2>
-            <div class="card bg-gray-900 text-white">
-                <p class="text-[10px] font-black opacity-50 uppercase">ID Licence</p>
-                <h3 id="displayID" class="text-2xl font-mono font-black mt-1 text-blue-400"></h3>
+            
+            <div class="card bg-gray-900 text-white flex justify-between items-center mb-4">
+                <div>
+                    <p class="text-[10px] font-black opacity-40 uppercase">Identifiant de Licence</p>
+                    <h3 id="displayID" class="text-2xl font-mono font-black text-blue-400"></h3>
+                </div>
+                <button onclick="copyID()" class="text-gray-500 p-2"><i data-lucide="copy"></i></button>
             </div>
-            <div class="card border-2 border-green-200 mt-4">
-                <h3 class="font-black text-sm mb-2">Renouveler Licence (30j)</h3>
-                <input type="text" id="activation-key" placeholder="Code PRO-XXXX" class="input-f text-center font-mono uppercase">
-                <button onclick="checkKey()" class="btn-blue bg-green-600 mb-3">ACTIVER</button>
-                <button onclick="contactWA()" class="w-full text-[10px] font-black text-green-600">CONTACTER (+226 66566140)</button>
+
+            <div class="card border-2 border-green-100 text-center">
+                <h3 class="font-black text-xs mb-3 uppercase text-green-700">Abonnement Professionnel</h3>
+                <button onclick="contactWA()" class="btn-blue bg-green-600 mb-2 flex items-center justify-center gap-2">
+                    <i data-lucide="message-circle"></i> PAYER VIA WHATSAPP (ORANGE/MOOV)
+                </button>
+                <button onclick="openChariow()" class="btn-blue bg-orange-500 mb-4 flex items-center justify-center gap-2">
+                    <i data-lucide="shopping-bag"></i> PAYER EN LIGNE (CHARIOW)
+                </button>
+                <input type="text" id="activation-key" placeholder="ENTREZ VOTRE CODE PRO-XXXX" class="input-f text-center font-mono border-2 border-green-50 uppercase">
+                <button onclick="checkKey()" class="w-full bg-gray-800 text-white p-4 rounded-xl font-black uppercase text-sm">Activer le code</button>
             </div>
-            <div class="card mt-4">
-                <button onclick="exportAudit()" class="btn-blue bg-black mb-3">EXPORTER L'AUDIT (.JSON)</button>
-                <button onclick="resetProfitAudit()" class="w-full p-4 rounded-2xl bg-red-50 text-red-600 font-black text-xs uppercase border border-red-100">Remise à zéro Tracée</button>
+
+            <button onclick="openSetup(true)" class="card w-full flex items-center gap-4 p-5 font-bold text-gray-700">
+                <i data-lucide="edit-3" class="text-blue-600"></i> Modifier les infos de l'entreprise
+            </button>
+
+            <div class="card space-y-3">
+                <h3 class="font-black text-[10px] text-gray-400 uppercase">Gestion des données</h3>
+                <button onclick="exportAudit()" class="w-full flex items-center justify-center gap-2 p-3 bg-gray-100 rounded-xl font-bold text-sm"><i data-lucide="download"></i> Sauvegarder (Exporter)</button>
+                <label for="restore-file" class="w-full flex items-center justify-center gap-2 p-3 bg-gray-100 rounded-xl font-bold text-sm cursor-pointer"><i data-lucide="upload"></i> Restaurer (Importer)</label>
+                <input type="file" id="restore-file" class="hidden" accept=".json" onchange="restoreData(this)">
+                <button onclick="resetProfitAudit()" class="w-full p-3 text-red-500 font-black text-[10px] uppercase border border-red-50 rounded-xl italic">Remise à zéro de la caisse</button>
             </div>
+
+            <button onclick="logout()" class="w-full p-4 text-gray-400 font-bold text-xs uppercase flex items-center justify-center gap-2">
+                <i data-lucide="log-out" class="w-4"></i> Déconnexion (Effacer les données)
+            </button>
         </div>
     </main>
 
     <nav>
         <button onclick="nav('home')" id="n-home" class="active"><i data-lucide="home"></i>Accueil</button>
-        <button onclick="nav('sale')" id="n-sale"><i data-lucide="shopping-cart"></i>Vente</button>
-        <button onclick="nav('expense')" id="n-expense"><i data-lucide="trending-down"></i>Charge</button>
+        <button onclick="nav('sale')" id="n-sale"><i data-lucide="shopping-cart"></i>Vendre</button>
         <button onclick="nav('stock')" id="n-stock"><i data-lucide="package"></i>Stock</button>
-        <button onclick="nav('pro')" id="n-pro"><i data-lucide="shield-check"></i>Admin</button>
+        <button onclick="nav('pro')" id="n-pro"><i data-lucide="settings"></i>Admin</button>
     </nav>
 
     <script>
-        let db = JSON.parse(localStorage.getItem('CP_V10_ULTIMATE')) || { 
-            p:{name:"Mon Business", cur:"FCFA"}, stk:[], sales:[], expenses:[], resets:[], prof:0,
+        let db = JSON.parse(localStorage.getItem('CP_V13_ULTIMATE')) || { 
+            biz:{}, stk:[], sales:[], expenses:[], resets:[], prof:0,
             licenseID: "CP-" + Math.floor(1000 + Math.random() * 9000), expiryDate: null 
         };
         let cart = [];
 
-        function save() { localStorage.setItem('CP_V10_ULTIMATE', JSON.stringify(db)); }
+        function save() { localStorage.setItem('CP_V13_ULTIMATE', JSON.stringify(db)); }
 
-        // --- LICENCE (ID*7+42+MOIS) ---
-        function checkLicense() {
-            const now = new Date().getTime();
-            const badge = document.getElementById('days-badge');
-            const statusText = document.getElementById('licence-text');
-            const isOk = db.expiryDate && now < db.expiryDate;
+        // --- GESTION SETUP / PROFIL ---
+        window.onload = () => { if (!db.biz.name) openSetup(false); else render(); };
+
+        function openSetup(isEdit) {
+            document.getElementById('overlay-screen').style.display = 'block';
+            if(isEdit) {
+                document.getElementById('setup-title').innerText = "Modifier Profil";
+                document.getElementById('setup-user').value = db.biz.user;
+                document.getElementById('setup-biz').value = db.biz.name;
+                document.getElementById('setup-addr').value = db.biz.addr;
+                document.getElementById('setup-phone').value = db.biz.phone;
+                document.getElementById('setup-cur').value = db.biz.cur;
+                document.getElementById('cancel-setup').classList.remove('hidden');
+            }
+        }
+
+        function closeSetup() { document.getElementById('overlay-screen').style.display = 'none'; }
+
+        async function saveSetup() {
+            const bizName = document.getElementById('setup-biz').value;
+            if(!bizName) return alert("Nom entreprise requis");
+            const logoFile = document.getElementById('setup-logo').files[0];
+            const reader = new FileReader();
             
+            const finalize = (logoData) => {
+                db.biz = {
+                    user: document.getElementById('setup-user').value,
+                    name: bizName, addr: document.getElementById('setup-addr').value,
+                    phone: document.getElementById('setup-phone').value,
+                    cur: document.getElementById('setup-cur').value,
+                    logo: logoData || db.biz.logo || ""
+                };
+                save(); location.reload();
+            };
+
+            if (logoFile) {
+                reader.onloadend = () => finalize(reader.result);
+                reader.readAsDataURL(logoFile);
+            } else finalize();
+        }
+
+        // --- LICENCE (FORMULE : ID*7 + JOUR + MOIS) ---
+        function checkLicense() {
+            const now = Date.now();
+            const badge = document.getElementById('days-badge');
+            const isOk = db.expiryDate && now < db.expiryDate;
             document.getElementById('lock-zone').classList.toggle('locked', !isOk);
-            if (!isOk) {
+            if(!isOk) {
                 badge.innerText = "EXPIRÉ"; badge.className = "px-3 py-1 rounded-full text-[10px] font-black bg-red-100 text-red-600";
-                statusText.innerText = "Accès Restreint";
             } else {
-                const days = Math.ceil((db.expiryDate - now) / 86400000);
-                badge.innerText = days + " JOURS"; badge.className = "px-3 py-1 rounded-full text-[10px] font-black bg-green-100 text-green-600";
-                statusText.innerText = "Licence Active";
+                const days = Math.ceil((db.expiryDate-now)/86400000);
+                badge.innerText = days + " JOURS RESTANTS"; badge.className = "px-3 py-1 rounded-full text-[10px] font-black bg-green-100 text-green-600";
             }
             return isOk;
         }
 
         function checkKey() {
             const input = document.getElementById('activation-key').value.trim().toUpperCase();
-            const formula = (parseInt(db.licenseID.replace(/\D/g, '')) * 7) + 42 + (new Date().getMonth() + 1);
+            const date = new Date();
+            const formula = (parseInt(db.licenseID.replace(/\D/g, '')) * 7) + date.getDate() + (date.getMonth() + 1);
             if (input === "PRO-" + formula) {
-                const base = (db.expiryDate && db.expiryDate > Date.now()) ? db.expiryDate : Date.now();
-                db.expiryDate = base + (30 * 86400000);
-                save(); alert("✅ ACTIVÉ !"); location.reload();
-            } else { alert("❌ Code incorrect"); }
+                db.expiryDate = (db.expiryDate > Date.now() ? db.expiryDate : Date.now()) + (30*86400000);
+                save(); alert("Félicitations ! Version PRO activée."); location.reload();
+            } else { alert("Code invalide pour cette date !"); }
         }
 
-        // --- GESTION DES CHARGES ---
+        // --- FACTURE DELUXE ---
+        function genPDF(sale) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            if (db.biz.logo) doc.addImage(db.biz.logo, 'PNG', 15, 10, 25, 25);
+            doc.setFont(undefined, 'bold').setFontSize(20).setTextColor(37, 99, 235).text(db.biz.name.toUpperCase(), 45, 20);
+            doc.setFont(undefined, 'normal').setFontSize(9).setTextColor(100).text(`${db.biz.addr} | Tel: ${db.biz.phone}`, 45, 27);
+            doc.setDrawColor(230).line(15, 40, 195, 40);
+            doc.setFontSize(10).setTextColor(0).text(`FACTURE : # ${sale.id.toString().slice(-5)}`, 15, 50);
+            doc.text(`DATE : ${sale.d}`, 15, 55);
+            doc.text(`VENDEUR : ${sale.ven}`, 140, 55);
+            doc.text(`CLIENT : ${sale.cli.toUpperCase()}`, 15, 65);
+            doc.autoTable({ startY: 70, head: [['ARTICLE', 'QTÉ', 'PRIX', 'TOTAL']], body: sale.items.map(i => [i.n, i.sq, i.s.toLocaleString(), i.st.toLocaleString()]), headStyles:{fillColor:[37, 99, 235]} });
+            doc.setFontSize(14).text(`NET À PAYER : ${sale.tot.toLocaleString()} ${db.biz.cur}`, 120, doc.lastAutoTable.finalY + 15);
+            doc.setFontSize(9).setFont(undefined, 'italic').text("Merci de votre confiance ! Votre fidélité est notre plus grande satisfaction.", 105, doc.lastAutoTable.finalY + 30, {align:'center'});
+            doc.save(`Facture_${sale.cli}.pdf`);
+        }
+
+        // --- LOGIQUE METIER ---
+        function doSale() {
+            if(!checkLicense() || !cart.length) return;
+            let tP=0, tV=0;
+            cart.forEach(c => { let s = db.stk.find(x => x.id == c.id); s.q -= c.sq; tV += c.st; tP += (c.s-c.c)*c.sq; });
+            db.prof += tP;
+            const sale = {id:Date.now(), ven:document.getElementById('vendeur').value || "Gérant", cli:document.getElementById('cl_name').value || "Passager", tot:tV, items:[...cart], d:new Date().toLocaleString(), t:Date.now()};
+            db.sales.push(sale); save(); genPDF(sale);
+            cart=[]; render(); nav('home');
+        }
+
         function addExpense() {
             let n = document.getElementById('exp_name').value, a = +document.getElementById('exp_amt').value;
             if(!n || !a) return;
-            db.prof -= a;
-            db.expenses.push({id:Date.now(), n, a, d:new Date().toLocaleString(), t:Date.now()});
-            save(); render(); nav('home');
-            alert("Charge enregistrée !");
+            db.prof -= a; db.expenses.push({id:Date.now(), n, a, d:new Date().toLocaleString(), t:Date.now(), isExp:true});
+            save(); render(); nav('home'); alert("Dépense enregistrée.");
         }
 
-        // --- VENTES ET RAPPORTS ---
+        function render() {
+            document.getElementById('header-biz').innerText = db.biz.name || "ComptaPro";
+            document.getElementById('valP').innerText = db.prof.toLocaleString();
+            document.querySelectorAll('.cur').forEach(e => e.innerText = db.biz.cur);
+            document.getElementById('displayID').innerText = db.licenseID;
+            const hist = [...db.sales, ...db.expenses, ...db.resets].sort((a,b) => b.id - a.id).slice(0, 12);
+            document.getElementById('hist').innerHTML = hist.map(i => `
+                <div class="card flex justify-between items-center ${i.montant?'bg-red-50':''}">
+                    <div><b class="${i.isExp?'text-red-500':i.montant?'text-red-800':''}">${i.cli || i.n}</b><br><small class="text-[9px] text-gray-400">${i.d}</small></div>
+                    <b class="${i.isExp || i.montant?'text-red-500':'text-blue-600'}">${(i.tot || -i.a || -i.montant).toLocaleString()}</b>
+                </div>
+            `).join('');
+            document.getElementById('stkList').innerHTML = db.stk.map(i => `<div class="card flex justify-between text-xs"><span><b>${i.n}</b> (Qté: ${i.q})</span><b>${i.s}</b></div>`).join('');
+            document.getElementById('sel_p').innerHTML = db.stk.map(i => `<option value="${i.id}">${i.n} (${i.q})</option>`).join('');
+            const now = Date.now();
+            const calc = (t) => db.sales.filter(s => (now-s.t) < t).reduce((a,b) => a+b.tot, 0);
+            document.getElementById('repJ').innerText = calc(86400000).toLocaleString();
+            document.getElementById('repS').innerText = calc(604800000).toLocaleString();
+            document.getElementById('repM').innerText = calc(2592000000).toLocaleString();
+            checkLicense(); lucide.createIcons();
+        }
+
+        // --- FONCTIONS ADMIN ---
+        function copyID() { navigator.clipboard.writeText(db.licenseID); alert("ID Copié !"); }
+        function openChariow() { window.open("https://qaasxtqf.mychariow.shop/abonnement-pro-compta-mobile/checkout", "_blank"); }
+        function contactWA() { window.open(`https://wa.me/22666566140?text=Paiement%20Licence%20ID:${db.licenseID}`, '_blank'); }
+        function logout() { if(confirm("EFFACER TOUT ? Sauvegardez d'abord !")) { localStorage.clear(); location.reload(); } }
+        function exportAudit() {
+            const blob = new Blob([JSON.stringify(db, null, 2)], {type: "application/json"});
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Backup_${db.biz.name}.json`; a.click();
+        }
+        function restoreData(input) {
+            const reader = new FileReader();
+            reader.onload = (e) => { db = JSON.parse(e.target.result); save(); location.reload(); };
+            reader.readAsText(input.files[0]);
+        }
+        function resetProfitAudit() {
+            if(confirm("Confirmer la clôture de caisse ?")) {
+                db.resets.push({id:Date.now(), n:"CLÔTURE DE CAISSE", montant:db.prof, d:new Date().toLocaleString()});
+                db.prof = 0; save(); render();
+            }
+        }
+        function nav(id) {
+            document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+            document.getElementById('page-'+id).classList.add('active');
+            document.getElementById('n-'+id).classList.add('active');
+            lucide.createIcons();
+        }
+        function toggleF(id) { document.getElementById(id).classList.toggle('hidden'); }
         function addStock() {
             let n=document.getElementById('p_name').value, c=+document.getElementById('p_cost').value, s=+document.getElementById('p_sell').value, q=+document.getElementById('p_qty').value;
             db.stk.push({id:Date.now(), n, c, s, q}); save(); render(); toggleF('stk-form');
         }
-
         function addCart() {
             let id = document.getElementById('sel_p').value, q = +document.getElementById('sel_q').value;
             let it = db.stk.find(x => x.id == id);
             if(!it || q > it.q) return alert("Stock insuffisant");
             cart.push({...it, sq:q, st:it.s*q}); renderCart();
         }
-
         function renderCart() {
             let t = 0;
             document.getElementById('cart').innerHTML = cart.map(i => { t+=i.st; return `<div class="flex justify-between text-xs font-bold bg-gray-50 p-2 rounded-lg"><span>${i.n} x${i.sq}</span><span>${i.st}</span></div>`}).join('');
             document.getElementById('cartT').innerText = t.toLocaleString();
         }
-
-        function doSale() {
-            if(!checkLicense()) return alert("Activez la licence !");
-            let ven = document.getElementById('vendeur').value || "Inconnu";
-            let tP=0, tV=0;
-            cart.forEach(c => { let s = db.stk.find(x => x.id == c.id); s.q -= c.sq; tV += c.st; tP += (c.s - c.c) * c.sq; });
-            db.prof += tP;
-            const sale = {id:Date.now(), ven, cli:document.getElementById('cl_name').value || "Passager", tot:tV, items:[...cart], d:new Date().toLocaleString(), t:Date.now()};
-            db.sales.push(sale); genPDF(sale);
-            save(); cart=[]; render(); nav('home');
-        }
-
-        function genPDF(s) {
-            const { jsPDF } = window.jspdf; const doc = new jsPDF('p', 'mm', [80, 150]);
-            doc.setFontSize(14).text(db.p.name, 10, 10);
-            doc.setFontSize(8).text("Vendeur: "+s.ven + " | Client: "+s.cli, 10, 18);
-            doc.text("Date: "+s.d, 10, 22);
-            doc.autoTable({ startY: 25, head: [['Art.', 'Qté', 'T.']], body: s.items.map(i => [i.n, i.sq, i.st]), styles: {fontSize: 7}, theme: 'plain' });
-            doc.text("TOTAL: " + s.tot + " " + db.p.cur, 10, doc.lastAutoTable.finalY + 10);
-            doc.text("Merci de votre visite !", 10, doc.lastAutoTable.finalY + 15);
-            doc.save(`Ticket_${Date.now()}.pdf`);
-        }
-
-        // --- RAPPORTS TEMPORELS ---
-        function updateReports() {
-            const now = Date.now();
-            const oneDay = 86400000, oneWeek = oneDay * 7, oneMonth = oneDay * 30;
-            const calc = (time) => db.sales.filter(s => (now - s.t) < time).reduce((a,b) => a + b.tot, 0);
-            document.getElementById('repJ').innerText = calc(oneDay).toLocaleString();
-            document.getElementById('repS').innerText = calc(oneWeek).toLocaleString();
-            document.getElementById('repM').innerText = calc(oneMonth).toLocaleString();
-        }
-
-        function render() {
-            document.getElementById('valP').innerText = db.prof.toLocaleString();
-            document.querySelectorAll('.cur').forEach(e => e.innerText = db.p.cur);
-            document.getElementById('displayID').innerText = db.licenseID;
-            
-            const histHtml = [...db.sales, ...db.expenses, ...db.resets].sort((a,b) => b.id - a.id).slice(0, 20).map(item => {
-                const isExp = item.a !== undefined; const isReset = item.montant !== undefined;
-                return `<div class="card flex justify-between items-center ${isReset?'bg-red-50 border-l-4 border-red-500':''}">
-                    <div><b class="${isExp?'text-red-500':isReset?'text-red-700':''}">${item.n || item.cli}</b><br><small class="text-[9px] text-gray-400">${item.d} ${item.ven ? '• '+item.ven : ''}</small></div>
-                    <b class="${isExp?'text-red-500':isReset?'text-red-700':'text-blue-600'}">${(item.tot || -item.a || -item.montant).toLocaleString()}</b>
-                </div>`;
-            }).join('');
-            
-            document.getElementById('hist').innerHTML = histHtml;
-            document.getElementById('stkList').innerHTML = db.stk.map(i => `<div class="card flex justify-between text-xs"><span><b>${i.n}</b> (Qté: ${i.q})</span><b>${i.s}</b></div>`).join('');
-            document.getElementById('sel_p').innerHTML = db.stk.map(i => `<option value="${i.id}">${i.n} (${i.q})</option>`).join('');
-            checkLicense(); updateReports(); lucide.createIcons();
-        }
-
-        function resetProfitAudit() {
-            if(confirm("Confirmer la remise à zéro ?")){
-                db.resets.push({id:Date.now(), n:"🛠 AUDIT RESET", montant:db.prof, d:new Date().toLocaleString()});
-                db.prof = 0; save(); render();
-            }
-        }
-
-        function exportAudit() {
-            const blob = new Blob([JSON.stringify(db, null, 2)], {type: "application/json"});
-            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `ComptaPro_Audit.json`; a.click();
-        }
-
-        function nav(id) { 
-            document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-            document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
-            document.getElementById('page-'+id).classList.add('active'); 
-            document.getElementById('n-'+id).classList.add('active');
-            lucide.createIcons();
-        }
-        function toggleF(id) { document.getElementById(id).classList.toggle('hidden'); }
-        window.onload = () => { render(); };
     </script>
 </body>
 </html>
