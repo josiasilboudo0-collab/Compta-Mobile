@@ -289,11 +289,19 @@
                 </div>
             `).join('');
             
-            // Modification ici : Ajout du bouton supprimer dans l'inventaire
+            // MODIFICATION INVENTAIRE : Boutons + et - pour les quantités
             document.getElementById('stkList').innerHTML = db.stk.map((i, index) => `
                 <div class="card flex justify-between items-center text-xs">
-                    <span><b>${i.n}</b> (Qté: ${i.q}) - <small>${i.s}</small></span>
-                    <button onclick="removeStock(${index})" class="text-red-500 p-2"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    <div class="flex-1">
+                        <b class="text-sm block">${i.n}</b>
+                        <span class="text-blue-600 font-bold">Prix: ${i.s} ${db.biz.cur}</span>
+                    </div>
+                    <div class="flex items-center gap-3 bg-gray-50 px-3 py-2 rounded-xl border">
+                        <button onclick="updateQty(${index}, -1)" class="bg-white shadow-sm border w-7 h-7 rounded-full flex items-center justify-center text-red-500 font-black">-</button>
+                        <span class="font-black text-sm w-6 text-center">${i.q}</span>
+                        <button onclick="updateQty(${index}, 1)" class="bg-white shadow-sm border w-7 h-7 rounded-full flex items-center justify-center text-green-600 font-black">+</button>
+                    </div>
+                    <button onclick="removeStock(${index})" class="ml-4 text-gray-300 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                 </div>`).join('');
             
             document.getElementById('sel_p').innerHTML = db.stk.map(i => `<option value="${i.id}">${i.n} (${i.q})</option>`).join('');
@@ -303,6 +311,57 @@
             document.getElementById('repS').innerText = calc(604800000).toLocaleString();
             document.getElementById('repM').innerText = calc(2592000000).toLocaleString();
             checkLicense(); lucide.createIcons();
+        }
+
+        // Nouvelle fonction pour ajuster les quantités directement
+        function updateQty(index, val) {
+            let newQty = db.stk[index].q + val;
+            if(newQty >= 0) {
+                db.stk[index].q = newQty;
+                save(); render();
+            }
+        }
+
+        function removeStock(index) {
+            if(confirm("Supprimer cet article définitivement ?")) {
+                db.stk.splice(index, 1);
+                save(); render();
+            }
+        }
+
+        function addStock() {
+            let n=document.getElementById('p_name').value, c=+document.getElementById('p_cost').value, s=+document.getElementById('p_sell').value, q=+document.getElementById('p_qty').value;
+            if(!n || q < 0) return;
+            db.stk.push({id:Date.now(), n, c, s, q}); save(); render(); toggleF('stk-form');
+        }
+
+        function addCart() {
+            let id = document.getElementById('sel_p').value, q = +document.getElementById('sel_q').value;
+            let it = db.stk.find(x => x.id == id);
+            if(!it || q > it.q) return alert("Stock insuffisant");
+            cart.push({...it, sq:q, st:it.s*q, cartId: Date.now()}); 
+            renderCart();
+        }
+
+        function renderCart() {
+            let t = 0;
+            document.getElementById('cart').innerHTML = cart.map((i, index) => { 
+                t+=i.st; 
+                return `
+                <div class="flex justify-between items-center text-xs font-bold bg-gray-50 p-2 rounded-lg">
+                    <span>${i.n} x${i.sq}</span>
+                    <div class="flex items-center gap-2">
+                        <span>${i.st.toLocaleString()}</span>
+                        <button onclick="removeFromCart(${index})" class="text-red-500"><i data-lucide="x-circle" class="w-4 h-4"></i></button>
+                    </div>
+                </div>`}).join('');
+            document.getElementById('cartT').innerText = t.toLocaleString();
+            lucide.createIcons();
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            renderCart();
         }
 
         function copyID() { navigator.clipboard.writeText(db.licenseID); alert("ID Copié !"); }
@@ -332,51 +391,6 @@
             lucide.createIcons();
         }
         function toggleF(id) { document.getElementById(id).classList.toggle('hidden'); }
-        
-        function addStock() {
-            let n=document.getElementById('p_name').value, c=+document.getElementById('p_cost').value, s=+document.getElementById('p_sell').value, q=+document.getElementById('p_qty').value;
-            if(!n || q <= 0) return;
-            db.stk.push({id:Date.now(), n, c, s, q}); save(); render(); toggleF('stk-form');
-        }
-
-        // Nouvelle fonction pour supprimer un article du stock
-        function removeStock(index) {
-            if(confirm("Supprimer cet article définitivement ?")) {
-                db.stk.splice(index, 1);
-                save(); render();
-            }
-        }
-
-        function addCart() {
-            let id = document.getElementById('sel_p').value, q = +document.getElementById('sel_q').value;
-            let it = db.stk.find(x => x.id == id);
-            if(!it || q > it.q) return alert("Stock insuffisant");
-            cart.push({...it, sq:q, st:it.s*q, cartId: Date.now()}); 
-            renderCart();
-        }
-
-        // Modification ici : Ajout du bouton supprimer dans le panier
-        function renderCart() {
-            let t = 0;
-            document.getElementById('cart').innerHTML = cart.map((i, index) => { 
-                t+=i.st; 
-                return `
-                <div class="flex justify-between items-center text-xs font-bold bg-gray-50 p-2 rounded-lg">
-                    <span>${i.n} x${i.sq}</span>
-                    <div class="flex items-center gap-2">
-                        <span>${i.st.toLocaleString()}</span>
-                        <button onclick="removeFromCart(${index})" class="text-red-500"><i data-lucide="x-circle" class="w-4 h-4"></i></button>
-                    </div>
-                </div>`}).join('');
-            document.getElementById('cartT').innerText = t.toLocaleString();
-            lucide.createIcons();
-        }
-
-        // Nouvelle fonction pour supprimer un article du panier
-        function removeFromCart(index) {
-            cart.splice(index, 1);
-            renderCart();
-        }
     </script>
 </body>
 </html>
