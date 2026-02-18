@@ -21,7 +21,7 @@
         @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
         .glass-header { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(0,0,0,0.05); }
-        .card-premium { background: white; border-radius: 30px; border: 1px solid rgba(0,0,0,0.03); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.04); padding: 24px; transition: transform 0.2s; }
+        .card-premium { background: white; border-radius: 30px; border: 1px solid rgba(0,0,0,0.03); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.04); padding: 24px; }
         
         .btn-main { background: var(--primary); color: white; border-radius: 20px; padding: 18px; font-weight: 700; width: 100%; box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.4); border: none; }
         .btn-secondary { background: #f1f5f9; color: #475569; border-radius: 18px; padding: 14px; font-weight: 600; width: 100%; border: 1px solid #e2e8f0; }
@@ -36,22 +36,28 @@
 
         #setup-screen { position: fixed; inset: 0; background: white; z-index: 5000; padding: 40px 25px; display: none; overflow-y: auto; }
         .locked { filter: blur(10px); pointer-events: none; opacity: 0.6; }
+        
+        /* Style pour l'aperçu du logo */
+        .logo-preview { width: 80px; height: 80px; object-fit: cover; border-radius: 20px; margin: 0 auto 15px; border: 2px solid #e2e8f0; display: block; }
     </style>
 </head>
 <body>
 
     <div id="setup-screen">
         <div class="mb-8">
-            <div class="w-16 h-1 w-full bg-blue-100 rounded-full mb-8"></div>
-            <h2 id="setup-title" class="text-4xl font-extrabold tracking-tight text-slate-900">Bienvenue.</h2>
-            <p class="text-slate-500 mt-2">Créez votre profil professionnel en quelques secondes.</p>
+            <h2 id="setup-title" class="text-4xl font-extrabold tracking-tight text-slate-900">Profil Business</h2>
+            <p class="text-slate-500 mt-2">Personnalisez votre interface et vos factures.</p>
         </div>
         
         <div class="space-y-4">
             <div class="bg-slate-50 p-6 rounded-3xl border-2 border-dashed border-slate-200 text-center">
-                <label class="text-xs font-bold text-slate-400 uppercase mb-2 block">Logo de l'entreprise</label>
-                <input type="file" id="setup-logo" accept="image/*" class="text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                <img id="logo-preview-img" src="https://placehold.co/100x100?text=Logo" class="logo-preview">
+                <label class="text-xs font-bold text-blue-600 uppercase cursor-pointer">
+                    Changer le logo
+                    <input type="file" id="setup-logo" accept="image/*" class="hidden" onchange="previewLogo(this)">
+                </label>
             </div>
+            
             <input type="text" id="setup-user" placeholder="Votre Nom complet" class="input-pro">
             <input type="text" id="setup-biz" placeholder="Nom de l'Entreprise" class="input-pro">
             <input type="text" id="setup-addr" placeholder="Adresse" class="input-pro">
@@ -62,17 +68,20 @@
                 <option value="$">USD (Dollar $)</option>
                 <option value="€">EUR (Euro €)</option>
             </select>
-            <button onclick="saveSetup()" class="btn-main text-lg mt-6">COMMENCER</button>
+            <button onclick="saveSetup()" class="btn-main text-lg mt-6">SAUVEGARDER</button>
             <button id="cancel-setup" onclick="closeSetup()" class="w-full text-slate-400 font-bold mt-4 hidden">Annuler</button>
         </div>
     </div>
 
     <header class="glass-header p-5 sticky top-0 z-[1100] flex justify-between items-center">
         <div class="flex items-center gap-3">
-            <img id="header-logo-img" src="" class="w-10 h-10 rounded-xl hidden object-cover border border-slate-100">
+            <div id="header-logo-container" class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center overflow-hidden border border-slate-100">
+                <img id="header-logo-img" src="" class="w-full h-full object-cover hidden">
+                <i id="header-logo-icon" data-lucide="briefcase" class="w-5 text-slate-400"></i>
+            </div>
             <div>
                 <h1 id="header-biz" class="font-extrabold text-lg text-slate-900 tracking-tight uppercase leading-none">ComptaPro</h1>
-                <p id="licence-status" class="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-1">Chargement...</p>
+                <p id="licence-status" class="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-1 italic">Vérification...</p>
             </div>
         </div>
         <div id="days-badge" class="px-3 py-1 rounded-full text-[9px] font-extrabold tracking-wider"></div>
@@ -99,20 +108,18 @@
                         </div>
                     </div>
                 </div>
-                <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
             </div>
 
             <div class="grid grid-cols-2 gap-4 mb-8">
                 <button onclick="nav('sale')" class="card-premium flex flex-col items-center gap-3">
                     <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center"><i data-lucide="shopping-cart"></i></div>
-                    <span class="text-[10px] font-bold text-slate-600 uppercase">Nouvelle Vente</span>
+                    <span class="text-[10px] font-bold text-slate-600 uppercase">Vendre</span>
                 </button>
                 <button onclick="nav('expense')" class="card-premium flex flex-col items-center gap-3">
                     <div class="w-12 h-12 bg-red-50 text-red-600 rounded-2xl flex items-center justify-center"><i data-lucide="trending-down"></i></div>
-                    <span class="text-[10px] font-bold text-slate-600 uppercase">Nouvelle Charge</span>
+                    <span class="text-[10px] font-bold text-slate-600 uppercase">Charge</span>
                 </button>
             </div>
-
             <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-4 px-2">Activités récentes</h3>
             <div id="hist" class="space-y-4"></div>
         </div>
@@ -124,21 +131,19 @@
                     <h2 class="text-2xl font-black">Caisse</h2>
                 </div>
                 <div class="card-premium">
-                    <input type="text" id="vendeur" placeholder="Nom du Vendeur" class="input-pro">
-                    <input type="text" id="cl_name" placeholder="Nom du Client" class="input-pro">
+                    <input type="text" id="vendeur" placeholder="Vendeur" class="input-pro">
+                    <input type="text" id="cl_name" placeholder="Client (Optionnel)" class="input-pro">
                     <div class="flex gap-2 mb-4">
                         <select id="sel_p" class="input-pro flex-1 m-0"></select>
                         <input type="number" id="sel_q" value="1" class="input-pro w-24 text-center m-0">
                     </div>
                     <button onclick="addCart()" class="btn-secondary flex items-center justify-center gap-2 mb-6">
-                        <i data-lucide="plus-circle" class="w-5"></i> Ajouter l'article
+                        <i data-lucide="plus-circle" class="w-5"></i> Ajouter
                     </button>
-
                     <div id="cart" class="space-y-3 mb-6 border-t border-slate-100 pt-4"></div>
-                    
                     <div class="flex justify-between items-end">
                         <div>
-                            <p class="text-[10px] font-bold text-slate-400 uppercase">Total à payer</p>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase">Total</p>
                             <h3 class="text-2xl font-black text-slate-900"><span id="cartT">0</span> <small class="cur text-sm"></small></h3>
                         </div>
                         <button onclick="doSale()" class="btn-main !w-auto px-10">VALIDER</button>
@@ -149,11 +154,11 @@
             <div id="page-expense" class="page">
                 <div class="flex items-center gap-3 mb-6">
                     <button onclick="nav('home')" class="p-2 bg-slate-100 rounded-full text-slate-400"><i data-lucide="chevron-left"></i></button>
-                    <h2 class="text-2xl font-black text-red-600">Dépenses</h2>
+                    <h2 class="text-2xl font-black text-red-600">Dépense</h2>
                 </div>
                 <div class="card-premium">
-                    <input type="text" id="exp_name" placeholder="Motif (ex: Loyer, Electricité)" class="input-pro">
-                    <input type="number" id="exp_amt" placeholder="Montant décaissé" class="input-pro">
+                    <input type="text" id="exp_name" placeholder="Motif" class="input-pro">
+                    <input type="number" id="exp_amt" placeholder="Montant" class="input-pro">
                     <button onclick="addExpense()" class="btn-main !bg-red-600 shadow-red-200 mt-4">ENREGISTRER</button>
                 </div>
             </div>
@@ -163,23 +168,21 @@
                     <h2 class="text-2xl font-black">Inventaire</h2>
                     <button onclick="toggleF('stk-form')" class="w-12 h-12 bg-slate-900 text-white rounded-2xl flex items-center justify-center shadow-lg"><i data-lucide="plus"></i></button>
                 </div>
-
                 <div id="stk-form" class="hidden card-premium border-2 border-blue-100 mb-6">
-                    <input type="text" id="p_name" placeholder="Nom de l'article" class="input-pro">
+                    <input type="text" id="p_name" placeholder="Article" class="input-pro">
                     <div class="grid grid-cols-2 gap-3">
                         <input type="number" id="p_cost" placeholder="Prix Achat" class="input-pro">
                         <input type="number" id="p_sell" placeholder="Prix Vente" class="input-pro">
                     </div>
-                    <input type="number" id="p_qty" placeholder="Quantité" class="input-pro">
-                    <button onclick="addStock()" class="btn-main">ENREGISTRER</button>
+                    <input type="number" id="p_qty" placeholder="Quantité Initiale" class="input-pro">
+                    <button onclick="addStock()" class="btn-main">AJOUTER AU STOCK</button>
                 </div>
-
                 <div id="stkList" class="space-y-3"></div>
             </div>
         </div>
 
         <div id="page-pro" class="page">
-            <h2 class="text-2xl font-black mb-6">Paramètres</h2>
+            <h2 class="text-2xl font-black mb-6">Compte</h2>
             <div class="card-premium bg-slate-900 text-white mb-6">
                 <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">ID Licence</p>
                 <div class="flex justify-between items-center">
@@ -187,29 +190,27 @@
                     <button onclick="copyID()" class="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center"><i data-lucide="copy" class="w-4"></i></button>
                 </div>
             </div>
-
             <button onclick="openSetup(true)" class="card-premium w-full flex items-center justify-between mb-4">
                 <div class="flex items-center gap-4">
                     <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center"><i data-lucide="settings" class="w-5"></i></div>
-                    <span class="font-bold text-slate-700">Modifier le Profil/Logo</span>
+                    <span class="font-bold text-slate-700">Editer le Profil & Logo</span>
                 </div>
                 <i data-lucide="chevron-right" class="text-slate-300"></i>
             </button>
-
             <div class="grid grid-cols-2 gap-3 mb-6">
-                <button onclick="exportAudit()" class="btn-secondary !text-xs !py-4 flex flex-col items-center gap-2"><i data-lucide="save" class="w-4"></i> Sauvegarder</button>
-                <label for="restore-file" class="btn-secondary !text-xs !py-4 flex flex-col items-center gap-2 cursor-pointer"><i data-lucide="refresh-ccw" class="w-4"></i> Restaurer</label>
+                <button onclick="exportAudit()" class="btn-secondary !text-xs flex flex-col items-center gap-2"><i data-lucide="save" class="w-4"></i> Backup</button>
+                <label for="restore-file" class="btn-secondary !text-xs flex flex-col items-center gap-2 cursor-pointer"><i data-lucide="upload" class="w-4"></i> Restore</label>
                 <input type="file" id="restore-file" class="hidden" accept=".json" onchange="restoreData(this)">
             </div>
-            <button onclick="resetProfitAudit()" class="w-full text-[10px] font-black text-red-400 uppercase tracking-widest mb-8">Clôturer la caisse</button>
+            <button onclick="resetProfitAudit()" class="w-full text-[10px] font-black text-red-400 uppercase tracking-widest">Clôturer la caisse (Remise à zéro)</button>
         </div>
     </main>
 
     <nav class="nav-pro">
-        <button onclick="nav('home')" id="n-home" class="active"><i data-lucide="layout-grid"></i>Dashboard</button>
+        <button onclick="nav('home')" id="n-home" class="active"><i data-lucide="layout-grid"></i>Home</button>
         <button onclick="nav('sale')" id="n-sale"><i data-lucide="shopping-bag"></i>Ventes</button>
         <button onclick="nav('stock')" id="n-stock"><i data-lucide="package"></i>Stock</button>
-        <button onclick="nav('pro')" id="n-pro"><i data-lucide="user-cog"></i>Compte</button>
+        <button onclick="nav('pro')" id="n-pro"><i data-lucide="user-cog"></i>Profil</button>
     </nav>
 
     <script>
@@ -223,178 +224,182 @@
 
         function save() { localStorage.setItem('CP_V14_ELITE', JSON.stringify(db)); }
 
+        // --- GESTION LOGO ---
+        function previewLogo(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById('logo-preview-img').src = e.target.result;
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
         function openSetup(isEdit) {
             document.getElementById('setup-screen').style.display = 'block';
             if(isEdit) {
-                document.getElementById('setup-title').innerText = "Profil";
                 const b = db.biz;
                 document.getElementById('setup-user').value = b.user || "";
                 document.getElementById('setup-biz').value = b.name || "";
                 document.getElementById('setup-addr').value = b.addr || "";
                 document.getElementById('setup-phone').value = b.phone || "";
                 document.getElementById('setup-cur').value = b.cur || "FCFA";
+                if(b.logo) document.getElementById('logo-preview-img').src = b.logo;
                 document.getElementById('cancel-setup').classList.remove('hidden');
             }
         }
+
         function closeSetup() { document.getElementById('setup-screen').style.display = 'none'; }
         
         async function saveSetup() {
             const bizName = document.getElementById('setup-biz').value;
-            if(!bizName) return alert("Veuillez remplir le nom de l'entreprise");
-            const logoFile = document.getElementById('setup-logo').files[0];
-            const finalize = (logoData) => {
-                db.biz = {
-                    user: document.getElementById('setup-user').value,
-                    name: bizName, addr: document.getElementById('setup-addr').value,
-                    phone: document.getElementById('setup-phone').value,
-                    cur: document.getElementById('setup-cur').value,
-                    logo: logoData || db.biz.logo || ""
-                };
-                save(); location.reload();
+            if(!bizName) return alert("Nom de l'entreprise requis");
+            
+            const logoPreview = document.getElementById('logo-preview-img').src;
+            // Si l'image n'est pas le placeholder par défaut, on l'enregistre
+            const finalLogo = logoPreview.includes('placehold.co') ? (db.biz.logo || "") : logoPreview;
+
+            db.biz = {
+                user: document.getElementById('setup-user').value,
+                name: bizName, addr: document.getElementById('setup-addr').value,
+                phone: document.getElementById('setup-phone').value,
+                cur: document.getElementById('setup-cur').value,
+                logo: finalLogo
             };
-            if(logoFile) {
-                const reader = new FileReader();
-                reader.onloadend = () => finalize(reader.result);
-                reader.readAsDataURL(logoFile);
-            } else finalize();
+            save(); 
+            location.reload();
         }
 
-        // --- GESTION DU STOCK ---
-        function updateStockQty(id) {
-            let item = db.stk.find(x => x.id == id);
-            let newQty = prompt(`Nouvelle quantité pour ${item.n} :`, item.q);
-            if(newQty !== null && !isNaN(newQty)) {
-                item.q = parseInt(newQty);
-                save(); render();
-            }
-        }
-
+        // --- ACTIONS ---
         function addStock() {
             let n=document.getElementById('p_name').value, c=+document.getElementById('p_cost').value, s=+document.getElementById('p_sell').value, q=+document.getElementById('p_qty').value;
             if(!n || !s) return; db.stk.push({id:Date.now(), n, c, s, q}); save(); render(); toggleF('stk-form');
         }
 
-        // --- GESTION DE LA CAISSE (PANIER) ---
+        function updateStockQty(id) {
+            let item = db.stk.find(x => x.id == id);
+            let newQty = prompt(`Nouvelle quantité pour ${item.n} :`, item.q);
+            if(newQty !== null) { item.q = parseInt(newQty); save(); render(); }
+        }
+
         function addCart() {
             let id = document.getElementById('sel_p').value, q = parseInt(document.getElementById('sel_q').value);
             let it = db.stk.find(x => x.id == id);
-            if(!it || q > it.q) return alert("Quantité insuffisante en stock !");
-            
-            let existing = cart.find(x => x.id == id);
-            if(existing) {
-                if(existing.sq + q > it.q) return alert("Plus de stock disponible !");
-                existing.sq += q;
-                existing.st = existing.s * existing.sq;
-            } else {
-                cart.push({...it, sq:q, st:it.s*q});
-            }
-            renderCart();
-        }
-
-        function changeCartQty(index, delta) {
-            let item = cart[index];
-            let stockItem = db.stk.find(x => x.id == item.id);
-            let newQty = item.sq + delta;
-            
-            if(newQty <= 0) return removeFromCart(index);
-            if(newQty > stockItem.q) return alert("Stock maximum atteint !");
-            
-            item.sq = newQty;
-            item.st = item.s * item.sq;
-            renderCart();
-        }
-
-        function removeFromCart(index) {
-            cart.splice(index, 1);
-            renderCart();
+            if(!it || q > it.q) return alert("Stock insuffisant !");
+            cart.push({...it, sq:q, st:it.s*q}); renderCart();
         }
 
         function renderCart() {
             let t = 0;
-            document.getElementById('cart').innerHTML = cart.map((i, index) => { 
+            document.getElementById('cart').innerHTML = cart.map((i, idx) => { 
                 t += i.st; 
-                return `
-                <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-100">
-                    <div class="flex-1">
-                        <b class="text-xs text-slate-800">${i.n}</b><br>
-                        <span class="text-[10px] text-slate-500">${i.s.toLocaleString()} ${db.biz.cur}</span>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <div class="flex items-center bg-white rounded-lg border px-2 py-1 gap-3">
-                            <button onclick="changeCartQty(${index}, -1)" class="text-red-500 font-bold">-</button>
-                            <span class="text-xs font-black">${i.sq}</span>
-                            <button onclick="changeCartQty(${index}, 1)" class="text-blue-600 font-bold">+</button>
-                        </div>
-                        <button onclick="removeFromCart(${index})" class="text-slate-300 hover:text-red-500"><i data-lucide="trash-2" class="w-4"></i></button>
-                    </div>
-                </div>`;
+                return `<div class="flex justify-between text-xs bg-slate-50 p-2 rounded-lg"><span>${i.n} x${i.sq}</span><b>${i.st.toLocaleString()}</b></div>`;
             }).join('');
             document.getElementById('cartT').innerText = t.toLocaleString();
-            lucide.createIcons();
         }
 
         function doSale() {
-            if(!checkLicense() || !cart.length) return;
+            if(!cart.length) return;
             let tP=0, tV=0;
             cart.forEach(c => { 
                 let s = db.stk.find(x => x.id == c.id); 
                 s.q -= c.sq; tV += c.st; tP += (c.s-c.c)*c.sq; 
             });
             db.prof += tP;
-            const sale = {id:Date.now(), ven:document.getElementById('vendeur').value || "Gérant", cli:document.getElementById('cl_name').value || "Passager", tot:tV, items:[...cart], d:new Date().toLocaleString(), t:Date.now()};
+            const sale = {id:Date.now(), cli:document.getElementById('cl_name').value || "Client", tot:tV, items:[...cart], d:new Date().toLocaleString(), t:Date.now()};
             db.sales.push(sale); save(); genPDF(sale);
             cart=[]; render(); nav('home');
         }
 
+        function addExpense() {
+            let n = document.getElementById('exp_name').value, a = +document.getElementById('exp_amt').value;
+            if(!n || !a) return;
+            db.prof -= a;
+            db.expenses.push({id:Date.now(), n, a, d:new Date().toLocaleString(), t:Date.now(), isExp:true});
+            save(); render(); nav('home');
+        }
+
+        // --- RENDU GLOBAL ---
         function render() {
-            // Logo
-            const logoEl = document.getElementById('header-logo-img');
-            if(db.biz.logo) { logoEl.src = db.biz.logo; logoEl.classList.remove('hidden'); }
-            
-            document.getElementById('header-biz').innerText = db.biz.name || "ComptaPro";
+            // Affichage Logo Header
+            const logoImg = document.getElementById('header-logo-img');
+            const logoIcon = document.getElementById('header-logo-icon');
+            if(db.biz.logo && db.biz.logo !== "") {
+                logoImg.src = db.biz.logo;
+                logoImg.classList.remove('hidden');
+                logoIcon.classList.add('hidden');
+            }
+
+            document.getElementById('header-biz').innerText = db.biz.name;
             document.getElementById('valP').innerText = db.prof.toLocaleString();
             document.querySelectorAll('.cur').forEach(e => e.innerText = db.biz.cur);
             document.getElementById('displayID').innerText = db.licenseID;
             
-            // Historique
-            const hist = [...db.sales, ...db.expenses, ...db.resets].sort((a,b) => b.id - a.id).slice(0, 10);
+            const hist = [...db.sales, ...db.expenses, ...db.resets].sort((a,b) => b.id - a.id).slice(0, 8);
             document.getElementById('hist').innerHTML = hist.map(i => `
-                <div class="card-premium flex justify-between items-center py-4 px-5 border-l-4 ${i.isExp ? 'border-red-500' : 'border-blue-500'}">
-                    <div><b class="text-sm font-bold text-slate-800">${i.cli || i.n}</b><br><small class="text-[9px] text-slate-400 uppercase">${i.d}</small></div>
-                    <b class="${i.isExp || i.montant ? 'text-red-500' : 'text-blue-600'} text-sm">${i.isExp || i.montant ? '-' : '+'}${ (i.tot || i.a || i.montant).toLocaleString() }</b>
+                <div class="card-premium flex justify-between items-center py-3 border-l-4 ${i.isExp?'border-red-500':'border-blue-500'}">
+                    <div><b class="text-sm">${i.cli || i.n}</b><br><small class="text-[9px] opacity-50">${i.d}</small></div>
+                    <b class="${i.isExp?'text-red-500':'text-blue-600'} text-sm">${(i.tot || i.a || i.montant).toLocaleString()}</b>
                 </div>
             `).join('');
             
-            // Stock
             document.getElementById('stkList').innerHTML = db.stk.map(i => `
-                <div class="card-premium flex justify-between items-center py-4">
-                    <div><b class="text-slate-800 text-sm">${i.n}</b><br><small class="text-slate-400 font-bold text-[10px] uppercase">En Stock: ${i.q}</small></div>
-                    <div class="flex items-center gap-4">
-                        <div class="text-right font-black text-slate-900 text-sm">${i.s.toLocaleString()}</div>
-                        <button onclick="updateStockQty(${i.id})" class="p-2 bg-slate-50 rounded-lg text-blue-600"><i data-lucide="edit-3" class="w-4"></i></button>
-                    </div>
+                <div class="card-premium flex justify-between items-center py-3">
+                    <div><b class="text-sm">${i.n}</b><br><small class="font-bold">Stock: ${i.q}</small></div>
+                    <button onclick="updateStockQty(${i.id})" class="p-2 bg-slate-50 rounded-lg text-blue-600"><i data-lucide="edit-3" class="w-4"></i></button>
                 </div>
             `).join('');
             
             document.getElementById('sel_p').innerHTML = db.stk.map(i => `<option value="${i.id}">${i.n} (${i.q})</option>`).join('');
-            const now = Date.now();
-            const calc = (t) => db.sales.filter(s => (now-s.t) < t).reduce((a,b) => a+b.tot, 0);
+            
+            const calc = (t) => db.sales.filter(s => (Date.now()-s.t) < t).reduce((a,b) => a+b.tot, 0);
             document.getElementById('repJ').innerText = calc(86400000).toLocaleString();
             document.getElementById('repS').innerText = calc(604800000).toLocaleString();
             document.getElementById('repM').innerText = calc(2592000000).toLocaleString();
+            
             checkLicense(); lucide.createIcons();
         }
 
-        // PDF et autres fonctions techniques
+        // --- PDF ---
         function genPDF(sale) {
             const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            if(db.biz.logo) try { doc.addImage(db.biz.logo, 'PNG', 15, 10, 20, 20); } catch(e){}
-            doc.setFont(undefined, 'bold').setFontSize(20).text(db.biz.name.toUpperCase(), 40, 20);
-            doc.setFontSize(9).setFont(undefined, 'normal').text(`${db.biz.addr} | ${db.biz.phone}`, 40, 26);
-            doc.autoTable({ startY: 40, head: [['ARTICLE', 'QTÉ', 'PRIX UNIT.', 'TOTAL']], body: sale.items.map(i => [i.n, i.sq, i.s.toLocaleString(), i.st.toLocaleString()]), headStyles:{fillColor:[30, 41, 59]} });
-            doc.setFontSize(14).text(`TOTAL: ${sale.tot.toLocaleString()} ${db.biz.cur}`, 15, doc.lastAutoTable.finalY + 15);
-            doc.save(`Facture_${sale.cli}.pdf`);
+            const doc = new jsPDF('p', 'mm', [80, 150]); // Format Ticket
+            
+            let y = 10;
+            if(db.biz.logo) {
+                try { doc.addImage(db.biz.logo, 'JPEG', 30, y, 20, 20); y += 25; } catch(e){}
+            }
+            
+            doc.setFontSize(10).text(db.biz.name.toUpperCase(), 40, y, {align:'center'});
+            doc.setFontSize(7).text(db.biz.addr, 40, y+4, {align:'center'});
+            doc.text(db.biz.phone, 40, y+8, {align:'center'});
+            
+            doc.autoTable({
+                startY: y+12,
+                head: [['Art.', 'Q', 'Total']],
+                body: sale.items.map(i => [i.n, i.sq, i.st]),
+                theme: 'plain',
+                styles: {fontSize: 7}
+            });
+            
+            doc.setFontSize(10).text(`TOTAL: ${sale.tot} ${db.biz.cur}`, 10, doc.lastAutoTable.finalY + 10);
+            doc.save(`Facture_${sale.id}.pdf`);
+        }
+
+        function checkLicense() {
+            if(!db.expiryDate) { db.expiryDate = Date.now() + 86400000 * 3; save(); }
+            const badge = document.getElementById('days-badge');
+            const status = document.getElementById('licence-status');
+            const days = Math.ceil((db.expiryDate-Date.now())/86400000);
+            
+            if(days <= 0) {
+                badge.innerText = "EXPIRÉ"; badge.className = "px-3 py-1 rounded-full text-[9px] bg-red-100 text-red-500 font-black";
+                status.innerText = "MODE LECTURE SEULE";
+                document.getElementById('lock-zone').classList.add('locked');
+            } else {
+                badge.innerText = days + " JOURS"; badge.className = "px-3 py-1 rounded-full text-[9px] bg-green-100 text-green-500 font-black";
+                status.innerText = "LICENCE ACTIVE";
+            }
         }
 
         function nav(id) {
@@ -405,38 +410,11 @@
             lucide.createIcons();
         }
 
-        function addExpense() {
-            let n = document.getElementById('exp_name').value;
-            let a = +document.getElementById('exp_amt').value;
-            if(!n || !a) return alert("Remplissez les champs");
-            db.prof -= a;
-            db.expenses.push({id:Date.now(), n, a, d:new Date().toLocaleString(), t:Date.now(), isExp:true});
-            save(); render(); nav('home');
-        }
-
-        function checkLicense() {
-            const isOk = db.expiryDate ? Date.now() < db.expiryDate : false;
-            const badge = document.getElementById('days-badge');
-            const status = document.getElementById('licence-status');
-            document.getElementById('lock-zone').classList.toggle('locked', !isOk);
-            if(!isOk) {
-                badge.innerText = "EXPIRÉ"; badge.className = "px-3 py-1 rounded-full text-[9px] font-extrabold tracking-wider bg-red-100 text-red-500";
-                status.innerText = "MODE CONSULTATION";
-            } else {
-                const days = Math.ceil((db.expiryDate-Date.now())/86400000);
-                badge.innerText = days + " JOURS"; badge.className = "px-3 py-1 rounded-full text-[9px] font-extrabold tracking-wider bg-green-100 text-green-500";
-                status.innerText = "LICENCE ACTIVE";
-            }
-            // Temporairement, forcer l'accès pour tester si pas de date
-            if(!db.expiryDate) { db.expiryDate = Date.now() + 86400000 * 3; save(); }
-            return true;
-        }
-
         function toggleF(id) { document.getElementById(id).classList.toggle('hidden'); }
         function copyID() { navigator.clipboard.writeText(db.licenseID); alert("ID Copié"); }
         function exportAudit() {
             const blob = new Blob([JSON.stringify(db)], {type: "application/json"});
-            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Backup.json`; a.click();
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Backup_ComptaPro.json`; a.click();
         }
         function restoreData(input) {
             const r = new FileReader(); r.onload = (e) => { db = JSON.parse(e.target.result); save(); location.reload(); };
