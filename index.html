@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ComptaPro Elite V14 - Pro</title>
+    <title>ComptaPro Elite V14</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -21,138 +21,137 @@
         @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
         .glass-header { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(0,0,0,0.05); }
-        .card-premium { background: white; border-radius: 25px; border: 1px solid rgba(0,0,0,0.03); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.04); padding: 20px; transition: transform 0.2s; position: relative; }
+        .card-premium { background: white; border-radius: 30px; border: 1px solid rgba(0,0,0,0.03); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.04); padding: 24px; transition: transform 0.2s; position: relative; overflow: hidden; }
+        
+        /* Animation au clic/appui long */
+        .card-premium:active { transform: scale(0.98); }
         
         .btn-main { background: var(--primary); color: white; border-radius: 20px; padding: 18px; font-weight: 700; width: 100%; box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.4); border: none; }
         .btn-secondary { background: #f1f5f9; color: #475569; border-radius: 18px; padding: 14px; font-weight: 600; width: 100%; border: 1px solid #e2e8f0; }
         
         .input-pro { width: 100%; background: #f1f5f9; border: 2px solid transparent; border-radius: 16px; padding: 16px; font-size: 15px; transition: all 0.3s; outline: none; margin-bottom: 12px; }
-        .input-pro:focus { border-color: var(--primary); background: white; }
+        .input-pro:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); }
 
         .nav-pro { position: fixed; bottom: 20px; left: 20px; right: 20px; background: #1e293b; border-radius: 25px; height: 75px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
         .nav-pro button { color: #94a3b8; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 10px; font-weight: 600; transition: 0.3s; }
-        .nav-pro button.active { color: white; }
+        .nav-pro button.active { color: white; transform: translateY(-5px); }
         .nav-pro button.active i { color: var(--primary); }
+
+        /* Style Icône Poubelle dynamique */
+        .btn-del { position: absolute; top: 12px; right: 12px; color: #ef4444; opacity: 0; transition: all 0.3s; background: #fee2e2; padding: 8px; border-radius: 12px; z-index: 20; }
+        .card-premium:hover .btn-del, .card-premium:active .btn-del { opacity: 1; }
 
         #setup-screen { position: fixed; inset: 0; background: white; z-index: 5000; padding: 40px 25px; display: none; overflow-y: auto; }
         .locked { filter: blur(10px); pointer-events: none; opacity: 0.6; }
-        .btn-del-mini { color: #ef4444; padding: 8px; background: #fef2f2; border-radius: 10px; }
-        .qty-badge { background: #eff6ff; color: #2563eb; padding: 4px 10px; border-radius: 10px; font-weight: 800; font-size: 14px; }
     </style>
 </head>
 <body>
 
     <div id="setup-screen">
         <div class="mb-8">
+            <div class="w-16 h-1 w-full bg-blue-100 rounded-full mb-8"></div>
             <h2 id="setup-title" class="text-4xl font-extrabold tracking-tight text-slate-900">Bienvenue.</h2>
-            <p class="text-slate-500 mt-2">Créez votre profil professionnel.</p>
+            <p class="text-slate-500 mt-2">Créez votre profil professionnel en quelques secondes.</p>
         </div>
+        
         <div class="space-y-4">
+            <div class="bg-slate-50 p-6 rounded-3xl border-2 border-dashed border-slate-200 text-center">
+                <label class="text-xs font-bold text-slate-400 uppercase mb-2 block">Logo de l'entreprise</label>
+                <input type="file" id="setup-logo" accept="image/*" class="text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+            </div>
             <input type="text" id="setup-user" placeholder="Votre Nom complet" class="input-pro">
             <input type="text" id="setup-biz" placeholder="Nom de l'Entreprise" class="input-pro">
             <input type="text" id="setup-addr" placeholder="Adresse" class="input-pro">
-            <input type="text" id="setup-phone" placeholder="Téléphone" class="input-pro">
+            <input type="text" id="setup-phone" placeholder="Téléphone / WhatsApp" class="input-pro">
             <select id="setup-cur" class="input-pro">
-                <option value="FCFA">FCFA</option>
-                <option value="GNF">GNF</option>
-                <option value="$">USD ($)</option>
-                <option value="€">EUR (€)</option>
+                <option value="FCFA">FCFA (Franc CFA)</option>
+                <option value="GNF">GNF (Franc Guinéen)</option>
+                <option value="$">USD (Dollar $)</option>
+                <option value="€">EUR (Euro €)</option>
             </select>
             <button onclick="saveSetup()" class="btn-main text-lg mt-6">COMMENCER</button>
+            <button id="cancel-setup" onclick="closeSetup()" class="w-full text-slate-400 font-bold mt-4 hidden">Annuler</button>
         </div>
     </div>
 
     <header class="glass-header p-5 sticky top-0 z-[1100] flex justify-between items-center">
         <div>
-            <h1 id="header-biz" class="font-extrabold text-xl text-slate-900 uppercase">ComptaPro</h1>
-            <p id="licence-status" class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">V14 ELITE</p>
+            <h1 id="header-biz" class="font-extrabold text-xl text-slate-900 tracking-tight uppercase">ComptaPro</h1>
+            <p id="licence-status" class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Chargement...</p>
         </div>
-        <div id="days-badge" class="px-4 py-1.5 rounded-full text-[10px] font-extrabold"></div>
+        <div id="days-badge" class="px-4 py-1.5 rounded-full text-[10px] font-extrabold tracking-wider"></div>
     </header>
 
     <main class="p-6">
         <div id="page-home" class="page active">
-            <div class="bg-gradient-to-br from-blue-600 to-indigo-700 p-8 rounded-[40px] text-white shadow-2xl mb-8">
-                <p class="text-xs font-bold opacity-80 uppercase tracking-widest">Bénéfice Net Global</p>
-                <h2 class="text-4xl font-extrabold mt-2 tracking-tighter"><span id="valP">0</span> <small class="text-lg cur font-normal opacity-80"></small></h2>
-                <div class="grid grid-cols-3 gap-3 mt-8">
-                    <div class="bg-white/10 backdrop-blur-md p-3 rounded-2xl text-center">
-                        <span class="text-[9px] font-black opacity-60 block mb-1">JOUR</span>
-                        <span id="repJ" class="text-xs font-extrabold">0</span>
-                    </div>
-                    <div class="bg-white/10 backdrop-blur-md p-3 rounded-2xl text-center">
-                        <span class="text-[9px] font-black opacity-60 block mb-1">SEMAINE</span>
-                        <span id="repS" class="text-xs font-extrabold">0</span>
-                    </div>
-                    <div class="bg-white/10 backdrop-blur-md p-3 rounded-2xl text-center">
-                        <span class="text-[9px] font-black opacity-60 block mb-1">MOIS</span>
-                        <span id="repM" class="text-xs font-extrabold">0</span>
+            <div class="bg-gradient-to-br from-blue-600 to-indigo-700 p-8 rounded-[40px] text-white shadow-2xl mb-8 relative overflow-hidden">
+                <div class="relative z-10">
+                    <p class="text-xs font-bold opacity-80 uppercase tracking-widest">Bénéfice Net Global</p>
+                    <h2 class="text-4xl font-extrabold mt-2 tracking-tighter"><span id="valP">0</span> <small class="text-lg cur font-normal opacity-80"></small></h2>
+                    
+                    <div class="grid grid-cols-3 gap-3 mt-8">
+                        <div class="bg-white/10 backdrop-blur-md p-3 rounded-2xl border border-white/10 text-center">
+                            <span class="text-[9px] font-black opacity-60 block mb-1">AUJOURD'HUI</span>
+                            <span id="repJ" class="text-xs font-extrabold">0</span>
+                        </div>
+                        <div class="bg-white/10 backdrop-blur-md p-3 rounded-2xl border border-white/10 text-center">
+                            <span class="text-[9px] font-black opacity-60 block mb-1">CETTE SEMAINE</span>
+                            <span id="repS" class="text-xs font-extrabold">0</span>
+                        </div>
+                        <div class="bg-white/10 backdrop-blur-md p-3 rounded-2xl border border-white/10 text-center">
+                            <span class="text-[9px] font-black opacity-60 block mb-1">CE MOIS</span>
+                            <span id="repM" class="text-xs font-extrabold">0</span>
+                        </div>
                     </div>
                 </div>
+                <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
             </div>
 
             <div class="grid grid-cols-2 gap-4 mb-8">
                 <button onclick="nav('sale')" class="card-premium flex flex-col items-center gap-3">
                     <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center"><i data-lucide="shopping-cart"></i></div>
-                    <span class="text-xs font-bold text-slate-600 uppercase">Vente</span>
+                    <span class="text-xs font-bold text-slate-600 uppercase">Nouvelle Vente</span>
                 </button>
                 <button onclick="nav('expense')" class="card-premium flex flex-col items-center gap-3">
                     <div class="w-12 h-12 bg-red-50 text-red-600 rounded-2xl flex items-center justify-center"><i data-lucide="trending-down"></i></div>
-                    <span class="text-xs font-bold text-slate-600 uppercase">Charge</span>
+                    <span class="text-xs font-bold text-slate-600 uppercase">Nouvelle Charge</span>
                 </button>
             </div>
 
-            <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-4 px-2">Activités récentes</h3>
+            <div class="flex items-center justify-between mb-4 px-2">
+                <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest">Activités récentes</h3>
+                <i data-lucide="layers" class="w-4 h-4 text-slate-300"></i>
+            </div>
             <div id="hist" class="space-y-4"></div>
         </div>
 
         <div id="lock-zone">
             <div id="page-sale" class="page">
-                <h2 class="text-2xl font-black mb-6">Caisse</h2>
+                <div class="flex items-center gap-3 mb-6">
+                    <button onclick="nav('home')" class="p-2 bg-slate-100 rounded-full text-slate-400"><i data-lucide="chevron-left"></i></button>
+                    <h2 class="text-2xl font-black">Caisse</h2>
+                </div>
                 <div class="card-premium">
+                    <input type="text" id="vendeur" placeholder="Nom du Vendeur" class="input-pro">
                     <input type="text" id="cl_name" placeholder="Nom du Client" class="input-pro">
                     <div class="flex gap-2 mb-4">
                         <select id="sel_p" class="input-pro flex-1 m-0"></select>
-                        <input type="number" id="sel_q" value="1" class="input-pro w-20 text-center m-0">
+                        <input type="number" id="sel_q" value="1" class="input-pro w-24 text-center m-0">
                     </div>
-                    <button onclick="addCart()" class="btn-secondary flex items-center justify-center gap-2 mb-6">
-                        <i data-lucide="plus-circle" class="w-5"></i> Ajouter
-                    </button>
-
-                    <div id="cart" class="space-y-3 mb-6 border-t border-slate-100 pt-4">
-                        </div>
-                    
-                    <div class="flex justify-between items-end border-t pt-4">
-                        <div>
-                            <p class="text-[10px] font-bold text-slate-400 uppercase">Total</p>
-                            <h3 class="text-2xl font-black text-slate-900"><span id="cartT">0</span> <small class="cur text-sm"></small></h3>
-                        </div>
+                    <button onclick="addCart()" class="btn-secondary flex items-center justify-center gap-2 mb-6"><i data-lucide="plus-circle" class="w-5"></i> Ajouter</button>
+                    <div id="cart" class="space-y-3 mb-6 border-t border-slate-100 pt-4"></div>
+                    <div class="flex justify-between items-end">
+                        <div><p class="text-[10px] font-bold text-slate-400 uppercase">Total</p><h3 class="text-2xl font-black"><span id="cartT">0</span> <small class="cur text-sm"></small></h3></div>
                         <button onclick="doSale()" class="btn-main !w-auto px-10">VALIDER</button>
                     </div>
                 </div>
             </div>
 
-            <div id="page-stock" class="page">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-black">Inventaire</h2>
-                    <button onclick="toggleF('stk-form')" class="w-12 h-12 bg-slate-900 text-white rounded-2xl flex items-center justify-center"><i data-lucide="plus"></i></button>
-                </div>
-
-                <div id="stk-form" class="hidden card-premium border-2 border-blue-100 mb-6">
-                    <input type="text" id="p_name" placeholder="Article" class="input-pro">
-                    <div class="grid grid-cols-2 gap-3">
-                        <input type="number" id="p_cost" placeholder="Prix Achat" class="input-pro">
-                        <input type="number" id="p_sell" placeholder="Prix Vente" class="input-pro">
-                    </div>
-                    <input type="number" id="p_qty" placeholder="Stock Initial" class="input-pro">
-                    <button onclick="addStock()" class="btn-main">AJOUTER AU STOCK</button>
-                </div>
-
-                <div id="stkList" class="space-y-3"></div>
-            </div>
-
             <div id="page-expense" class="page">
-                <h2 class="text-2xl font-black text-red-600 mb-6">Dépenses</h2>
+                <div class="flex items-center gap-3 mb-6">
+                    <button onclick="nav('home')" class="p-2 bg-slate-100 rounded-full text-slate-400"><i data-lucide="chevron-left"></i></button>
+                    <h2 class="text-2xl font-black text-red-600">Dépenses</h2>
+                </div>
                 <div class="card-premium">
                     <input type="text" id="exp_name" placeholder="Motif" class="input-pro">
                     <input type="number" id="exp_amt" placeholder="Montant" class="input-pro">
@@ -160,12 +159,52 @@
                 </div>
             </div>
 
-            <div id="page-pro" class="page">
-                <h2 class="text-2xl font-black mb-6">Compte</h2>
-                <div id="displayID" class="p-4 bg-slate-100 rounded-2xl mb-4 font-mono text-center"></div>
-                <button onclick="exportAudit()" class="btn-secondary mb-4">Sauvegarder les données</button>
-                <button onclick="logout()" class="w-full text-red-500 text-xs font-bold underline">Réinitialiser l'application</button>
+            <div id="page-stock" class="page">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-black">Inventaire</h2>
+                    <button onclick="toggleF('stk-form')" class="w-12 h-12 bg-slate-900 text-white rounded-2xl flex items-center justify-center shadow-lg"><i data-lucide="plus"></i></button>
+                </div>
+                <div id="stk-form" class="hidden card-premium border-2 border-blue-100 mb-6">
+                    <input type="text" id="p_name" placeholder="Nom de l'article" class="input-pro">
+                    <div class="grid grid-cols-2 gap-3">
+                        <input type="number" id="p_cost" placeholder="Prix Achat" class="input-pro">
+                        <input type="number" id="p_sell" placeholder="Prix Vente" class="input-pro">
+                    </div>
+                    <input type="number" id="p_qty" placeholder="Quantité" class="input-pro">
+                    <button onclick="addStock()" class="btn-main">ENREGISTRER</button>
+                </div>
+                <div id="stkList" class="space-y-3"></div>
             </div>
+        </div>
+
+        <div id="page-pro" class="page">
+            <h2 class="text-2xl font-black mb-6">Paramètres</h2>
+            <div class="card-premium bg-slate-900 text-white mb-6 relative overflow-hidden">
+                <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">ID Licence Pro</p>
+                <div class="flex justify-between items-center relative z-10">
+                    <h3 id="displayID" class="text-2xl font-extrabold text-blue-400 tracking-wider"></h3>
+                    <button onclick="copyID()" class="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center"><i data-lucide="copy" class="w-4"></i></button>
+                </div>
+            </div>
+            
+            <div class="card-premium border-2 border-green-50 mb-6">
+                <button onclick="contactWA()" class="btn-main !bg-green-600 mb-3 flex items-center justify-center gap-3"><i data-lucide="message-square"></i> Payer via Orange/Moov</button>
+                <div class="flex gap-2">
+                    <input type="text" id="activation-key" placeholder="Code PRO-XXXX" class="input-pro m-0 text-center font-bold">
+                    <button onclick="checkKey()" class="bg-slate-900 text-white px-6 rounded-2xl font-bold">ACTIVER</button>
+                </div>
+            </div>
+
+            <button onclick="openSetup(true)" class="card-premium w-full flex items-center justify-between mb-4">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center"><i data-lucide="settings" class="w-5"></i></div>
+                    <span class="font-bold text-slate-700">Infos entreprise</span>
+                </div>
+                <i data-lucide="chevron-right" class="text-slate-300"></i>
+            </button>
+            
+            <button onclick="resetProfitAudit()" class="w-full text-[10px] font-black text-red-400 uppercase tracking-widest mt-8 mb-4">Clôture de caisse</button>
+            <button onclick="logout()" class="w-full text-slate-300 text-xs font-bold underline">Se déconnecter</button>
         </div>
     </main>
 
@@ -178,8 +217,8 @@
 
     <script>
         let db = JSON.parse(localStorage.getItem('CP_V14_ELITE')) || { 
-            biz:{}, stk:[], sales:[], expenses:[], prof:0,
-            licenseID: "CP-" + Math.floor(1000 + Math.random() * 9000), expiryDate: Date.now() + (100*86400000) 
+            biz:{}, stk:[], sales:[], expenses:[], resets:[], prof:0,
+            licenseID: "CP-" + Math.floor(1000 + Math.random() * 9000), expiryDate: null 
         };
         let cart = [];
 
@@ -187,166 +226,125 @@
 
         function save() { localStorage.setItem('CP_V14_ELITE', JSON.stringify(db)); }
 
+        // --- GESTION DES ACTIVITÉS (HISTORIQUE) ---
+        function deleteActivity(id, type) {
+            if(!confirm("Annuler cette opération ? Le stock et le bénéfice seront ajustés instantanément.")) return;
+            
+            if(type === 'sale') {
+                const sale = db.sales.find(x => x.id === id);
+                if(sale) {
+                    // 1. Rendre le stock
+                    sale.items.forEach(c => {
+                        let item = db.stk.find(x => x.id == c.id);
+                        if(item) item.q += c.sq;
+                    });
+                    // 2. Ajuster le bénéfice (soustraire le gain de cette vente)
+                    db.prof -= (sale.tp || 0);
+                    // 3. Supprimer de la liste
+                    db.sales = db.sales.filter(x => x.id !== id);
+                }
+            } else if(type === 'exp') {
+                const exp = db.expenses.find(x => x.id === id);
+                if(exp) {
+                    // Rendre l'argent au bénéfice
+                    db.prof += exp.a;
+                    db.expenses = db.expenses.filter(x => x.id !== id);
+                }
+            } else {
+                db.resets = db.resets.filter(x => x.id !== id);
+            }
+            
+            save();
+            render();
+        }
+
+        // --- GESTION DU STOCK ---
+        function deleteStock(id) {
+            if(confirm("Supprimer cet article définitivement ?")) {
+                db.stk = db.stk.filter(x => x.id !== id);
+                save();
+                render();
+            }
+        }
+
+        // --- LOGIQUE CORE ---
+        function doSale() {
+            if(!checkLicense() || !cart.length) return;
+            let tP=0, tV=0;
+            cart.forEach(c => { 
+                let s = db.stk.find(x => x.id == c.id); 
+                s.q -= c.sq; 
+                tV += c.st; 
+                tP += (c.s - c.c) * c.sq; // Calcul bénéfice : (Vente - Achat) * Quantité
+            });
+            db.prof += tP;
+            const sale = {id:Date.now(), ven:document.getElementById('vendeur').value || "Gérant", cli:document.getElementById('cl_name').value || "Passager", tot:tV, items:[...cart], d:new Date().toLocaleString(), t:Date.now(), tp: tP, isSale: true};
+            db.sales.push(sale); 
+            save(); 
+            genPDF(sale);
+            cart=[]; 
+            render(); 
+            nav('home');
+        }
+
         function render() {
             document.getElementById('header-biz').innerText = db.biz.name || "ComptaPro";
-            document.getElementById('valP').innerText = db.prof.toLocaleString();
+            document.getElementById('valP').innerText = Math.round(db.prof).toLocaleString();
             document.querySelectorAll('.cur').forEach(e => e.innerText = db.biz.cur);
-            document.getElementById('displayID').innerText = "LICENCE : " + db.licenseID;
+            document.getElementById('displayID').innerText = db.licenseID;
             
-            // Historique
-            const hist = [...db.sales, ...db.expenses].sort((a,b) => b.id - a.id).slice(0, 8);
+            // Rendu Historique avec bouton poubelle au survol
+            const hist = [...db.sales, ...db.expenses, ...db.resets].sort((a,b) => b.id - a.id).slice(0, 15);
             document.getElementById('hist').innerHTML = hist.map(i => `
-                <div class="card-premium flex justify-between items-center ${i.isExp ? 'bg-red-50/50' : ''}">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 ${i.isExp ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'} rounded-full flex items-center justify-center">
-                            <i data-lucide="${i.isExp ? 'arrow-down' : 'arrow-up'}" class="w-4"></i>
+                <div class="card-premium flex justify-between items-center ${i.montant || i.isExp ? 'border-red-100 bg-red-50/30' : ''}">
+                    <button onclick="deleteActivity(${i.id}, '${i.isSale ? 'sale' : i.isExp ? 'exp' : 'reset'}')" class="btn-del">
+                        <i data-lucide="trash-2" class="w-4"></i>
+                    </button>
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 ${i.isExp || i.montant ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'} rounded-full flex items-center justify-center">
+                            <i data-lucide="${i.isExp ? 'arrow-down-right' : i.montant ? 'shield-alert' : 'arrow-up-right'}" class="w-4"></i>
                         </div>
-                        <div><b class="text-sm">${i.cli || i.n}</b><br><small class="text-[10px] text-slate-400">${i.d}</small></div>
-                    </div>
-                    <b class="${i.isExp ? 'text-red-500' : 'text-blue-600'} text-sm">${i.isExp ? '-' : '+'}${ (i.tot || i.a).toLocaleString() }</b>
-                </div>
-            `).join('');
-            
-            // Liste Stock avec Modification Quantité
-            document.getElementById('stkList').innerHTML = db.stk.map(i => `
-                <div class="card-premium">
-                    <div class="flex justify-between items-start mb-4">
                         <div>
-                            <b class="text-slate-800 text-lg">${i.n}</b>
-                            <p class="text-xs text-slate-400">Vente: ${i.s.toLocaleString()} ${db.biz.cur}</p>
+                            <b class="text-sm font-bold text-slate-800">${i.cli || i.n}</b><br>
+                            <small class="text-[10px] text-slate-400 font-bold">${i.d}</small>
                         </div>
-                        <button onclick="deleteStock(${i.id})" class="btn-del-mini"><i data-lucide="trash-2" class="w-4"></i></button>
                     </div>
-                    <div class="flex items-center justify-between bg-slate-50 p-2 rounded-xl">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase ml-2">Stock Actuel</span>
-                        <div class="flex items-center gap-3">
-                            <button onclick="adjStk(${i.id}, -1)" class="w-8 h-8 bg-white border rounded-lg shadow-sm font-bold">-</button>
-                            <span onclick="editStkManual(${i.id})" class="qty-badge cursor-pointer">${i.q}</span>
-                            <button onclick="adjStk(${i.id}, 1)" class="w-8 h-8 bg-white border rounded-lg shadow-sm font-bold">+</button>
-                        </div>
+                    <b class="${i.isExp || i.montant ? 'text-red-500' : 'text-blue-600'} text-sm">
+                        ${i.isExp || i.montant ? '-' : '+'}${ (i.tot || i.a || i.montant).toLocaleString() }
+                    </b>
+                </div>
+            `).join('');
+            
+            // Rendu Inventaire avec bouton poubelle
+            document.getElementById('stkList').innerHTML = db.stk.map(i => `
+                <div class="card-premium flex justify-between items-center py-4">
+                    <button onclick="deleteStock(${i.id})" class="btn-del">
+                        <i data-lucide="trash-2" class="w-4"></i>
+                    </button>
+                    <div>
+                        <b class="text-slate-800">${i.n}</b><br>
+                        <small class="text-slate-400 font-bold text-[10px] uppercase">Stock: ${i.q} unités</small>
+                    </div>
+                    <div class="text-right font-black text-slate-900">
+                        ${i.s.toLocaleString()} <small class="text-[9px] opacity-50">${db.biz.cur}</small>
                     </div>
                 </div>
             `).join('');
             
-            document.getElementById('sel_p').innerHTML = db.stk.map(i => `<option value="${i.id}">${i.n} (Dispo: ${i.q})</option>`).join('');
+            document.getElementById('sel_p').innerHTML = db.stk.map(i => `<option value="${i.id}">${i.n} (${i.q})</option>`).join('');
             
+            // Stats Dashboard
             const now = Date.now();
-            const calc = (t) => db.sales.filter(s => (now-s.id) < t).reduce((a,b) => a+b.tot, 0);
+            const calc = (t) => db.sales.filter(s => (now-s.t) < t).reduce((a,b) => a+b.tot, 0);
             document.getElementById('repJ').innerText = calc(86400000).toLocaleString();
             document.getElementById('repS').innerText = calc(604800000).toLocaleString();
             document.getElementById('repM').innerText = calc(2592000000).toLocaleString();
+            
+            checkLicense(); 
             lucide.createIcons();
         }
 
-        // --- Fonctions Stock ---
-        function adjStk(id, delta) {
-            let item = db.stk.find(x => x.id === id);
-            if(item) {
-                item.q = Math.max(0, item.q + delta);
-                save(); render();
-            }
-        }
-
-        function editStkManual(id) {
-            let item = db.stk.find(x => x.id === id);
-            let val = prompt(`Nouvelle quantité pour ${item.n} :`, item.q);
-            if(val !== null && !isNaN(val)) {
-                item.q = parseInt(val);
-                save(); render();
-            }
-        }
-
-        function addStock() {
-            let n=document.getElementById('p_name').value, c=+document.getElementById('p_cost').value, s=+document.getElementById('p_sell').value, q=+document.getElementById('p_qty').value;
-            if(!n || !s) return; 
-            db.stk.push({id:Date.now(), n, c, s, q}); 
-            save(); render(); toggleF('stk-form');
-        }
-
-        function deleteStock(id) {
-            if(confirm("Supprimer définitivement cet article ?")) {
-                db.stk = db.stk.filter(x => x.id !== id);
-                save(); render();
-            }
-        }
-
-        // --- Fonctions Caisse ---
-        function addCart() {
-            let id = document.getElementById('sel_p').value, q = +document.getElementById('sel_q').value;
-            let it = db.stk.find(x => x.id == id);
-            if(!it) return;
-            if(q > it.q) return alert("Stock insuffisant !");
-            
-            // On ajoute au panier (on peut ajouter plusieurs fois le même article)
-            cart.push({
-                cartId: Date.now(), // ID unique pour la suppression dans le panier
-                id: it.id, 
-                n: it.n, 
-                sq: q, 
-                s: it.s, 
-                c: it.c, 
-                st: it.s * q
-            });
-            renderCart();
-        }
-
-        function removeFromCart(cartId) {
-            cart = cart.filter(item => item.cartId !== cartId);
-            renderCart();
-        }
-
-        function renderCart() {
-            let t = 0;
-            const container = document.getElementById('cart');
-            if(cart.length === 0) {
-                container.innerHTML = `<p class="text-center text-slate-400 text-xs py-4">Panier vide</p>`;
-            } else {
-                container.innerHTML = cart.map(i => { 
-                    t += i.st; 
-                    return `
-                    <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-100">
-                        <div>
-                            <b class="text-xs block">${i.n}</b>
-                            <small class="text-blue-600">Qté: ${i.sq} × ${i.s.toLocaleString()}</small>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <b class="text-xs">${i.st.toLocaleString()}</b>
-                            <button onclick="removeFromCart(${i.cartId})" class="text-red-400 p-1"><i data-lucide="x-circle" class="w-4"></i></button>
-                        </div>
-                    </div>`;
-                }).join('');
-            }
-            document.getElementById('cartT').innerText = t.toLocaleString();
-            lucide.createIcons();
-        }
-
-        function doSale() {
-            if(!cart.length) return alert("Le panier est vide");
-            let tP=0, tV=0;
-            
-            // Déduction du stock et calcul profit
-            cart.forEach(c => { 
-                let s = db.stk.find(x => x.id == c.id); 
-                if(s) s.q -= c.sq; 
-                tV += c.st; 
-                tP += (c.s - c.c) * c.sq; 
-            });
-
-            db.prof += tP;
-            db.sales.push({
-                id: Date.now(), 
-                cli: document.getElementById('cl_name').value || "Client", 
-                tot: tV, 
-                d: new Date().toLocaleString(),
-                items: [...cart]
-            });
-            
-            cart = []; 
-            save(); render(); renderCart(); nav('home');
-            alert("Vente enregistrée !");
-        }
-
-        // --- Navigation & Utilitaires ---
+        // --- FONCTIONS AUXILIAIRES ---
         function nav(id) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-pro button').forEach(b => b.classList.remove('active'));
@@ -355,39 +353,86 @@
             lucide.createIcons();
         }
 
-        function toggleF(id) { document.getElementById(id).classList.toggle('hidden'); }
-        
-        function openSetup() { document.getElementById('setup-screen').style.display = 'block'; }
-        
-        function saveSetup() {
+        function openSetup(isEdit) {
+            document.getElementById('setup-screen').style.display = 'block';
+            if(isEdit) {
+                const b = db.biz;
+                document.getElementById('setup-user').value = b.user || "";
+                document.getElementById('setup-biz').value = b.name || "";
+                document.getElementById('setup-addr').value = b.addr || "";
+                document.getElementById('setup-phone').value = b.phone || "";
+                document.getElementById('setup-cur').value = b.cur || "FCFA";
+                document.getElementById('cancel-setup').classList.remove('hidden');
+            }
+        }
+        function closeSetup() { document.getElementById('setup-screen').style.display = 'none'; }
+
+        async function saveSetup() {
+            const bizName = document.getElementById('setup-biz').value;
+            if(!bizName) return alert("Nom requis");
             db.biz = {
                 user: document.getElementById('setup-user').value,
-                name: document.getElementById('setup-biz').value,
-                cur: document.getElementById('setup-cur').value
+                name: bizName, addr: document.getElementById('setup-addr').value,
+                phone: document.getElementById('setup-phone').value,
+                cur: document.getElementById('setup-cur').value,
+                logo: db.biz.logo || ""
             };
             save(); location.reload();
+        }
+
+        function addCart() {
+            let id = document.getElementById('sel_p').value, q = +document.getElementById('sel_q').value;
+            let it = db.stk.find(x => x.id == id);
+            if(!it || q > it.q) return alert("Stock insuffisant");
+            cart.push({...it, sq:q, st:it.s*q}); 
+            renderCart();
+        }
+
+        function renderCart() {
+            let t = 0;
+            document.getElementById('cart').innerHTML = cart.map(i => { t+=i.st; return `<div class="flex justify-between text-xs font-bold bg-slate-50 p-3 rounded-xl border border-slate-100"><span>${i.n} (x${i.sq})</span><span>${i.st.toLocaleString()}</span></div>`}).join('');
+            document.getElementById('cartT').innerText = t.toLocaleString();
+        }
+
+        function addStock() {
+            let n=document.getElementById('p_name').value, c=+document.getElementById('p_cost').value, s=+document.getElementById('p_sell').value, q=+document.getElementById('p_qty').value;
+            if(!n || !s) return; db.stk.push({id:Date.now(), n, c, s, q}); save(); render(); toggleF('stk-form');
         }
 
         function addExpense() {
             let n = document.getElementById('exp_name').value, a = +document.getElementById('exp_amt').value;
             if(!n || !a) return;
             db.prof -= a;
-            db.expenses.push({id:Date.now(), n, a, d:new Date().toLocaleString(), isExp:true});
+            db.expenses.push({id:Date.now(), n, a, d:new Date().toLocaleString(), t:Date.now(), isExp:true});
             save(); render(); nav('home');
         }
 
-        function exportAudit() {
-            const data = JSON.stringify(db, null, 2);
-            const blob = new Blob([data], {type: "application/json"});
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = `ComptaPro_Backup.json`;
-            a.click();
+        function checkLicense() {
+            const now = Date.now();
+            const isOk = db.expiryDate && now < db.expiryDate;
+            const badge = document.getElementById('days-badge');
+            document.getElementById('lock-zone').classList.toggle('locked', !isOk);
+            if(!isOk) {
+                badge.innerText = "EXPIRÉ"; badge.className = "px-4 py-1.5 rounded-full text-[10px] font-extrabold bg-red-100 text-red-500";
+            } else {
+                const days = Math.ceil((db.expiryDate-now)/86400000);
+                badge.innerText = days + " JOURS PRO"; badge.className = "px-4 py-1.5 rounded-full text-[10px] font-extrabold bg-green-100 text-green-600";
+            }
+            return isOk;
         }
 
-        function logout() {
-            if(confirm("Effacer toutes les données ?")) { localStorage.clear(); location.reload(); }
+        function resetProfitAudit() {
+            if(confirm("Clôturer la caisse ? Le bénéfice repartira à 0.")) {
+                db.resets.push({id:Date.now(), n:"Clôture", montant:db.prof, d:new Date().toLocaleString()});
+                db.prof = 0; save(); render();
+            }
         }
+
+        function genPDF(sale) { /* Logique PDF simplifiée pour l'exemple */ console.log("PDF Généré pour", sale.cli); }
+        function copyID() { navigator.clipboard.writeText(db.licenseID); alert("ID copié"); }
+        function contactWA() { window.open(`https://wa.me/22666566140?text=Licence:${db.licenseID}`); }
+        function toggleF(id) { document.getElementById(id).classList.toggle('hidden'); }
+        function logout() { if(confirm("Effacer les données ?")) { localStorage.clear(); location.reload(); } }
     </script>
 </body>
 </html>
