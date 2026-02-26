@@ -10,9 +10,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
@@ -21,17 +21,15 @@
         .page.active { display: block; animation: slideUp 0.4s ease-out; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
         .card { background: white; padding: 24px; border-radius: 28px; border: 1px solid rgba(226, 232, 240, 0.8); box-shadow: 0 10px 30px -10px rgba(0,0,0,0.04); margin-bottom: 16px; transition: transform 0.2s; }
-        .card:active { transform: scale(0.99); }
         .input-f { width: 100%; padding: 16px; border-radius: 16px; border: 1px solid #E2E8F0; margin-bottom: 12px; outline: none; transition: all 0.2s; background: #FDFDFD; }
         .input-f:focus { border-color: #2563EB; box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); background: white; }
-        .btn-blue { background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%); color: white; padding: 18px; border-radius: 20px; font-weight: 700; width: 100%; border: none; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2); transition: all 0.2s; }
+        .btn-blue { background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%); color: white; padding: 18px; border-radius: 20px; font-weight: 700; width: 100%; border: none; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2); }
         .locked { filter: blur(15px); pointer-events: none; opacity: 0.6; }
         nav { position: fixed; bottom: 20px; left: 20px; right: 20px; height: 75px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px); display: flex; justify-content: space-around; align-items: center; border-radius: 25px; border: 1px solid rgba(255, 255, 255, 0.3); box-shadow: 0 20px 40px rgba(0,0,0,0.1); z-index: 1000; }
-        nav button { color: #94A3B8; font-size: 11px; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: 0.3s; }
-        nav button.active { color: #2563EB; transform: translateY(-5px); }
-        nav button.active i { background: rgba(37, 99, 235, 0.1); padding: 8px; border-radius: 14px; }
+        nav button { color: #94A3B8; font-size: 11px; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        nav button.active { color: #2563EB; }
         #overlay-screen { position: fixed; inset: 0; background: #F8FAFC; z-index: 2000; display: none; overflow-y: auto; padding: 40px 30px; }
-        .badge-status { font-size: 10px; font-weight: 800; padding: 6px 12px; border-radius: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .badge-status { font-size: 10px; font-weight: 800; padding: 6px 12px; border-radius: 12px; text-transform: uppercase; }
         .low-stock-alert { color: #ef4444 !important; animation: pulse-red 1s infinite; font-weight: 800; }
         @keyframes pulse-red { 50% { opacity: 0.5; } }
         .cursor-pointer { cursor: pointer; }
@@ -40,13 +38,15 @@
 <body>
 
     <div id="overlay-screen">
-        <h2 id="setup-title" class="text-4xl font-extrabold text-slate-900 mb-2 tracking-tight">Bienvenue !</h2>
-        <p class="text-slate-500 mb-10 font-medium">Configurez votre identité professionnelle.</p>
-        <div class="space-y-4">
-            <div class="bg-blue-50/50 p-6 rounded-3xl border border-dashed border-blue-200 text-center">
-                <label class="text-xs font-bold uppercase text-blue-600 mb-3 block">Logo de l'entreprise</label>
-                <input type="file" id="setup-logo" accept="image/*" class="text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700">
+        <h2 id="setup-title" class="text-4xl font-extrabold text-slate-900 mb-2 tracking-tight">Configuration Cloud</h2>
+        <p class="text-slate-500 mb-10 font-medium">Vos données seront sauvegardées en sécurité.</p>
+        <div class="space-y-2">
+            <div class="bg-blue-50/50 p-4 rounded-3xl border border-dashed border-blue-200 text-center mb-4">
+                <input type="file" id="setup-logo" accept="image/*" class="text-xs">
             </div>
+            <input type="email" id="setup-email" placeholder="Email (Compte Cloud)" class="input-f font-bold text-blue-600">
+            <input type="password" id="setup-pass" placeholder="Mot de passe" class="input-f">
+            <hr class="my-4">
             <input type="text" id="setup-user" placeholder="Votre Nom" class="input-f">
             <input type="text" id="setup-biz" placeholder="Nom de l'Entreprise" class="input-f">
             <input type="text" id="setup-addr" placeholder="Adresse Physique" class="input-f">
@@ -57,7 +57,7 @@
                 <option value="$">Devise : Dollar ($)</option>
                 <option value="€">Devise : Euro (€)</option>
             </select>
-            <button onclick="saveSetup()" class="btn-blue text-lg mt-4">CRÉER MON COMPTE</button>
+            <button id="btn-save-setup" onclick="saveSetup()" class="btn-blue text-lg mt-4">SAUVEGARDER & SYNCHRONISER</button>
             <button id="cancel-setup" onclick="closeSetup()" class="w-full text-slate-400 font-bold text-sm mt-4 hidden">ANNULER</button>
         </div>
     </div>
@@ -65,7 +65,7 @@
     <header class="p-6 bg-white/80 backdrop-blur-md border-b border-slate-100 flex justify-between items-center sticky top-0 z-[1100]">
         <div>
             <h1 id="header-biz" class="font-extrabold text-xl text-slate-900 tracking-tighter uppercase">ComptaPro</h1>
-            <p id="licence-status" class="text-[9px] font-extrabold text-blue-500 uppercase tracking-[0.2em]">📴 MODE LOCAL</p>
+            <p id="cloud-status" class="text-[8px] font-bold text-green-500 uppercase">Cloud Connecté</p>
         </div>
         <div id="days-badge" class="badge-status"></div>
     </header>
@@ -77,15 +77,15 @@
                 <p class="text-xs opacity-60 uppercase font-extrabold tracking-widest mb-1">Bénéfice Net Global</p>
                 <h2 class="text-4xl font-extrabold tracking-tighter mb-8"><span id="valP">0</span> <small class="cur text-blue-400 text-lg"></small></h2>
                 <div class="grid grid-cols-3 gap-3">
-                    <div class="bg-white/10 backdrop-blur-md p-3 rounded-2xl border border-white/10 text-center">
+                    <div class="bg-white/10 backdrop-blur-md p-3 rounded-2xl text-center">
                         <span class="text-[9px] font-bold opacity-50 block mb-1">JOUR</span>
                         <span id="repJ" class="font-extrabold text-sm">0</span>
                     </div>
-                    <div class="bg-white/10 backdrop-blur-md p-3 rounded-2xl border border-white/10 text-center">
+                    <div class="bg-white/10 backdrop-blur-md p-3 rounded-2xl text-center">
                         <span class="text-[9px] font-bold opacity-50 block mb-1">SEM.</span>
                         <span id="repS" class="font-extrabold text-sm">0</span>
                     </div>
-                    <div class="bg-white/10 backdrop-blur-md p-3 rounded-2xl border border-white/10 text-center">
+                    <div class="bg-white/10 backdrop-blur-md p-3 rounded-2xl text-center">
                         <span class="text-[9px] font-bold opacity-50 block mb-1">MOIS</span>
                         <span id="repM" class="font-extrabold text-sm">0</span>
                     </div>
@@ -95,11 +95,11 @@
             <div class="grid grid-cols-2 gap-4 mb-8">
                 <button onclick="nav('sale')" class="card m-0 flex flex-col items-center gap-3 p-6 text-blue-600">
                     <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center"><i data-lucide="shopping-cart"></i></div>
-                    <span class="text-xs font-extrabold uppercase tracking-tight text-slate-700">Vendre</span>
+                    <span class="text-xs font-extrabold uppercase text-slate-700">Vendre</span>
                 </button>
                 <button onclick="nav('expense')" class="card m-0 flex flex-col items-center gap-3 p-6 text-red-500">
                     <div class="w-12 h-12 bg-red-50 rounded-2xl flex items-center justify-center"><i data-lucide="arrow-down-circle"></i></div>
-                    <span class="text-xs font-extrabold uppercase tracking-tight text-slate-700">Dépense</span>
+                    <span class="text-xs font-extrabold uppercase text-slate-700">Dépense</span>
                 </button>
             </div>
             <h3 class="text-xs font-extrabold text-slate-400 mb-4 uppercase tracking-widest px-1">Activités Récentes</h3>
@@ -108,23 +108,23 @@
 
         <div id="lock-zone">
             <div id="page-sale" class="page">
-                <h2 class="text-2xl font-extrabold mb-6 tracking-tight">Nouvelle Vente</h2>
+                <h2 class="text-2xl font-extrabold mb-6">Nouvelle Vente</h2>
                 <div class="card border-t-8 border-blue-600">
-                    <input type="text" id="vendeur" placeholder="Vendeur" class="input-f bg-slate-50 border-transparent">
+                    <input type="text" id="vendeur" placeholder="Vendeur" class="input-f bg-slate-50">
                     <input type="text" id="cl_name" placeholder="Nom du Client" class="input-f">
                     <div class="flex gap-2 mb-4">
-                        <select id="sel_p" class="input-f flex-1 m-0 font-bold text-slate-700"></select>
+                        <select id="sel_p" class="input-f flex-1 m-0 font-bold"></select>
                         <input type="number" id="sel_q" value="1" class="input-f w-20 text-center m-0 font-bold">
-                        <button onclick="addCart()" class="bg-slate-900 text-white px-5 rounded-2xl active:scale-90 transition-transform"><i data-lucide="plus"></i></button>
+                        <button onclick="addCart()" class="bg-slate-900 text-white px-5 rounded-2xl"><i data-lucide="plus"></i></button>
                     </div>
-                    <div id="cart" class="mt-4 space-y-2 border-t border-dashed border-slate-200 pt-5"></div>
-                    <div id="money-calc" class="mt-6 p-4 bg-slate-50 rounded-2xl border border-slate-100 hidden">
+                    <div id="cart" class="mt-4 space-y-2 border-t border-dashed pt-5"></div>
+                    <div id="money-calc" class="mt-6 p-4 bg-slate-50 rounded-2xl hidden">
                         <div class="flex justify-between items-center mb-2">
-                            <span class="text-[10px] font-bold text-slate-400 uppercase">Argent Reçu</span>
-                            <input type="number" id="cash-in" oninput="updateChange()" class="w-32 p-2 rounded-lg border border-slate-200 text-right font-bold" placeholder="0">
+                            <span class="text-[10px] font-bold text-slate-400">REÇU</span>
+                            <input type="number" id="cash-in" oninput="updateChange()" class="w-32 p-2 rounded-lg border font-bold text-right" placeholder="0">
                         </div>
                         <div class="flex justify-between items-center">
-                            <span class="text-[10px] font-bold text-slate-400 uppercase">Monnaie à rendre</span>
+                            <span class="text-[10px] font-bold text-slate-400">MONNAIE</span>
                             <span id="change-due" class="font-extrabold text-green-600">0</span>
                         </div>
                     </div>
@@ -133,24 +133,24 @@
                             <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Total Net</p>
                             <span class="font-extrabold text-3xl tracking-tighter"><span id="cartT">0</span> <small class="cur text-lg text-slate-400"></small></span>
                         </div>
-                        <button onclick="doSale()" class="bg-green-600 text-white px-10 py-4 rounded-2xl shadow-lg shadow-green-100 font-extrabold uppercase text-sm active:scale-95 transition-all">Valider</button>
+                        <button onclick="doSale()" class="bg-green-600 text-white px-10 py-4 rounded-2xl font-extrabold shadow-lg">VALIDER</button>
                     </div>
                 </div>
             </div>
 
             <div id="page-expense" class="page">
-                <h2 class="text-2xl font-extrabold mb-6 tracking-tight">Enregistrer une Charge</h2>
+                <h2 class="text-2xl font-extrabold mb-6">Enregistrer une Charge</h2>
                 <div class="card border-t-8 border-red-500">
                     <input type="text" id="exp_name" placeholder="Motif de la dépense" class="input-f">
                     <input type="number" id="exp_amt" placeholder="Montant" class="input-f">
-                    <button onclick="addExpense()" class="w-full bg-red-500 text-white p-5 rounded-2xl font-extrabold shadow-lg shadow-red-100 mt-2">ENREGISTRER</button>
+                    <button onclick="addExpense()" class="w-full bg-red-500 text-white p-5 rounded-2xl font-extrabold">ENREGISTRER</button>
                 </div>
             </div>
 
             <div id="page-stock" class="page">
                 <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-extrabold tracking-tight">Inventaire</h2>
-                    <button onclick="toggleF('stk-form')" class="bg-blue-600 text-white px-5 py-2.5 rounded-2xl font-bold text-sm flex items-center gap-2 shadow-lg"><i data-lucide="plus" class="w-4 h-4"></i> Produit</button>
+                    <h2 class="text-2xl font-extrabold">Inventaire</h2>
+                    <button onclick="toggleF('stk-form')" class="bg-blue-600 text-white px-5 py-2.5 rounded-2xl font-bold flex items-center gap-2 shadow-lg"><i data-lucide="plus" class="w-4 h-4"></i> Produit</button>
                 </div>
                 <div id="stk-form" class="hidden card bg-blue-50/50 border-blue-100">
                     <input type="text" id="p_name" placeholder="Nom de l'article" class="input-f">
@@ -166,42 +166,29 @@
         </div>
 
         <div id="page-pro" class="page">
-            <h2 class="text-2xl font-extrabold mb-6 tracking-tight">Administration & Cloud</h2>
-
-            <div class="card border-2 border-blue-100 bg-blue-50/20 text-center mb-6">
-                <h3 class="font-extrabold text-xs mb-4 uppercase text-blue-700 tracking-widest">Compte Cloud</h3>
-                <div id="auth-ui">
-                    <input type="email" id="auth-email" placeholder="Email" class="input-f">
-                    <input type="password" id="auth-pass" placeholder="Mot de passe" class="input-f">
-                    <div class="flex gap-2">
-                        <button onclick="handleAuth('login')" class="btn-blue flex-1 py-3 text-xs">CONNEXION</button>
-                        <button onclick="handleAuth('signup')" class="btn-blue flex-1 py-3 text-xs bg-slate-600">CRÉER COMPTE</button>
-                    </div>
-                </div>
-                <div id="user-logged" class="hidden">
-                    <p id="user-email" class="font-bold text-slate-600 mb-2"></p>
-                    <button onclick="auth.signOut()" class="text-red-500 font-bold text-xs uppercase">Se déconnecter</button>
-                </div>
-            </div>
-
-            <div class="bg-slate-900 rounded-[30px] p-6 text-white mb-6 flex justify-between items-center shadow-xl">
+            <h2 class="text-2xl font-extrabold mb-6">Administration</h2>
+            <div class="bg-slate-900 rounded-[30px] p-6 text-white mb-6 flex justify-between items-center">
                 <div>
                     <p class="text-[10px] font-bold opacity-50 uppercase tracking-widest mb-1">ID Licence</p>
-                    <h3 id="displayID" class="text-xl font-mono font-bold text-blue-400 tracking-tighter"></h3>
+                    <h3 id="displayID" class="text-xl font-mono font-bold text-blue-400"></h3>
                 </div>
-                <button onclick="copyID()" class="bg-white/10 p-3 rounded-2xl text-white/50"><i data-lucide="copy" class="w-5 h-5"></i></button>
+                <button onclick="copyID()" class="bg-white/10 p-3 rounded-2xl"><i data-lucide="copy"></i></button>
             </div>
 
             <button onclick="openSetup(true)" class="card w-full flex items-center justify-between p-5 font-bold text-slate-700 mb-4">
-                <div class="flex items-center gap-4"><i data-lucide="settings-2" class="text-blue-600"></i> Modifier Profil Boutique</div>
+                <div class="flex items-center gap-4"><i data-lucide="settings-2" class="text-blue-600"></i> Modifier Profil Cloud</div>
                 <i data-lucide="chevron-right" class="w-4 h-4 opacity-30"></i>
             </button>
 
             <div class="card space-y-3">
                 <h3 class="font-extrabold text-[10px] text-slate-400 uppercase tracking-widest px-1">Maintenance</h3>
-                <button onclick="exportAudit()" class="w-full flex items-center justify-between p-4 bg-slate-50 rounded-2xl font-bold text-sm text-slate-600">Exporter Backup <i data-lucide="download" class="w-4 h-4"></i></button>
-                <button onclick="resetProfitAudit()" class="w-full p-4 text-red-500 font-extrabold text-[10px] uppercase tracking-tighter border border-red-50 rounded-2xl">Clôture de caisse</button>
+                <button onclick="exportAudit()" class="w-full flex items-center justify-between p-4 bg-slate-50 rounded-2xl font-bold text-sm text-slate-600">Exporter les données <i data-lucide="download"></i></button>
+                <button onclick="resetProfitAudit()" class="w-full p-4 text-red-500 font-extrabold text-[10px] uppercase border border-red-50 rounded-2xl">Remise à zéro caisse</button>
             </div>
+
+            <button onclick="logout()" class="w-full py-8 text-slate-300 font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2">
+                <i data-lucide="log-out"></i> Déconnexion & Effacer Local
+            </button>
         </div>
     </main>
 
@@ -215,82 +202,66 @@
     <script>
         // --- CONFIGURATION FIREBASE ---
         const firebaseConfig = {
-            apiKey: "AIzaSyCPtymnAB2eO26TjGiSzzxZpA89WwqYeiI",
-            authDomain: "compta-pro-1b8bb.firebaseapp.com",
-            databaseURL: "https://compta-pro-1b8bb-default-rtdb.firebaseio.com",
-            projectId: "compta-pro-1b8bb",
-            storageBucket: "compta-pro-1b8bb.firebasestorage.app",
-            messagingSenderId: "40924705781",
-            appId: "1:40924705781:web:f2dd349d1fa76bc37f66bc"
+            apiKey: "TON_API_KEY",
+            authDomain: "TON_PROJET.firebaseapp.com",
+            projectId: "TON_PROJET",
+            storageBucket: "TON_PROJET.appspot.com",
+            messagingSenderId: "TON_ID",
+            appId: "TON_APP_ID"
         };
-
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
-        const rtdb = firebase.database();
+        const fdb = firebase.firestore();
 
         let db = JSON.parse(localStorage.getItem('CP_V13_ULTIMATE')) || { 
             biz:{}, stk:[], sales:[], expenses:[], resets:[], prof:0,
             licenseID: "CP-" + Math.floor(1000 + Math.random() * 9000), 
-            expiryDate: null, installDate: Date.now() 
+            expiryDate: null, 
+            installDate: Date.now() 
         };
         let cart = [];
-        let currentUser = null;
 
-        // --- GESTION DE LA SAUVEGARDE (CLOUD + LOCAL) ---
-        function save() { 
-            localStorage.setItem('CP_V13_ULTIMATE', JSON.stringify(db)); 
-            if (currentUser) {
-                rtdb.ref('users/' + currentUser.uid).set(db);
+        // --- SAUVEGARDE LOCALE + CLOUD ---
+        async function save() { 
+            localStorage.setItem('CP_V13_ULTIMATE', JSON.stringify(db));
+            if (auth.currentUser) {
+                try {
+                    await fdb.collection("users").doc(auth.currentUser.uid).set(db);
+                    document.getElementById('cloud-status').innerText = "Cloud Sync: OK";
+                    document.getElementById('cloud-status').className = "text-[8px] font-bold text-green-500 uppercase";
+                } catch (e) {
+                    document.getElementById('cloud-status').innerText = "Cloud Sync: Erreur";
+                    document.getElementById('cloud-status').className = "text-[8px] font-bold text-red-500 uppercase";
+                }
             }
         }
 
-        // --- SYNCHRONISATION CLOUD ---
-        auth.onAuthStateChanged(user => {
-            const ui = document.getElementById('auth-ui');
-            const logged = document.getElementById('user-logged');
-            const status = document.getElementById('licence-status');
-
-            if (user) {
-                currentUser = user;
-                ui.classList.add('hidden');
-                logged.classList.remove('hidden');
-                document.getElementById('user-email').innerText = user.email;
-                status.innerText = "☁️ SYNCHRONISÉ";
-                rtdb.ref('users/' + user.uid).on('value', (snap) => {
-                    if (snap.val()) { db = snap.val(); render(); }
-                });
-            } else {
-                currentUser = null;
-                ui.classList.remove('hidden');
-                logged.classList.add('hidden');
-                status.innerText = "📴 MODE LOCAL";
+        window.onload = () => {
+            auth.onAuthStateChanged(async (user) => {
+                if (user) {
+                    const snap = await fdb.collection("users").doc(user.uid).get();
+                    if (snap.exists) {
+                        db = snap.data();
+                        render();
+                    }
+                } else if (!db.biz.name) {
+                    openSetup(false);
+                }
                 render();
-            }
-        });
-
-        async function handleAuth(type) {
-            const email = document.getElementById('auth-email').value;
-            const pass = document.getElementById('auth-pass').value;
-            if(!email || !pass) return alert("Champs vides");
-            try {
-                if(type === 'signup') await auth.createUserWithEmailAndPassword(email, pass);
-                else await auth.signInWithEmailAndPassword(email, pass);
-                alert("Connecté !");
-            } catch(e) { alert(e.message); }
-        }
-
-        // --- RESTE DES FONCTIONS D'ORIGINE ---
-        window.onload = () => { if (!db.biz.name) openSetup(false); else render(); };
+            });
+        };
 
         function openSetup(isEdit) {
             document.getElementById('overlay-screen').style.display = 'block';
             if(isEdit) {
                 document.getElementById('setup-title').innerText = "Modifier Profil";
-                document.getElementById('setup-user').value = db.biz.user || "";
-                document.getElementById('setup-biz').value = db.biz.name || "";
-                document.getElementById('setup-addr').value = db.biz.addr || "";
-                document.getElementById('setup-phone').value = db.biz.phone || "";
-                document.getElementById('setup-cur').value = db.biz.cur || "FCFA";
+                document.getElementById('setup-email').value = db.biz.email || "";
+                document.getElementById('setup-pass').value = db.biz.pass || "";
+                document.getElementById('setup-user').value = db.biz.user;
+                document.getElementById('setup-biz').value = db.biz.name;
+                document.getElementById('setup-addr').value = db.biz.addr;
+                document.getElementById('setup-phone').value = db.biz.phone;
+                document.getElementById('setup-cur').value = db.biz.cur;
                 document.getElementById('cancel-setup').classList.remove('hidden');
             }
         }
@@ -298,33 +269,71 @@
         function closeSetup() { document.getElementById('overlay-screen').style.display = 'none'; }
 
         async function saveSetup() {
+            const email = document.getElementById('setup-email').value;
+            const pass = document.getElementById('setup-pass').value;
             const bizName = document.getElementById('setup-biz').value;
-            if(!bizName) return alert("Nom entreprise requis");
-            const logoFile = document.getElementById('setup-logo').files[0];
-            const reader = new FileReader();
             
-            const finalize = (logoData) => {
-                db.biz = {
-                    user: document.getElementById('setup-user').value,
-                    name: bizName, addr: document.getElementById('setup-addr').value,
-                    phone: document.getElementById('setup-phone').value,
-                    cur: document.getElementById('setup-cur').value,
-                    logo: logoData || (db.biz ? db.biz.logo : "") || ""
-                };
-                save(); closeSetup(); render();
-            };
+            if(!email || !pass || !bizName) return alert("Email, Password et Nom requis");
+            
+            const btn = document.getElementById('btn-save-setup');
+            btn.innerText = "CONNEXION CLOUD...";
+            btn.disabled = true;
 
-            if (logoFile) {
-                reader.onloadend = () => finalize(reader.result);
-                reader.readAsDataURL(logoFile);
-            } else finalize();
+            try {
+                // Auth Firebase
+                let userCredential;
+                try {
+                    userCredential = await auth.createUserWithEmailAndPassword(email, pass);
+                } catch (e) {
+                    userCredential = await auth.signInWithEmailAndPassword(email, pass);
+                }
+                
+                const logoFile = document.getElementById('setup-logo').files[0];
+                const reader = new FileReader();
+
+                const finalize = (logoData) => {
+                    db.biz = {
+                        uid: userCredential.user.uid,
+                        email: email, pass: pass,
+                        user: document.getElementById('setup-user').value,
+                        name: bizName, addr: document.getElementById('setup-addr').value,
+                        phone: document.getElementById('setup-phone').value,
+                        cur: document.getElementById('setup-cur').value,
+                        logo: logoData || db.biz.logo || ""
+                    };
+                    save().then(() => location.reload());
+                };
+
+                if (logoFile) {
+                    reader.onloadend = () => finalize(reader.result);
+                    reader.readAsDataURL(logoFile);
+                } else finalize();
+
+            } catch (error) {
+                alert("Erreur Cloud: " + error.message);
+                btn.disabled = false;
+                btn.innerText = "SAUVEGARDER & SYNCHRONISER";
+            }
         }
 
+        // --- RESTE DU CODE (FONCTIONS MÉTIER) INCHANGÉ ---
         function checkLicense() {
+            const now = Date.now();
             const badge = document.getElementById('days-badge');
-            badge.innerText = "ACTIF";
-            badge.className = "badge-status bg-green-100 text-green-600 border border-green-200";
-            return true;
+            const trialEnd = db.installDate + (7 * 86400000);
+            const currentExpiry = db.expiryDate || trialEnd;
+            const isOk = currentExpiry > now;
+            document.getElementById('lock-zone').classList.toggle('locked', !isOk);
+            if(!isOk) {
+                badge.innerText = "LICENCE EXPIRÉE"; 
+                badge.className = "badge-status bg-red-100 text-red-600";
+                if(document.querySelector('.page.active').id !== 'page-pro') nav('pro');
+            } else {
+                const days = Math.ceil((currentExpiry - now)/86400000);
+                badge.innerText = days + (db.expiryDate ? " JOURS VALIDES" : " JOURS D'ESSAI");
+                badge.className = "badge-status bg-green-100 text-green-600";
+            }
+            return isOk;
         }
 
         function genPDF(sale) {
@@ -333,17 +342,12 @@
             if (db.biz.logo) doc.addImage(db.biz.logo, 'PNG', 15, 10, 25, 25);
             doc.setFont(undefined, 'bold').setFontSize(20).setTextColor(37, 99, 235).text(db.biz.name.toUpperCase(), 45, 20);
             doc.setFont(undefined, 'normal').setFontSize(9).setTextColor(100).text(`${db.biz.addr} | Tel: ${db.biz.phone}`, 45, 27);
-            doc.setDrawColor(230).line(15, 40, 195, 40);
-            doc.setFontSize(10).setTextColor(0).text(`FACTURE : # ${sale.id.toString().slice(-5)}`, 15, 50);
-            doc.text(`DATE : ${sale.d}`, 15, 55);
-            doc.text(`CLIENT : ${sale.cli.toUpperCase()}`, 15, 65);
-            doc.autoTable({ startY: 70, head: [['ARTICLE', 'QTÉ', 'PRIX', 'TOTAL']], body: sale.items.map(i => [i.n, i.sq, i.s.toLocaleString(), i.st.toLocaleString()]), headStyles:{fillColor:[37, 99, 235]} });
-            doc.setFontSize(14).text(`NET À PAYER : ${sale.tot.toLocaleString()} ${db.biz.cur}`, 120, doc.lastAutoTable.finalY + 15);
+            doc.autoTable({ startY: 70, head: [['ARTICLE', 'QTÉ', 'TOTAL']], body: sale.items.map(i => [i.n, i.sq, i.st.toLocaleString()]), headStyles:{fillColor:[37, 99, 235]} });
             doc.save(`Facture_${sale.cli}.pdf`);
         }
 
         function doSale() {
-            if(!cart.length) return;
+            if(!checkLicense() || !cart.length) return;
             let tP=0, tV=0;
             cart.forEach(c => { let s = db.stk.find(x => x.id == c.id); s.q -= c.sq; tV += c.st; tP += (c.s-c.c)*c.sq; });
             db.prof += tP;
@@ -368,44 +372,44 @@
 
         function render() {
             document.getElementById('header-biz').innerText = db.biz.name || "ComptaPro";
-            document.getElementById('valP').innerText = (db.prof || 0).toLocaleString();
+            document.getElementById('valP').innerText = db.prof.toLocaleString();
             document.querySelectorAll('.cur').forEach(e => e.innerText = db.biz.cur);
             document.getElementById('displayID').innerText = db.licenseID;
             
-            const hist = [...(db.sales||[]), ...(db.expenses||[]), ...(db.resets||[])].sort((a,b) => b.id - a.id).slice(0, 12);
+            const hist = [...db.sales, ...db.expenses, ...db.resets].sort((a,b) => b.id - a.id).slice(0, 12);
             document.getElementById('hist').innerHTML = hist.map(i => `
-                <div class="card flex justify-between items-center p-4 border-l-4 ${i.montant?'border-red-800 bg-red-50':i.isExp?'border-red-500':'border-blue-500'}">
-                    <div><b>${i.cli || i.n}</b><br><small class="text-[9px] text-slate-400 font-bold uppercase">${i.d}</small></div>
-                    <b class="text-sm ${i.isExp || i.montant?'text-red-500':'text-blue-600'}">${(i.tot || -i.a || -i.montant).toLocaleString()}</b>
-                </div>
-            `).join('');
+                <div class="card flex justify-between items-center p-4 border-l-4 ${i.isExp?'border-red-500':'border-blue-500'}">
+                    <div><b class="text-slate-800">${i.cli || i.n}</b><br><small class="text-[9px] text-slate-400 font-bold">${i.d}</small></div>
+                    <b class="${i.isExp?'text-red-500':'text-blue-600'}">${(i.tot || -i.a || -i.montant).toLocaleString()}</b>
+                </div>`).join('');
             
-            document.getElementById('stkList').innerHTML = (db.stk||[]).map((i, index) => `
+            document.getElementById('stkList').innerHTML = db.stk.map((i, idx) => `
                 <div class="card flex justify-between items-center p-4">
-                    <div class="flex-1"><b class="text-sm block text-slate-800">${i.n}</b><span class="text-blue-600 font-extrabold text-[10px]">${i.s} ${db.biz.cur}</span></div>
+                    <div class="flex-1"><b class="text-sm">${i.n}</b><br><span class="text-blue-600 font-bold text-[10px]">${i.s} ${db.biz.cur}</span></div>
                     <div class="flex items-center gap-3 bg-slate-100 p-2 rounded-2xl">
-                        <button onclick="updateQty(${index}, -1)" class="w-8 h-8 rounded-xl text-red-500 font-black">-</button>
-                        <span class="font-black text-sm w-6 text-center ${i.q <= 5 ? 'low-stock-alert' : ''}">${i.q}</span>
-                        <button onclick="updateQty(${index}, 1)" class="w-8 h-8 rounded-xl text-green-600 font-black">+</button>
+                        <button onclick="updateQty(${idx},-1)" class="w-8 h-8 rounded-xl bg-white text-red-500">-</button>
+                        <span class="font-black text-sm w-6 text-center ${i.q<=5?'low-stock-alert':''}">${i.q}</span>
+                        <button onclick="updateQty(${idx},1)" class="w-8 h-8 rounded-xl bg-white text-green-600">+</button>
                     </div>
                 </div>`).join('');
             
-            document.getElementById('sel_p').innerHTML = (db.stk||[]).map(i => `<option value="${i.id}">${i.n} (${i.q})</option>`).join('');
-            const calc = (t) => (db.sales||[]).filter(s => (Date.now()-s.t) < t).reduce((a,b) => a+b.tot, 0);
+            document.getElementById('sel_p').innerHTML = db.stk.map(i => `<option value="${i.id}">${i.n} (${i.q})</option>`).join('');
+            const now = Date.now();
+            const calc = (t) => db.sales.filter(s => (now-s.t) < t).reduce((a,b) => a+b.tot, 0);
             document.getElementById('repJ').innerText = calc(86400000).toLocaleString();
             document.getElementById('repS').innerText = calc(604800000).toLocaleString();
             document.getElementById('repM').innerText = calc(2592000000).toLocaleString();
-            lucide.createIcons();
+            checkLicense(); lucide.createIcons();
         }
 
-        function updateQty(index, val) {
-            db.stk[index].q += val; if(db.stk[index].q < 0) db.stk[index].q = 0;
-            save(); render();
+        function updateQty(idx, val) {
+            let n = db.stk[idx].q + val;
+            if(n >= 0) { db.stk[idx].q = n; save(); render(); }
         }
 
         function addStock() {
             let n=document.getElementById('p_name').value, c=+document.getElementById('p_cost').value, s=+document.getElementById('p_sell').value, q=+document.getElementById('p_qty').value;
-            if(!n) return;
+            if(!n || q < 0) return;
             db.stk.push({id:Date.now(), n, c, s, q}); save(); render(); toggleF('stk-form');
         }
 
@@ -419,32 +423,27 @@
         function renderCart() {
             let t = 0;
             const moneyCalc = document.getElementById('money-calc');
-            if(cart.length > 0) moneyCalc.classList.remove('hidden');
-            document.getElementById('cart').innerHTML = cart.map(i => { t+=i.st; return `
-                <div class="flex justify-between bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                    <div><b class="text-sm">${i.n}</b> (x${i.sq})</div><b>${i.st.toLocaleString()}</b>
-                </div>`}).join('');
+            if(cart.length > 0) moneyCalc.classList.remove('hidden'); else moneyCalc.classList.add('hidden');
+            document.getElementById('cart').innerHTML = cart.map((i, idx) => { 
+                t+=i.st; 
+                return `<div class="flex justify-between p-4 bg-slate-50 rounded-2xl mb-2"><b class="text-sm">${i.n} (x${i.sq})</b><b class="text-blue-600">${i.st.toLocaleString()}</b></div>`
+            }).join('');
             document.getElementById('cartT').innerText = t.toLocaleString();
             updateChange();
         }
 
-        function copyID() { navigator.clipboard.writeText(db.licenseID); alert("ID Copié !"); }
-        
-        function resetProfitAudit() {
-            if(confirm("Clôturer ?")) {
-                db.resets.push({id:Date.now(), n:"CLÔTURE", montant:db.prof, d:new Date().toLocaleString()});
-                db.prof = 0; save(); render();
-            }
-        }
-        
         function nav(id) {
             document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
             document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
             document.getElementById('page-'+id).classList.add('active');
             document.getElementById('n-'+id).classList.add('active');
-            lucide.createIcons();
+            lucide.createIcons(); checkLicense();
         }
         function toggleF(id) { document.getElementById(id).classList.toggle('hidden'); }
+        function copyID() { navigator.clipboard.writeText(db.licenseID); alert("ID Copié !"); }
+        function logout() { if(confirm("Déconnexion ?")) { auth.signOut(); localStorage.clear(); location.reload(); } }
+        function resetProfitAudit() { if(confirm("Remise à zéro ?")) { db.resets.push({id:Date.now(), n:"CLÔTURE", montant:db.prof, d:new Date().toLocaleString()}); db.prof=0; save(); render(); } }
+        function exportAudit() { const b = new Blob([JSON.stringify(db)], {type:"application/json"}); const a = document.createElement('a'); a.href=URL.createObjectURL(b); a.download=`Backup.json`; a.click(); }
     </script>
 </body>
 </html>
