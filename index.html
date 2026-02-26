@@ -9,44 +9,32 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
-        
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAFC; color: #1E293B; padding-bottom: 100px; }
         .page { display: none; } 
         .page.active { display: block; animation: slideUp 0.4s ease-out; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-        
         .card { background: white; padding: 24px; border-radius: 28px; border: 1px solid rgba(226, 232, 240, 0.8); box-shadow: 0 10px 30px -10px rgba(0,0,0,0.04); margin-bottom: 16px; transition: transform 0.2s; }
         .card:active { transform: scale(0.99); }
-        
         .input-f { width: 100%; padding: 16px; border-radius: 16px; border: 1px solid #E2E8F0; margin-bottom: 12px; outline: none; transition: all 0.2s; background: #FDFDFD; }
         .input-f:focus { border-color: #2563EB; box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); background: white; }
-        
         .btn-blue { background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%); color: white; padding: 18px; border-radius: 20px; font-weight: 700; width: 100%; border: none; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2); transition: all 0.2s; }
-        
         .locked { filter: blur(15px); pointer-events: none; opacity: 0.6; }
-        
         nav { position: fixed; bottom: 20px; left: 20px; right: 20px; height: 75px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px); display: flex; justify-content: space-around; align-items: center; border-radius: 25px; border: 1px solid rgba(255, 255, 255, 0.3); box-shadow: 0 20px 40px rgba(0,0,0,0.1); z-index: 1000; }
         nav button { color: #94A3B8; font-size: 11px; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: 0.3s; }
         nav button.active { color: #2563EB; transform: translateY(-5px); }
         nav button.active i { background: rgba(37, 99, 235, 0.1); padding: 8px; border-radius: 14px; }
-
         #overlay-screen { position: fixed; inset: 0; background: #F8FAFC; z-index: 2000; display: none; overflow-y: auto; padding: 40px 30px; }
         .badge-status { font-size: 10px; font-weight: 800; padding: 6px 12px; border-radius: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
-
         .low-stock-alert { color: #ef4444 !important; animation: pulse-red 1s infinite; font-weight: 800; }
         @keyframes pulse-red { 50% { opacity: 0.5; } }
-        
         .cursor-pointer { cursor: pointer; }
-
-        /* --- Style spécifique pour le sélecteur d'image (Profil) --- */
-        .logo-preview-container {
-            width: 100px; height: 100px; margin: 0 auto 20px;
-            border-radius: 30px; border: 2px dashed #CBD5E1;
-            display: flex; align-items: center; justify-content: center;
-            position: relative; overflow: hidden; background: #F1F5F9;
-        }
+        .logo-preview-container { width: 100px; height: 100px; margin: 0 auto 20px; border-radius: 30px; border: 2px dashed #CBD5E1; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; background: #F1F5F9; }
         #logo-preview { width: 100%; height: 100%; object-fit: cover; display: none; }
         .logo-placeholder { color: #94A3B8; display: flex; flex-direction: column; align-items: center; font-size: 10px; font-weight: 700; }
     </style>
@@ -100,10 +88,10 @@
                     <input type="text" id="setup-addr" placeholder="Ville, Quartier..." class="input-f">
                 </div>
                 
-                <div class="bg-slate-100/50 p-5 rounded-[24px] border border-slate-200 mt-4">
-                    <label class="text-[10px] font-extrabold text-blue-600 uppercase tracking-widest mb-3 block text-center">Sauvegarde Cloud</label>
-                    <input type="email" id="setup-email" placeholder="Email de secours" class="input-f">
-                    <input type="password" id="setup-pass" placeholder="Mot de passe cloud" class="input-f !mb-0">
+                <div class="bg-blue-50 p-5 rounded-[24px] border border-blue-100 mt-4">
+                    <label class="text-[10px] font-extrabold text-blue-600 uppercase tracking-widest mb-3 block text-center">Sauvegarde Cloud (Firebase)</label>
+                    <input type="email" id="setup-email" placeholder="Email (Sert d'identifiant Cloud)" class="input-f">
+                    <p class="text-[9px] text-blue-400 text-center font-bold">Vos données seront synchronisées sur cet email.</p>
                 </div>
 
                 <div class="pt-4 space-y-3">
@@ -113,6 +101,7 @@
             </div>
         </div>
     </div>
+
     <header class="p-6 bg-white/80 backdrop-blur-md border-b border-slate-100 flex justify-between items-center sticky top-0 z-[1100]">
         <div>
             <h1 id="header-biz" class="font-extrabold text-xl text-slate-900 tracking-tighter uppercase">ComptaPro</h1>
@@ -127,7 +116,6 @@
                 <div class="absolute -top-10 -right-10 w-32 h-32 bg-blue-600 rounded-full blur-[60px] opacity-40"></div>
                 <p class="text-xs opacity-60 uppercase font-extrabold tracking-widest mb-1">Bénéfice Net Global</p>
                 <h2 class="text-4xl font-extrabold tracking-tighter mb-8"><span id="valP">0</span> <small class="cur text-blue-400 text-lg"></small></h2>
-                
                 <div class="grid grid-cols-3 gap-3">
                     <div class="bg-white/10 backdrop-blur-md p-3 rounded-2xl border border-white/10 text-center">
                         <span class="text-[9px] font-bold opacity-50 block mb-1">JOUR</span>
@@ -154,7 +142,6 @@
                     <span class="text-xs font-extrabold uppercase tracking-tight text-slate-700">Dépense</span>
                 </button>
             </div>
-
             <h3 class="text-xs font-extrabold text-slate-400 mb-4 uppercase tracking-widest px-1">Activités Récentes</h3>
             <div id="hist" class="space-y-3"></div>
         </div>
@@ -165,15 +152,12 @@
                 <div class="card border-t-8 border-blue-600">
                     <input type="text" id="vendeur" placeholder="Vendeur" class="input-f bg-slate-50 border-transparent">
                     <input type="text" id="cl_name" placeholder="Nom du Client" class="input-f">
-                    
                     <div class="flex gap-2 mb-4">
                         <select id="sel_p" class="input-f flex-1 m-0 font-bold text-slate-700"></select>
                         <input type="number" id="sel_q" value="1" class="input-f w-20 text-center m-0 font-bold">
                         <button onclick="addCart()" class="bg-slate-900 text-white px-5 rounded-2xl active:scale-90 transition-transform"><i data-lucide="plus"></i></button>
                     </div>
-
                     <div id="cart" class="mt-4 space-y-2 border-t border-dashed border-slate-200 pt-5"></div>
-                    
                     <div id="money-calc" class="mt-6 p-4 bg-slate-50 rounded-2xl border border-slate-100 hidden">
                         <div class="flex justify-between items-center mb-2">
                             <span class="text-[10px] font-bold text-slate-400 uppercase">Argent Reçu</span>
@@ -184,7 +168,6 @@
                             <span id="change-due" class="font-extrabold text-green-600">0</span>
                         </div>
                     </div>
-
                     <div class="mt-8 flex justify-between items-end">
                         <div>
                             <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Total Net</p>
@@ -209,7 +192,6 @@
                     <h2 class="text-2xl font-extrabold tracking-tight">Inventaire</h2>
                     <button onclick="toggleF('stk-form')" class="bg-blue-600 text-white px-5 py-2.5 rounded-2xl font-bold text-sm flex items-center gap-2 shadow-lg"><i data-lucide="plus" class="w-4 h-4"></i> Produit</button>
                 </div>
-                
                 <div id="stk-form" class="hidden card bg-blue-50/50 border-blue-100">
                     <input type="text" id="p_name" placeholder="Nom de l'article" class="input-f">
                     <div class="grid grid-cols-2 gap-3">
@@ -225,7 +207,6 @@
 
         <div id="page-pro" class="page">
             <h2 class="text-2xl font-extrabold mb-6 tracking-tight">Administration</h2>
-            
             <div class="bg-slate-900 rounded-[30px] p-6 text-white mb-6 flex justify-between items-center shadow-xl">
                 <div>
                     <p class="text-[10px] font-bold opacity-50 uppercase tracking-widest mb-1">ID Licence</p>
@@ -233,26 +214,19 @@
                 </div>
                 <button onclick="copyID()" class="bg-white/10 p-3 rounded-2xl text-white/50"><i data-lucide="copy" class="w-5 h-5"></i></button>
             </div>
-
             <div class="card border-2 border-orange-100 bg-orange-50/20 text-center">
                 <h3 class="font-extrabold text-xs mb-4 uppercase text-orange-700 tracking-widest">Abonnement Professionnel</h3>
                 <div class="grid grid-cols-1 gap-2 mb-6">
-                    <button onclick="contactWA()" class="flex items-center justify-center gap-3 bg-green-600 text-white p-4 rounded-2xl font-bold text-sm shadow-md">
-                        <i data-lucide="message-circle"></i> PAIEMENT VIA WHATSAPP
-                    </button>
-                    <button onclick="openChariow()" class="flex items-center justify-center gap-3 bg-orange-500 text-white p-4 rounded-2xl font-bold text-sm shadow-md">
-                        <i data-lucide="credit-card"></i> Payer en ligne (Chariow)
-                    </button>
+                    <button onclick="contactWA()" class="flex items-center justify-center gap-3 bg-green-600 text-white p-4 rounded-2xl font-bold text-sm shadow-md"><i data-lucide="message-circle"></i> PAIEMENT VIA WHATSAPP</button>
+                    <button onclick="openChariow()" class="flex items-center justify-center gap-3 bg-orange-500 text-white p-4 rounded-2xl font-bold text-sm shadow-md"><i data-lucide="credit-card"></i> Payer en ligne (Chariow)</button>
                 </div>
                 <input type="text" id="activation-key" placeholder="Code d'activation" class="input-f text-center font-mono uppercase bg-white border-orange-200">
                 <button onclick="checkKey()" class="w-full bg-slate-800 text-white p-4 rounded-2xl font-bold text-xs uppercase tracking-widest">Activer la Licence</button>
             </div>
-
             <button onclick="openSetup(true)" class="card w-full flex items-center justify-between p-5 font-bold text-slate-700 mb-4">
                 <div class="flex items-center gap-4"><i data-lucide="settings-2" class="text-blue-600"></i> Modifier Profil Boutique</div>
                 <i data-lucide="chevron-right" class="w-4 h-4 opacity-30"></i>
             </button>
-
             <div class="card space-y-3">
                 <h3 class="font-extrabold text-[10px] text-slate-400 uppercase tracking-widest px-1">Maintenance</h3>
                 <button onclick="exportAudit()" class="w-full flex items-center justify-between p-4 bg-slate-50 rounded-2xl font-bold text-sm text-slate-600">Exporter les données <i data-lucide="download" class="w-4 h-4"></i></button>
@@ -260,10 +234,7 @@
                 <input type="file" id="restore-file" class="hidden" accept=".json" onchange="restoreData(this)">
                 <button onclick="resetProfitAudit()" class="w-full p-4 text-red-500 font-extrabold text-[10px] uppercase tracking-tighter border border-red-50 rounded-2xl">Clôture & Remise à zéro caisse</button>
             </div>
-
-            <button onclick="logout()" class="w-full py-8 text-slate-300 font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2">
-                <i data-lucide="log-out" class="w-4"></i> Effacer toutes les données
-            </button>
+            <button onclick="logout()" class="w-full py-8 text-slate-300 font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2"><i data-lucide="log-out" class="w-4"></i> Effacer toutes les données</button>
         </div>
     </main>
 
@@ -275,25 +246,62 @@
     </nav>
 
     <script>
+        // CONFIGURATION FIREBASE RÉELLE
+        const firebaseConfig = {
+            apiKey: "AIzaSyCPtymnAB2eO26TjGiSzzxZpA89WwqYeiI",
+            authDomain: "compta-pro-1b8bb.firebaseapp.com",
+            databaseURL: "https://compta-pro-1b8bb-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "compta-pro-1b8bb",
+            storageBucket: "compta-pro-1b8bb.firebasestorage.app",
+            messagingSenderId: "40924705781",
+            appId: "1:40924705781:web:f2dd349d1fa76bc37f66bc"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const fdb = firebase.firestore();
+
+        // CHARGEMENT INITIAL
         let db = JSON.parse(localStorage.getItem('CP_V13_ULTIMATE')) || { 
             biz:{}, stk:[], sales:[], expenses:[], resets:[], prof:0,
             licenseID: "CP-" + Math.floor(1000 + Math.random() * 9000), 
-            expiryDate: null, 
-            installDate: Date.now() 
+            expiryDate: null, installDate: Date.now() 
         };
         let cart = [];
 
-        function save() { localStorage.setItem('CP_V13_ULTIMATE', JSON.stringify(db)); }
+        // SAUVEGARDE LOCALE + CLOUD
+        async function save() { 
+            localStorage.setItem('CP_V13_ULTIMATE', JSON.stringify(db)); 
+            if(db.biz && db.biz.email) {
+                try {
+                    await fdb.collection("boutiques").doc(db.biz.email.toLowerCase()).set(db);
+                } catch(e) { console.error("Cloud Sync Error", e); }
+            }
+        }
 
-        window.onload = () => { if (!db.biz.name) openSetup(false); else render(); };
+        window.onload = async () => { 
+            if (!db.biz.name) {
+                openSetup(false); 
+            } else {
+                // Tenter de restaurer depuis le cloud si email présent
+                if(db.biz.email) {
+                    const doc = await fdb.collection("boutiques").doc(db.biz.email.toLowerCase()).get();
+                    if(doc.exists) {
+                        const cloudData = doc.data();
+                        if(cloudData.sales.length > db.sales.length) {
+                            db = cloudData;
+                            localStorage.setItem('CP_V13_ULTIMATE', JSON.stringify(db));
+                        }
+                    }
+                }
+                render(); 
+            }
+        };
 
-        // --- FONCTIONS MODIFIÉES POUR LE PROFIL ---
         function previewImage(input) {
             const preview = document.getElementById('logo-preview');
             const icon = document.getElementById('logo-icon');
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = (e) => {
                     preview.src = e.target.result;
                     preview.style.display = 'block';
                     icon.style.display = 'none';
@@ -312,9 +320,7 @@
                 document.getElementById('setup-phone').value = db.biz.phone || "";
                 document.getElementById('setup-cur').value = db.biz.cur || "FCFA";
                 document.getElementById('setup-email').value = db.biz.email || "";
-                document.getElementById('setup-pass').value = db.biz.pass || "";
                 document.getElementById('cancel-setup').classList.remove('hidden');
-                
                 if(db.biz.logo) {
                     document.getElementById('logo-preview').src = db.biz.logo;
                     document.getElementById('logo-preview').style.display = 'block';
@@ -328,7 +334,7 @@
             if(!bizName) return alert("Nom entreprise requis");
             const logoFile = document.getElementById('setup-logo').files[0];
             
-            const finalize = (logoData) => {
+            const finalize = async (logoData) => {
                 db.biz = {
                     user: document.getElementById('setup-user').value,
                     name: bizName, 
@@ -336,10 +342,10 @@
                     phone: document.getElementById('setup-phone').value,
                     cur: document.getElementById('setup-cur').value,
                     email: document.getElementById('setup-email').value,
-                    pass: document.getElementById('setup-pass').value,
                     logo: logoData || db.biz.logo || ""
                 };
-                save(); location.reload();
+                await save(); 
+                location.reload();
             };
 
             if (logoFile) {
@@ -348,7 +354,6 @@
                 reader.readAsDataURL(logoFile);
             } else finalize();
         }
-        // --- FIN DES MODIFICATIONS PROFIL ---
 
         function closeSetup() { document.getElementById('overlay-screen').style.display = 'none'; }
 
@@ -439,26 +444,18 @@
                 const isSale = !!i.items; 
                 const clickAttr = isSale ? `onclick="reDownloadSale(${i.id})"` : "";
                 const cursor = isSale ? "cursor-pointer" : "";
-
                 return `
                 <div class="card flex justify-between items-center p-4 border-l-4 ${i.montant?'border-red-800 bg-red-50':i.isExp?'border-red-500':'border-blue-500'}">
                     <div class="${cursor}" ${clickAttr}>
-                        <b class="text-slate-800 flex items-center gap-2">
-                            ${i.cli || i.n}
-                            ${isSale ? '<i data-lucide="download" class="w-3 h-3 text-blue-400"></i>' : ''}
-                        </b>
+                        <b class="text-slate-800 flex items-center gap-2">${i.cli || i.n} ${isSale ? '<i data-lucide="download" class="w-3 h-3 text-blue-400"></i>' : ''}</b>
                         <br><small class="text-[9px] text-slate-400 font-bold uppercase">${i.d}</small>
                     </div>
                     <b class="text-sm ${i.isExp || i.montant?'text-red-500':'text-blue-600'}">${(i.tot || -i.a || -i.montant).toLocaleString()}</b>
-                </div>
-            `}).join('');
+                </div>`}).join('');
             
             document.getElementById('stkList').innerHTML = db.stk.map((i, index) => `
                 <div class="card flex justify-between items-center p-4">
-                    <div class="flex-1">
-                        <b class="text-sm block text-slate-800">${i.n}</b>
-                        <span class="text-blue-600 font-extrabold text-[10px] bg-blue-50 px-2 py-1 rounded-lg mt-1 inline-block">${i.s} ${db.biz.cur}</span>
-                    </div>
+                    <div class="flex-1"><b class="text-sm block text-slate-800">${i.n}</b><span class="text-blue-600 font-extrabold text-[10px] bg-blue-50 px-2 py-1 rounded-lg mt-1 inline-block">${i.s} ${db.biz.cur}</span></div>
                     <div class="flex items-center gap-3 bg-slate-100 p-2 rounded-2xl border border-slate-200">
                         <button onclick="updateQty(${index}, -1)" class="bg-white shadow-sm w-8 h-8 rounded-xl flex items-center justify-center text-red-500 font-black">-</button>
                         <span class="font-black text-sm w-6 text-center ${i.q <= 5 ? 'low-stock-alert' : 'text-slate-700'}">${i.q}</span>
@@ -506,46 +503,57 @@
             if(cart.length > 0) moneyCalc.classList.remove('hidden');
             else moneyCalc.classList.add('hidden');
             cartDiv.innerHTML = cart.map((i, index) => { 
-                t+=i.st; 
-                return `
-                <div class="flex justify-between items-center bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                    <div><b class="text-sm text-slate-700">${i.n}</b><br><small class="text-slate-400 font-bold">Qté: ${i.sq} × ${i.s}</small></div>
-                    <div class="flex items-center gap-4">
-                        <button onclick="removeFromCart(${index})" class="text-red-300 hover:text-red-500"><i data-lucide="x-circle" class="w-5 h-5"></i></button>
-                    </div>
-                </div>`}).join('');
+                t += i.st;
+                return `<div class="flex justify-between text-sm"><span>${i.sq}x ${i.n}</span><b>${i.st.toLocaleString()}</b></div>`;
+            }).join('');
             document.getElementById('cartT').innerText = t.toLocaleString();
-            updateChange(); lucide.createIcons();
+            updateChange();
         }
 
-        function removeFromCart(index) { cart.splice(index, 1); renderCart(); }
+        function nav(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-'+id).classList.add('active');
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+            document.getElementById('n-'+id).classList.add('active');
+            if(id === 'sale') { cart = []; renderCart(); }
+        }
+
+        function toggleF(id) { document.getElementById(id).classList.toggle('hidden'); }
         function copyID() { navigator.clipboard.writeText(db.licenseID); alert("ID Copié !"); }
-        function openChariow() { window.open("https://qaasxtqf.mychariow.shop/abonnement-pro-compta-mobile/checkout", "_blank"); }
-        function contactWA() { window.open(`https://wa.me/22666566140?text=Paiement%20Licence%20ID:${db.licenseID}`, '_blank'); }
-        function logout() { if(confirm("EFFACER TOUT ?")) { localStorage.clear(); location.reload(); } }
+        function contactWA() { window.open(`https://wa.me/224611225577?text=Activation%20PRO%20ID:%20${db.licenseID}`); }
+        function openChariow() { window.open(`https://chariow.com/pay/comptapro`); }
+
         function exportAudit() {
-            const blob = new Blob([JSON.stringify(db, null, 2)], {type: "application/json"});
-            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Backup_${db.biz.name}.json`; a.click();
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db));
+            const dlAnchorElem = document.createElement('a');
+            dlAnchorElem.setAttribute("href", dataStr);
+            dlAnchorElem.setAttribute("download", `ComptaPro_Backup_${new Date().toLocaleDateString()}.json`);
+            dlAnchorElem.click();
         }
+
         function restoreData(input) {
-            const reader = new FileReader();
-            reader.onload = (e) => { db = JSON.parse(e.target.result); save(); location.reload(); };
-            reader.readAsText(input.files[0]);
-        }
-        function resetProfitAudit() {
-            if(confirm("Clôturer la caisse ?")) {
-                db.resets.push({id:Date.now(), n:"CLÔTURE DE CAISSE", montant:db.prof, d:new Date().toLocaleString()});
-                db.prof = 0; save(); render();
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    db = JSON.parse(e.target.result);
+                    save(); location.reload();
+                };
+                reader.readAsText(input.files[0]);
             }
         }
-        function nav(id) {
-            document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-            document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
-            document.getElementById('page-'+id).classList.add('active');
-            document.getElementById('n-'+id).classList.add('active');
-            lucide.createIcons(); checkLicense();
+
+        function resetProfitAudit() {
+            if(confirm("Confirmer la clôture de caisse ? Le bénéfice sera remis à zéro.")) {
+                db.resets.push({id:Date.now(), n:"CLÔTURE DE CAISSE", montant:db.prof, d:new Date().toLocaleString()});
+                db.prof = 0; save(); render(); nav('home');
+            }
         }
-        function toggleF(id) { document.getElementById(id).classList.toggle('hidden'); }
+
+        function logout() {
+            if(confirm("ATTENTION : Cela effacera tout sur cet appareil !")) {
+                localStorage.clear(); location.reload();
+            }
+        }
     </script>
 </body>
 </html>
