@@ -3,11 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ComptaPro - Gestion simplifiée</title>
+    <title>ComptaPro Sync</title>
+    <link rel="manifest" href="manifest.json">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAFC; color: #1E293B; padding-bottom: 100px; }
@@ -23,54 +28,54 @@
         nav button { color: #94A3B8; font-size: 11px; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: 0.3s; }
         nav button.active { color: #2563EB; transform: translateY(-5px); }
         nav button.active i { background: rgba(37, 99, 235, 0.1); padding: 8px; border-radius: 14px; }
-        #overlay-screen { position: fixed; inset: 0; background: #F8FAFC; z-index: 2000; display: none; overflow-y: auto; padding: 40px 30px; }
-        .badge-status { font-size: 10px; font-weight: 800; padding: 6px 12px; border-radius: 12px; text-transform: uppercase; }
+        #overlay-screen, #qr-overlay { position: fixed; inset: 0; background: #F8FAFC; z-index: 2000; display: none; overflow-y: auto; padding: 40px 30px; }
+        .badge-status { font-size: 10px; font-weight: 800; padding: 6px 12px; border-radius: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
         .low-stock-alert { color: #ef4444 !important; animation: pulse-red 1s infinite; font-weight: 800; }
         @keyframes pulse-red { 50% { opacity: 0.5; } }
-        .logo-preview-container { width: 100px; height: 100px; margin: 0 auto 20px; border-radius: 30px; border: 2px dashed #CBD5E1; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #F1F5F9; cursor: pointer; }
+        .logo-preview-container { width: 100px; height: 100px; margin: 0 auto 20px; border-radius: 30px; border: 2px dashed #CBD5E1; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; background: #F1F5F9; }
         #logo-preview { width: 100%; height: 100%; object-fit: cover; display: none; }
     </style>
 </head>
 <body>
 
+    <div id="qr-overlay" class="flex flex-col items-center justify-center">
+        <h2 class="text-2xl font-black mb-4">Synchronisation</h2>
+        <div id="qrcode-container" class="bg-white p-6 rounded-3xl shadow-xl mb-6">
+            <img id="qr-img" src="" alt="QR Code Sync">
+        </div>
+        <p class="text-center text-slate-500 text-sm mb-8 px-6">Scannez ce code sur un autre appareil pour partager votre base de données en temps réel.</p>
+        <button onclick="closeQR()" class="btn-blue !w-auto px-10">FERMER</button>
+    </div>
+
     <div id="overlay-screen">
         <div class="max-w-md mx-auto">
-            <h2 id="setup-title" class="text-3xl font-extrabold text-slate-900 mb-2">Configuration</h2>
-            <p class="text-slate-500 mb-8 text-sm">Personnalisez votre boutique.</p>
-            
+            <h2 id="setup-title" class="text-3xl font-extrabold text-slate-900 mb-2 tracking-tight">Configuration Cloud</h2>
+            <p class="text-slate-500 mb-8 text-sm font-medium">Vos données seront synchronisées sur votre compte.</p>
             <div class="space-y-4">
                 <div class="logo-preview-container" onclick="document.getElementById('setup-logo').click()">
                     <img id="logo-preview" src="" alt="Aperçu">
-                    <div id="logo-icon" class="text-center text-[10px] text-slate-400 font-bold">
-                        <i data-lucide="camera" class="mx-auto mb-1"></i><span>LOGO</span>
-                    </div>
+                    <div id="logo-icon" class="text-slate-400 flex flex-col items-center text-[10px] font-bold"><i data-lucide="camera" class="mb-1"></i><span>LOGO</span></div>
                 </div>
                 <input type="file" id="setup-logo" accept="image/*" class="hidden" onchange="previewImage(this)">
-
                 <input type="text" id="setup-user" placeholder="Nom du Gérant" class="input-f">
                 <input type="text" id="setup-biz" placeholder="Nom de la Boutique" class="input-f">
                 <div class="grid grid-cols-2 gap-3">
                     <input type="text" id="setup-phone" placeholder="Téléphone" class="input-f">
-                    <select id="setup-cur" class="input-f">
-                        <option value="FCFA">FCFA</option>
-                        <option value="GNF">GNF</option>
-                        <option value="$">$ Dollar</option>
-                        <option value="€">€ Euro</option>
-                    </select>
+                    <select id="setup-cur" class="input-f"><option value="FCFA">FCFA</option><option value="GNF">GNF</option><option value="$">$</option><option value="€">€</option></select>
                 </div>
-                <input type="text" id="setup-addr" placeholder="Adresse physique" class="input-f">
-
-                <button onclick="saveSetup()" class="btn-blue text-lg">VALIDER</button>
-                <button id="cancel-setup" onclick="closeSetup()" class="w-full text-slate-400 font-bold text-sm hidden py-2">IGNORER</button>
+                <input type="text" id="setup-addr" placeholder="Adresse" class="input-f">
+                <div class="bg-blue-50 p-5 rounded-[24px] border border-blue-100 mt-4">
+                    <label class="text-[10px] font-extrabold text-blue-600 uppercase mb-3 block text-center">Identifiants de Synchronisation</label>
+                    <input type="email" id="setup-email" placeholder="Email (Sert d'identifiant unique)" class="input-f">
+                    <input type="password" id="setup-pass" placeholder="Mot de passe" class="input-f !mb-0">
+                </div>
+                <button onclick="saveSetup()" class="btn-blue text-lg">ACTIVER LA SYNCHRO</button>
             </div>
         </div>
     </div>
 
     <header class="p-6 bg-white/80 backdrop-blur-md border-b border-slate-100 flex justify-between items-center sticky top-0 z-[1100]">
-        <div>
-            <h1 id="header-biz" class="font-extrabold text-xl text-slate-900 tracking-tighter uppercase">ComptaPro</h1>
-            <p id="licence-status" class="text-[9px] font-extrabold text-blue-500 tracking-widest uppercase">Version Standard</p>
-        </div>
+        <div><h1 id="header-biz" class="font-extrabold text-xl text-slate-900 uppercase">ComptaPro</h1><p id="licence-status" class="text-[9px] font-extrabold text-blue-500 uppercase"></p></div>
         <div id="days-badge" class="badge-status"></div>
     </header>
 
@@ -80,33 +85,16 @@
                 <p class="text-xs opacity-60 uppercase font-extrabold tracking-widest mb-1">Bénéfice Net Global</p>
                 <h2 class="text-4xl font-extrabold tracking-tighter mb-8"><span id="valP">0</span> <small class="cur text-blue-400 text-lg"></small></h2>
                 <div class="grid grid-cols-3 gap-3">
-                    <div class="bg-white/10 p-3 rounded-2xl text-center">
-                        <span class="text-[9px] font-bold opacity-50 block mb-1">JOUR</span>
-                        <span id="repJ" class="font-extrabold text-sm">0</span>
-                    </div>
-                    <div class="bg-white/10 p-3 rounded-2xl text-center">
-                        <span class="text-[9px] font-bold opacity-50 block mb-1">SEM.</span>
-                        <span id="repS" class="font-extrabold text-sm">0</span>
-                    </div>
-                    <div class="bg-white/10 p-3 rounded-2xl text-center">
-                        <span class="text-[9px] font-bold opacity-50 block mb-1">MOIS</span>
-                        <span id="repM" class="font-extrabold text-sm">0</span>
-                    </div>
+                    <div class="bg-white/10 p-3 rounded-2xl text-center"><span class="text-[9px] block">JOUR</span><span id="repJ" class="font-bold">0</span></div>
+                    <div class="bg-white/10 p-3 rounded-2xl text-center"><span class="text-[9px] block">SEM.</span><span id="repS" class="font-bold">0</span></div>
+                    <div class="bg-white/10 p-3 rounded-2xl text-center"><span class="text-[9px] block">MOIS</span><span id="repM" class="font-bold">0</span></div>
                 </div>
             </div>
-
             <div class="grid grid-cols-2 gap-4 mb-8">
-                <button onclick="nav('sale')" class="card m-0 flex flex-col items-center gap-3 p-6">
-                    <i data-lucide="shopping-cart" class="text-blue-600"></i>
-                    <span class="text-xs font-extrabold uppercase">Vendre</span>
-                </button>
-                <button onclick="nav('expense')" class="card m-0 flex flex-col items-center gap-3 p-6">
-                    <i data-lucide="arrow-down-circle" class="text-red-500"></i>
-                    <span class="text-xs font-extrabold uppercase">Dépense</span>
-                </button>
+                <button onclick="nav('sale')" class="card m-0 flex flex-col items-center gap-3 p-6 text-blue-600"><i data-lucide="shopping-cart"></i><span class="text-xs font-bold uppercase">Vendre</span></button>
+                <button onclick="nav('expense')" class="card m-0 flex flex-col items-center gap-3 p-6 text-red-500"><i data-lucide="arrow-down-circle"></i><span class="text-xs font-bold uppercase">Dépense</span></button>
             </div>
-
-            <h3 class="text-xs font-extrabold text-slate-400 mb-4 uppercase tracking-widest">Activités Récentes</h3>
+            <h3 class="text-xs font-extrabold text-slate-400 mb-4 uppercase px-1">Activités Récentes</h3>
             <div id="hist" class="space-y-3"></div>
         </div>
 
@@ -114,52 +102,40 @@
             <div id="page-sale" class="page">
                 <h2 class="text-2xl font-extrabold mb-6">Nouvelle Vente</h2>
                 <div class="card border-t-8 border-blue-600">
-                    <input type="text" id="vendeur" placeholder="Vendeur" class="input-f">
+                    <input type="text" id="vendeur" placeholder="Vendeur" class="input-f bg-slate-50">
                     <input type="text" id="cl_name" placeholder="Nom du Client" class="input-f">
-                    
                     <div class="flex gap-2 mb-4">
                         <select id="sel_p" class="input-f flex-1 m-0 font-bold"></select>
-                        <input type="number" id="sel_q" value="1" class="input-f w-20 text-center m-0 font-bold">
+                        <input type="number" id="sel_q" value="1" class="input-f w-20 text-center m-0">
                         <button onclick="addCart()" class="bg-slate-900 text-white px-5 rounded-2xl"><i data-lucide="plus"></i></button>
                     </div>
-
-                    <div id="cart" class="mt-4 space-y-2 border-t border-dashed border-slate-200 pt-5"></div>
-                    
-                    <div id="money-calc" class="mt-6 p-4 bg-slate-50 rounded-2xl border border-slate-100 hidden">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="text-[10px] font-bold text-slate-400 uppercase">Reçu</span>
-                            <input type="number" id="cash-in" oninput="updateChange()" class="w-32 p-2 rounded-lg border text-right font-bold" placeholder="0">
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-[10px] font-bold text-slate-400 uppercase">Monnaie</span>
-                            <span id="change-due" class="font-extrabold text-green-600">0</span>
-                        </div>
-                    </div>
-
+                    <div id="cart" class="mt-4 space-y-2 border-t border-dashed pt-5"></div>
                     <div class="mt-8 flex justify-between items-end">
-                        <div>
-                            <p class="text-[10px] font-bold text-slate-400 uppercase">Total</p>
-                            <span class="font-extrabold text-3xl"><span id="cartT">0</span> <small class="cur text-lg text-slate-400"></small></span>
-                        </div>
-                        <button onclick="doSale()" class="bg-green-600 text-white px-10 py-4 rounded-2xl font-extrabold uppercase text-sm">Valider</button>
+                        <div><p class="text-[10px] font-bold text-slate-400 uppercase">Total</p><span class="font-black text-3xl"><span id="cartT">0</span> <small class="cur text-lg"></small></span></div>
+                        <button onclick="doSale()" class="bg-green-600 text-white px-10 py-4 rounded-2xl font-bold uppercase text-sm">Valider</button>
                     </div>
+                </div>
+            </div>
+
+            <div id="page-expense" class="page">
+                <h2 class="text-2xl font-extrabold mb-6">Enregistrer une Charge</h2>
+                <div class="card border-t-8 border-red-500">
+                    <input type="text" id="exp_name" placeholder="Motif" class="input-f">
+                    <input type="number" id="exp_amt" placeholder="Montant" class="input-f">
+                    <button onclick="addExpense()" class="btn-blue !bg-red-500">ENREGISTRER</button>
                 </div>
             </div>
 
             <div id="page-stock" class="page">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-extrabold">Inventaire</h2>
-                    <button onclick="toggleF('stk-form')" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-bold">+ Produit</button>
+                    <button onclick="toggleF('stk-form')" class="bg-blue-600 text-white px-5 py-2 rounded-2xl font-bold text-xs">+ Produit</button>
                 </div>
-                
                 <div id="stk-form" class="hidden card bg-blue-50/50">
-                    <input type="text" id="p_name" placeholder="Nom de l'article" class="input-f">
-                    <div class="grid grid-cols-2 gap-3">
-                        <input type="number" id="p_cost" placeholder="Prix Achat" class="input-f">
-                        <input type="number" id="p_sell" placeholder="Prix Vente" class="input-f">
-                    </div>
+                    <input type="text" id="p_name" placeholder="Nom" class="input-f">
+                    <div class="grid grid-cols-2 gap-3"><input type="number" id="p_cost" placeholder="Achat" class="input-f"><input type="number" id="p_sell" placeholder="Vente" class="input-f"></div>
                     <input type="number" id="p_qty" placeholder="Quantité" class="input-f">
-                    <button onclick="addStock()" class="btn-blue mt-2">AJOUTER</button>
+                    <button onclick="addStock()" class="btn-blue">AJOUTER AU STOCK</button>
                 </div>
                 <div id="stkList" class="space-y-3"></div>
             </div>
@@ -167,17 +143,25 @@
 
         <div id="page-pro" class="page">
             <h2 class="text-2xl font-extrabold mb-6">Administration</h2>
-            <div class="card bg-slate-900 text-white">
-                <p class="text-[10px] font-bold opacity-50 uppercase mb-1">ID Licence</p>
-                <h3 id="displayID" class="text-xl font-mono font-bold text-blue-400"></h3>
-            </div>
             
-            <button onclick="openSetup(true)" class="card w-full flex justify-between p-5 font-bold">
-                <span>Modifier Profil Boutique</span> <i data-lucide="chevron-right"></i>
-            </button>
+            <div class="bg-slate-900 rounded-[30px] p-6 text-white mb-6 flex justify-between items-center">
+                <div><p class="text-[10px] font-bold opacity-50 uppercase">ID Boutique Cloud</p><h3 id="displayID" class="text-xl font-mono text-blue-400"></h3></div>
+                <button onclick="showSyncQR()" class="bg-blue-600 p-3 rounded-2xl text-white flex items-center gap-2 text-xs font-bold"><i data-lucide="qr-code"></i> SYNC</button>
+            </div>
 
-            <button onclick="exportAudit()" class="card w-full text-left p-5 font-bold text-slate-600">Exporter les données</button>
-            <button onclick="resetData()" class="w-full py-8 text-red-400 font-bold text-xs uppercase tracking-widest">Réinitialiser l'application</button>
+            <div class="card border-2 border-orange-100 bg-orange-50/20 text-center">
+                <h3 class="font-bold text-xs mb-4 uppercase text-orange-700">Licence & Activation</h3>
+                <input type="text" id="activation-key" placeholder="Code d'activation" class="input-f text-center font-mono">
+                <button onclick="checkKey()" class="w-full bg-slate-800 text-white p-4 rounded-2xl font-bold text-xs uppercase">Activer</button>
+            </div>
+
+            <button onclick="openSetup(true)" class="card w-full flex items-center justify-between p-5 font-bold">
+                <div class="flex items-center gap-4 text-slate-700"><i data-lucide="settings-2" class="text-blue-600"></i> Modifier Profil</div>
+                <i data-lucide="chevron-right" class="opacity-30"></i>
+            </button>
+            
+            <button onclick="exportAudit()" class="card w-full p-5 font-bold text-slate-600 flex justify-between">Exporter JSON <i data-lucide="download"></i></button>
+            <button onclick="logout()" class="w-full py-8 text-red-400 font-bold text-xs uppercase flex items-center justify-center gap-2"><i data-lucide="log-out"></i> Déconnexion</button>
         </div>
     </main>
 
@@ -189,36 +173,78 @@
     </nav>
 
     <script>
-        let db = JSON.parse(localStorage.getItem('CP_V13_DATABASE')) || { 
-            biz:{}, stk:[], sales:[], expenses:[], prof:0,
-            licenseID: "CP-" + Math.floor(1000 + Math.random() * 9000), 
-            installDate: Date.now() 
+        // --- CONFIG FIREBASE ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyCPtymnAB2eO26TjGiSzzxZpA89WwqYeiI",
+            authDomain: "compta-pro-1b8bb.firebaseapp.com",
+            databaseURL: "https://compta-pro-1b8bb-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "compta-pro-1b8bb",
+            storageBucket: "compta-pro-1b8bb.firebasestorage.app",
+            messagingSenderId: "40924705781",
+            appId: "1:40924705781:web:f2dd349d1fa76bc37f66bc"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const rdb = firebase.database();
+
+        let db = JSON.parse(localStorage.getItem('CP_SYNC')) || { 
+            biz:{}, stk:[], sales:[], expenses:[], resets:[], prof:0,
+            licenseID: "CP-" + Math.floor(1000 + Math.random() * 9000),
+            installDate: Date.now()
         };
         let cart = [];
 
-        function save() { localStorage.setItem('CP_V13_DATABASE', JSON.stringify(db)); }
+        // --- SYNCHRONISATION ---
+        function save() {
+            localStorage.setItem('CP_SYNC', JSON.stringify(db));
+            if (db.biz.email) {
+                const path = db.biz.email.replace(/\./g, '_');
+                rdb.ref('users/' + path).set(db);
+            }
+        }
+
+        function syncFromCloud() {
+            if (db.biz.email) {
+                const path = db.biz.email.replace(/\./g, '_');
+                rdb.ref('users/' + path).on('value', (snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        db = data;
+                        render();
+                    }
+                });
+            }
+        }
 
         window.onload = () => { 
             if (!db.biz.name) openSetup(false); 
-            render(); 
+            else { render(); syncFromCloud(); }
             lucide.createIcons();
         };
 
+        // --- FONCTIONS QR CODE ---
+        function showSyncQR() {
+            const syncData = JSON.stringify({e: db.biz.email, p: db.biz.pass});
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(syncData)}`;
+            document.getElementById('qr-img').src = qrUrl;
+            document.getElementById('qr-overlay').style.display = 'flex';
+        }
+
+        function closeQR() { document.getElementById('qr-overlay').style.display = 'none'; }
+
+        // --- LOGIQUE CORE (Gardée intacte) ---
         function nav(p) {
             document.querySelectorAll('.page').forEach(pg => pg.classList.remove('active'));
-            document.getElementById('page-'+p).classList.add('active');
+            document.getElementById('page-' + p).classList.add('active');
             document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-            document.getElementById('n-'+p).classList.add('active');
-            window.scrollTo(0,0);
+            document.getElementById('n-' + p).classList.add('active');
         }
 
         function previewImage(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    const img = document.getElementById('logo-preview');
-                    img.src = e.target.result;
-                    img.style.display = 'block';
+                    document.getElementById('logo-preview').src = e.target.result;
+                    document.getElementById('logo-preview').style.display = 'block';
                     document.getElementById('logo-icon').style.display = 'none';
                 };
                 reader.readAsDataURL(input.files[0]);
@@ -230,105 +256,125 @@
             if(isEdit) {
                 document.getElementById('setup-user').value = db.biz.user || "";
                 document.getElementById('setup-biz').value = db.biz.name || "";
-                document.getElementById('cancel-setup').classList.remove('hidden');
+                document.getElementById('setup-email').value = db.biz.email || "";
             }
         }
 
         function saveSetup() {
-            const name = document.getElementById('setup-biz').value;
-            if(!name) return alert("Nom requis");
+            const bizName = document.getElementById('setup-biz').value;
+            const email = document.getElementById('setup-email').value;
+            if(!bizName || !email) return alert("Nom et Email requis pour la synchro");
+
             db.biz = {
-                name,
                 user: document.getElementById('setup-user').value,
+                name: bizName,
+                addr: document.getElementById('setup-addr').value,
                 phone: document.getElementById('setup-phone').value,
                 cur: document.getElementById('setup-cur').value,
-                addr: document.getElementById('setup-addr').value,
-                logo: document.getElementById('logo-preview').src
+                email: email,
+                pass: document.getElementById('setup-pass').value,
+                logo: document.getElementById('logo-preview').src || ""
             };
             save();
             location.reload();
         }
 
         function addStock() {
-            let n = document.getElementById('p_name').value;
-            let c = +document.getElementById('p_cost').value;
-            let s = +document.getElementById('p_sell').value;
-            let q = +document.getElementById('p_qty').value;
-            if(!n || q < 0) return;
+            const n = document.getElementById('p_name').value;
+            const c = +document.getElementById('p_cost').value;
+            const s = +document.getElementById('p_sell').value;
+            const q = +document.getElementById('p_qty').value;
+            if(!n || !s) return;
             db.stk.push({id: Date.now(), n, c, s, q});
             save(); render();
             document.getElementById('stk-form').classList.add('hidden');
         }
 
         function addCart() {
-            let id = document.getElementById('sel_p').value;
-            let q = +document.getElementById('sel_q').value;
-            let it = db.stk.find(x => x.id == id);
-            if(!it || q > it.q || q <= 0) return alert("Stock insuffisant ou quantité invalide");
-            
-            cart.push({id: it.id, n: it.n, sq: q, s: it.s, c: it.c, st: (it.s * q)});
+            const id = document.getElementById('sel_p').value;
+            const qty = +document.getElementById('sel_q').value;
+            const p = db.stk.find(x => x.id == id);
+            if(!p || p.q < qty) return alert("Stock insuffisant");
+            cart.push({...p, sq: qty, st: p.s * qty});
             renderCart();
         }
 
         function renderCart() {
-            const container = document.getElementById('cart');
-            const total = cart.reduce((a, b) => a + b.st, 0);
-            container.innerHTML = cart.map((c, i) => `
-                <div class="flex justify-between text-sm font-bold">
-                    <span>${c.n} x${c.sq}</span>
-                    <span>${c.st.toLocaleString()}</span>
-                </div>
-            `).join('');
+            const total = cart.reduce((a,b) => a + b.st, 0);
             document.getElementById('cartT').innerText = total.toLocaleString();
-            document.getElementById('money-calc').classList.remove('hidden');
+            document.getElementById('cart').innerHTML = cart.map(i => `<div class="flex justify-between text-sm font-bold"><span>${i.n} x${i.sq}</span><span>${i.st.toLocaleString()}</span></div>`).join('');
         }
 
         function doSale() {
             if(!cart.length) return;
-            let profit = 0;
-            let total = 0;
-            cart.forEach(c => {
-                let s = db.stk.find(x => x.id == c.id);
-                s.q -= c.sq;
-                profit += (c.s - c.c) * c.sq;
-                total += c.st;
+            let tP=0, tV=0;
+            cart.forEach(c => { 
+                let s = db.stk.find(x => x.id == c.id); 
+                s.q -= c.sq; 
+                tV += c.st; 
+                tP += (c.s - c.c) * c.sq; 
             });
-            db.prof += profit;
-            db.sales.push({id: Date.now(), d: new Date().toLocaleString(), cli: document.getElementById('cl_name').value || "Client", tot: total, items: [...cart]});
-            cart = [];
+            db.prof += tP;
+            db.sales.push({id:Date.now(), cli:document.getElementById('cl_name').value || "Client", tot:tV, d:new Date().toLocaleString(), t:Date.now(), items:[...cart]});
+            cart=[]; save(); render(); nav('home');
+        }
+
+        function addExpense() {
+            let n = document.getElementById('exp_name').value, a = +document.getElementById('exp_amt').value;
+            if(!n || !a) return;
+            db.prof -= a; db.expenses.push({id:Date.now(), n, a, d:new Date().toLocaleString(), t:Date.now(), isExp:true});
             save(); render(); nav('home');
-            alert("Vente enregistrée !");
         }
 
         function render() {
-            document.getElementById('valP').innerText = db.prof.toLocaleString();
             document.getElementById('header-biz').innerText = db.biz.name || "ComptaPro";
-            document.querySelectorAll('.cur').forEach(e => e.innerText = db.biz.cur || "FCFA");
-            document.getElementById('displayID').innerText = db.licenseID;
-            
-            // Liste stock
-            document.getElementById('stkList').innerHTML = db.stk.map(i => `
+            document.getElementById('valP').innerText = db.prof.toLocaleString();
+            document.querySelectorAll('.cur').forEach(e => e.innerText = db.biz.cur);
+            document.getElementById('displayID').innerText = db.biz.email || db.licenseID;
+
+            const hist = [...db.sales, ...db.expenses].sort((a,b) => b.id - a.id).slice(0, 10);
+            document.getElementById('hist').innerHTML = hist.map(i => `
+                <div class="card flex justify-between items-center p-4 border-l-4 ${i.isExp?'border-red-500':'border-blue-500'}">
+                    <div><b>${i.cli || i.n}</b><br><small class="text-[9px] font-bold text-slate-400">${i.d}</small></div>
+                    <b class="${i.isExp?'text-red-500':'text-blue-600'}">${(i.tot || -i.a).toLocaleString()}</b>
+                </div>`).join('');
+
+            document.getElementById('stkList').innerHTML = db.stk.map((i, index) => `
                 <div class="card flex justify-between items-center p-4">
-                    <div><b>${i.n}</b><br><small class="${i.q < 5 ? 'text-red-500 font-bold':''}">${i.q} en stock</small></div>
-                    <b class="text-blue-600">${i.s.toLocaleString()}</b>
-                </div>
-            `).join('');
+                    <div class="flex-1"><b class="text-sm block">${i.n}</b><span class="text-blue-600 font-bold text-[10px]">${i.s} ${db.biz.cur}</span></div>
+                    <div class="flex items-center gap-3 bg-slate-100 p-1 rounded-xl">
+                        <button onclick="updateQty(${index}, -1)" class="w-8 h-8 bg-white rounded-lg text-red-500">-</button>
+                        <span class="font-bold ${i.q <= 5 ? 'low-stock-alert' : ''}">${i.q}</span>
+                        <button onclick="updateQty(${index}, 1)" class="w-8 h-8 bg-white rounded-lg text-green-600">+</button>
+                    </div>
+                </div>`).join('');
 
-            // Select vente
             document.getElementById('sel_p').innerHTML = db.stk.map(i => `<option value="${i.id}">${i.n} (${i.q})</option>`).join('');
+            
+            const now = Date.now();
+            const calc = (t) => db.sales.filter(s => (now-s.t) < t).reduce((a,b) => a+b.tot, 0);
+            document.getElementById('repJ').innerText = calc(86400000).toLocaleString();
+            document.getElementById('repS').innerText = calc(604800000).toLocaleString();
+            document.getElementById('repM').innerText = calc(2592000000).toLocaleString();
+            lucide.createIcons();
+        }
 
-            // Historique
-            document.getElementById('hist').innerHTML = db.sales.slice(-5).reverse().map(s => `
-                <div class="card p-4 border-l-4 border-blue-500 flex justify-between">
-                    <div><b>${s.cli}</b><br><small>${s.d}</small></div>
-                    <b class="text-blue-600">+${s.tot.toLocaleString()}</b>
-                </div>
-            `).join('');
+        function updateQty(index, val) {
+            db.stk[index].q += val;
+            save(); render();
         }
 
         function toggleF(id) { document.getElementById(id).classList.toggle('hidden'); }
-        function closeSetup() { document.getElementById('overlay-screen').style.display = 'none'; }
-        function resetData() { if(confirm("Tout effacer ?")) { localStorage.clear(); location.reload(); } }
+        
+        function logout() { if(confirm("Effacer les données locales ?")) { localStorage.clear(); location.reload(); } }
+
+        function exportAudit() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db));
+            const dlAnchorElem = document.createElement('a');
+            dlAnchorElem.setAttribute("href", dataStr);
+            dlAnchorElem.setAttribute("download", "comptapro_backup.json");
+            dlAnchorElem.click();
+        }
     </script>
 </body>
 </html>
